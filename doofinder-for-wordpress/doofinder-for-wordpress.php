@@ -3,7 +3,7 @@
  * Plugin Name: Doofinder for WordPress
  * License: GPLv2 or later
  * License URI: http://www.gnu.org/licenses/gpl-2.0.html
- * Version: 0.5.0
+ * Version: 0.6.0
  * Author: doofinder
  * Description: Integrate Doofinder Search in your WordPress website.
  * WC requires at least:
@@ -32,7 +32,7 @@ if ( ! class_exists( '\Doofinder\WP\Doofinder_For_WordPress' ) ):
 		 *
 		 * @var string
 		 */
-		public static $version = '0.5.0';
+		public static $version = '0.6.0';
 
 		/**
 		 * The only instance of Doofinder_For_WordPress
@@ -214,10 +214,6 @@ if ( ! class_exists( '\Doofinder\WP\Doofinder_For_WordPress' ) ):
 			self::autoload( self::plugin_path() . 'includes/' );
 			self::register_urls();
 			flush_rewrite_rules();
-
-			if ( Setup_Wizard::should_activate() ) {
-				Setup_Wizard::activate();
-			}
 		}
 
 		/**

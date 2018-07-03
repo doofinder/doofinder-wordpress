@@ -33,6 +33,14 @@ class Index_Interface {
 	private $indexing_data;
 
 	/**
+	 * If true the message informing the user that indexing has been
+	 * completed successfully will be shown.
+	 *
+	 * @var bool
+	 */
+	private $show_success_message = false;
+
+	/**
 	 * Returns the only instance of Index_Interface
 	 *
 	 * @since 1.0.0
@@ -53,6 +61,8 @@ class Index_Interface {
 		$this->language      = Multilanguage::instance();
 		$this->indexing_data = Indexing_Data::instance();
 
+		$this->process_cookies();
+
 		// Add a submenu page with indexing interface.
 		$this->add_indexing_subpage();
 
@@ -61,6 +71,33 @@ class Index_Interface {
 
 		// Add frontend scripts.
 		$this->add_admin_scripts();
+	}
+
+	/**
+	 * After indexing is finished JS sets a cookie in order to make backend
+	 * display the message. We need to display the message and clear
+	 * the cookie, so that the message is not displayed again after refreshing
+	 * the page.
+	 *
+	 * Because cookies are sent as headers this all needs to be done
+	 * before rendering any HTML.
+	 */
+	private function process_cookies() {
+		add_action( 'admin_init', function () {
+			if ( ! isset( $_GET['page'] ) || $_GET['page'] !== 'index_posts' ) {
+				return;
+			}
+
+			// We need to remove the cookie before rendering HTML, so if the cookie
+            // to display success message is set - remember that information.
+			if ( isset( $_COOKIE['doofinder_wp_show_success_message'] ) ) {
+				$this->show_success_message = true;
+			}
+
+			// Clear the cookie.
+			unset( $_COOKIE['doofinder_wp_show_success_message'] );
+			setcookie( 'doofinder_wp_show_success_message', null, - 1 );
+		} );
 	}
 
 	/**
@@ -215,7 +252,9 @@ class Index_Interface {
 	private function render_html_missing_api_keys() {
 		?>
 
-        <div class="notice notice-error"><p><?php _e( 'API Key and/or Search Engine Hash ID are not set in Doofinder Settings for the selected language.', 'doofinder_for_wp' ); ?></p></div>
+        <div class="notice notice-error">
+            <p><?php _e( 'API Key and/or Search Engine Hash ID are not set in Doofinder Settings for the selected language.', 'doofinder_for_wp' ); ?></p>
+        </div>
 
 		<?php
 	}
@@ -268,7 +307,7 @@ class Index_Interface {
             </div>
 
 			<?php
-		} elseif ( $status === 'completed' && isset( $_COOKIE['doofinder_wp_show_success_message'] ) ) {
+		} elseif ( $status === 'completed' && $this->show_success_message ) {
 			?>
 
             <div class="updated settings-error notice">
@@ -276,10 +315,6 @@ class Index_Interface {
             </div>
 
 			<?php
-
-			// Clear $_COOKIE value and browser cookie file
-			unset( $_COOKIE['doofinder_wp_show_success_message'] );
-			setCookie( 'doofinder_wp_show_success_message', null, - 1 );
 		}
 	}
 
