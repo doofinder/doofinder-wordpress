@@ -60,7 +60,7 @@ class Settings {
 	 * @return string
 	 */
 	public static function get_url() {
-		return menu_page_url( self::$top_level_menu );
+		return menu_page_url( self::$top_level_menu, false );
 	}
 
 	/**
