@@ -102,8 +102,6 @@ if ( ! class_exists( '\Doofinder\WP\Doofinder_For_WordPress' ) ):
 
 			// Init admin functionalities
 			if ( is_admin() ) {
-				Setup_Wizard::instance();
-
 				Thumbnail::prepare_thumbnail_size();
 				Post::add_additional_settings();
 				Post::register_webhooks();
