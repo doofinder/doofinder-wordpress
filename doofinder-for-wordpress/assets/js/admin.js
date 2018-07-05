@@ -143,3 +143,24 @@ jQuery(function () {
     };
     initAjaxIndexContent();
 });
+jQuery(function () {
+    var $ = jQuery.noConflict();
+    var cancelButton = document.querySelector('#doofinder-for-wp-cancel-indexing');
+    if (!cancelButton) {
+        return;
+    }
+    cancelButton.addEventListener('click', function (e) {
+        e.preventDefault();
+        $.ajax({
+            type: 'POST',
+            dataType: 'json',
+            url: DoofinderForWP.ajaxUrl,
+            data: {
+                action: 'doofider_for_wp_cancel_indexing'
+            }
+        })
+            .then(function () {
+            window.location.reload();
+        });
+    });
+});

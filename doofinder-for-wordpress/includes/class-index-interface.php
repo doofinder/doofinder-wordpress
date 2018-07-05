@@ -68,6 +68,7 @@ class Index_Interface {
 
 		// Register JS action that will handle sending one batch of data to API.
 		$this->register_ajax_action();
+		$this->register_ajax_action_cancel();
 
 		// Add frontend scripts.
 		$this->add_admin_scripts();
@@ -89,7 +90,7 @@ class Index_Interface {
 			}
 
 			// We need to remove the cookie before rendering HTML, so if the cookie
-            // to display success message is set - remember that information.
+			// to display success message is set - remember that information.
 			if ( isset( $_COOKIE['doofinder_wp_show_success_message'] ) ) {
 				$this->show_success_message = true;
 			}
@@ -131,6 +132,19 @@ class Index_Interface {
 		add_action( 'wp_ajax_doofinder_for_wp_index_content', function () {
 			$data = new Data_Index();
 			$data->ajax_handler();
+		} );
+	}
+
+	/**
+	 * Register an ajax action that cancels the indexing.
+	 */
+	private function register_ajax_action_cancel() {
+		add_action( 'wp_ajax_doofider_for_wp_cancel_indexing', function () {
+			$data = Indexing_Data::instance();
+			$data->set( 'status', 'completed' );
+			$data->save();
+
+			wp_send_json_success();
 		} );
 	}
 
@@ -284,6 +298,7 @@ class Index_Interface {
 
 		if ( ! Settings::is_configuration_complete() ) {
 			$url = admin_url( 'admin.php?page=doofinder_for_wp' );
+
 			?>
 
             <div class="error settings-error notice">
@@ -412,6 +427,16 @@ class Index_Interface {
         >
 			<?php echo $buttonText; ?>
         </button>
+
+		<?php if ( $status === 'processing' ): ?>
+            <button
+                    type="button"
+                    id="doofinder-for-wp-cancel-indexing"
+                    class="button"
+            >
+				<?php _e( 'Cancel', 'doofinder_for_wp' ); ?>
+            </button>
+		<?php endif; ?>
 
         <div id="doofinder-for-wp-spinner" class="doofinder-for-wp-spinner spinner"></div>
 
