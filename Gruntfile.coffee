@@ -3,14 +3,19 @@ module.exports = (grunt) ->
 
   grunt.initConfig
     clean:
-      build: ['build/*']
+      build: ['build/trunk/**/*', 'build/assets/**/*']
 
     copy:
-      build:
+      source:
         expand: true
         cwd: "doofinder-for-wordpress"
         src: ["**/*", "!**/*.scss"]
-        dest: "build"
+        dest: "build/trunk"
+      assets:
+        expand: true
+        cwd: "assets"
+        src: ["**/*"]
+        dest: "build/assets"
 
     version:
       code:
@@ -24,7 +29,7 @@ module.exports = (grunt) ->
         ]
 
     compress:
-      build:
+      source:
         options:
           archive: "doofinder-for-wordpress.zip"
         files: [{
