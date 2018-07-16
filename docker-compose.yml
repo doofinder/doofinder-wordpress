@@ -17,7 +17,7 @@ services:
       - db
     build: .
     volumes:
-      - ./doofinder-for-wordpress:/usr/src/doofinder-for-wordpress
+      - ./doofinder:/usr/src/doofinder
     restart: unless-stopped
     networks:
       default:

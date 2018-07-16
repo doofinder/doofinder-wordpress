@@ -1,4 +1,4 @@
-=== Doofinder for WordPress ===
+=== Doofinder ===
 Contributors: doofinder, chopchoporg
 Tags: search, autocomplete
 Version: 0.1.0

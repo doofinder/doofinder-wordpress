@@ -21,7 +21,7 @@ if ! $(wp core is-installed); then
 
   chown -R www-data:www-data /var/www/html
 
-  ln -s /usr/src/doofinder-for-wordpress /var/www/html/wp-content/plugins
+  ln -s /usr/src/doofinder /var/www/html/wp-content/plugins
 fi
 
 # Pass through arguments to exec
