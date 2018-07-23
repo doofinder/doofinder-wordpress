@@ -3,7 +3,7 @@ module.exports = (grunt) ->
 
   grunt.initConfig
     clean:
-      build: ['build/trunk/**/*', 'build/assets/**/*']
+      build: ['build/trunk/*', 'build/assets/*']
 
     copy:
       source:
