@@ -177,7 +177,7 @@ class Post {
 	 * that the post should not be indexed.
 	 *
 	 * @param \WP_Post $post
-	 * @param bool $updated
+	 * @param bool     $updated
 	 */
 	private static function webhook_update_post( $post, $updated ) {
 		$api            = Api_Factory::get();
@@ -207,7 +207,7 @@ class Post {
 	 * Post constructor.
 	 *
 	 * @param \WP_Post|int $post
-	 * @param \stdClass[] $meta
+	 * @param \stdClass[]  $meta
 	 */
 	public function __construct( $post, $meta = null ) {
 		if ( $meta !== null ) {
@@ -288,9 +288,10 @@ class Post {
 		// Base data, that all posts must have.
 		// All other data will be added if present.
 		$data = array(
-			'id'    => $this->post->ID,
-			'title' => $this->post->post_title,
-			'link'  => get_the_permalink( $this->post ),
+			'id'        => $this->post->ID,
+			'title'     => $this->post->post_title,
+			'link'      => get_the_permalink( $this->post ),
+			'post_date' => $this->post->post_date
 		);
 
 		// Post content.

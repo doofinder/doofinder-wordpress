@@ -119,9 +119,11 @@ class Doofinder_Search {
 		// throws an exception, the list of IDs will be empty
 		// and Internal Search will display empty list of results.
 		try {
-			$this->results = $this->client->query( $query, $page, array(
+			$queryParams = array(
 				'rpp' => $per_page,
-			) );
+			);
+
+			$this->results = $this->client->query( $query, $page, $queryParams );
 
 			$this->extract_ids();
 			$this->calculate_totals();
