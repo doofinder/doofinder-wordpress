@@ -110,7 +110,7 @@ class Local_Dump implements Api_Wrapper {
 
 		$this->log->log( $items_type );
 		$this->log->log( array_map( function ( $item ) {
-			return $item['id'] . ' - ' . $item['title'];
+			return $item['id'] . ' - ' . $item['title'] . ' - ' . $item['post_date'];
 		}, $items ) );
 
 		return Api_Status::$success;
