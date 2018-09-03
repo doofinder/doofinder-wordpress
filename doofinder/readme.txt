@@ -1,7 +1,7 @@
 === Doofinder ===
 Contributors: doofinder, chopchoporg
 Tags: search, autocomplete
-Version: 0.1.0
+Version: 0.1.1
 Requires at least: 4.1
 Tested up to: 4.9.6
 Stable tag: trunk
@@ -111,6 +111,9 @@ Just send your questions to <mailto:support@doofinder.com> and we will try to an
 
 
 == Changelog ==
+
+= 0.1.1 =
+Post date is indexed for all data types.
 
 = 0.1.0 =
 First usable version.
