@@ -606,7 +606,9 @@ class Settings {
         <div class="wrap">
             <h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
 
-            <div class="notice notice-error"><p><?php _e('You have a multi-language plugin installed. Please choose language first to configure Doofinder.', 'doofinder_for_wp'); ?></p></div>
+            <div class="notice notice-error">
+                <p><?php _e( 'You have a multi-language plugin installed. Please choose language first to configure Doofinder.', 'doofinder_for_wp' ); ?></p>
+            </div>
         </div>
 
 		<?php
@@ -764,6 +766,7 @@ class Settings {
 		$saved_value = get_option( $option_name );
 
 		?>
+
         <span class="doofinder-tooltip"><span><?php _e( 'Enabling this setting will make WordPress use Doofinder internally for search.', 'doofinder_for_wp' ); ?></span></span>
         <label>
             <input type="checkbox" name="<?php echo $option_name; ?>"
@@ -856,11 +859,12 @@ class Settings {
 		return $input;
 	}
 
-	/*
+	/**
 	 * Helper function to search two dimensional array.
 	 *
 	 * @param string $needle
-	 * @param array $haystack
+	 * @param array  $haystack
+	 *
 	 * @return bool
 	 */
 	private function in_2d_array( $needle, array $haystack ) {
