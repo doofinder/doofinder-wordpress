@@ -38,11 +38,9 @@ interface Api_Wrapper {
 	public function send_batch( $items_type, array $items );
 
 	/**
-	 * Remove one type from the index.
+	 * Remove all post types from the API.
 	 *
-	 * @param string $type
-	 *
-	 * @return string Status of the operation, from Api_Status
+	 * @return string Status of the operation.
 	 */
-	public function remove_type( $type );
+	public function remove_types();
 }

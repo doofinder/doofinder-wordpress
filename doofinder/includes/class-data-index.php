@@ -135,7 +135,7 @@ class Data_Index {
 	 * @return bool True if the indexing has finished.
 	 */
 	public function index_posts() {
-		$this->indexing_data->set( 'status', 'processing' );
+		$this->maybe_remove_posts();
 
 		// Load the data that we'll use to fetch posts.
 		$this->load_post_types();
@@ -201,6 +201,27 @@ class Data_Index {
 	}
 
 	/**
+	 * Remove all post types, but only once, at the beginning of indexing process.
+	 */
+	private function maybe_remove_posts() {
+		if ( $this->indexing_data->get( 'status' ) === 'processing' ) {
+			return;
+		}
+
+		$types_removed = $this->api->remove_types();
+		$this->indexing_data->set( 'status', 'processing' );
+
+		if ( $types_removed !== Api_Status::$success ) {
+			$this->ajax_response_error( array(
+				'status'  => $types_removed,
+				'message' => __( 'Deleting objects...', 'doofinder_for_wp' ),
+			) );
+		}
+
+		$this->indexing_data->set( 'post_types_removed', Settings::get_post_types_to_index() );
+	}
+
+	/**
 	 * Load post types from DB, and set current post type if is not defined.
 	 *
 	 * @since 1.0.0
@@ -234,36 +255,11 @@ class Data_Index {
 
 		$this->post_count = count( $this->posts_ids );
 
-		$this->maybe_remove_current_post_type();
-
 		if ( $this->post_count === 0 ) {
 			if ( $this->check_next_post_type() ) {
 				$this->load_posts_ids();
 			}
 		}
-	}
-
-	/**
-	 * We should remove posts from a given type when we begin indexing that type.
-	 *
-	 * This function checks if the post type currently being indexed was removed,
-	 * and removes it it was not.
-	 */
-	private function maybe_remove_current_post_type() {
-		$post_type = $this->indexing_data->get( 'post_type' );
-		if ( $this->indexing_data->has( 'post_types_removed', $post_type ) ) {
-			return;
-		}
-
-		$removing_post_type = $this->api->remove_type( $post_type );
-		if ( $removing_post_type !== Api_Status::$success ) {
-			$this->ajax_response_error( array(
-				'status'  => $removing_post_type,
-				'message' => __( "Deleting \"$post_type\" type...", 'doofinder_for_wp' ),
-			) );
-		}
-
-		$this->indexing_data->set( 'post_types_removed', $post_type );
 	}
 
 	/**
@@ -401,7 +397,7 @@ class Data_Index {
 	 * @since 1.0.0
 	 *
 	 * @param bool   $completed Status of indexing posts.
-	 * @param string $message   Additional message to pass to front.
+	 * @param string $message Additional message to pass to front.
 	 */
 	private function ajax_response( $completed, $message = '' ) {
 		// We're about to call "die", so we need to make sure our data

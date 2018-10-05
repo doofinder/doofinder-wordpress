@@ -130,6 +130,20 @@ class SearchEngineTest extends \PHPUnit_Framework_TestCase
     $this->assertTrue($this->searchEngine->updateItem('newType', 'idx', $item));
   }
 
+  public function testPartialUpdateItemApiCall()
+  {
+    $item = array("id"=>"id1", "title"=>"title1", "cats"=>array("cat1", "cat2"));
+    $this->client->managementApiCall(
+      'PATCH',
+      'testHashid/items/newType/idx',
+      null,
+      json_encode($item)
+    )->shouldBeCalledTimes(1)->willReturn(
+      array('statusCode' => 200));
+
+    $this->assertTrue($this->searchEngine->updateItem('newType', 'idx', $item, true));
+  }
+
   public function testUpdateItemsApiCall()
   {
     $items = array(
@@ -141,6 +155,19 @@ class SearchEngineTest extends \PHPUnit_Framework_TestCase
     )->willReturn(array('statusCode'=>200));
 
     $this->assertTrue($this->searchEngine->updateItems('newType', $items));
+  }
+
+  public function testPartialUpdateItemsApiCall()
+  {
+    $items = array(
+      array('id'=>'id1', 't'=>'t1', 'cats'=>array('cat1', 'cat2')),
+      array('id'=>'id2', 't'=>'t2', 'cats'=>array('cat1', 'cat2'))
+    );
+    $this->client->managementApiCall(
+      'PATCH', 'testHashid/items/newType', null, json_encode($items)
+    )->willReturn(array('statusCode'=>200));
+
+    $this->assertTrue($this->searchEngine->updateItems('newType', $items, true));
   }
 
   public function testDeleteItemApiCall()
@@ -334,6 +361,22 @@ class SearchEngineTest extends \PHPUnit_Framework_TestCase
                    )
                  );
     $this->assertEquals($this->searchEngine->logs(), array('a', 'response'));
+  }
+
+  public function testDelete()
+  {
+    $this->client->deleteSearchEngine('testHashid')
+      ->shouldBeCalledTimes(1)
+      ->willReturn(true);
+    $this->assertEquals($this->searchEngine->delete(), true);
+  }
+
+  public function testUpdate()
+  {
+    $this->client->updateSearchEngine('testHashid', array("t"=>"nMod"))
+      ->shouldBeCalledTimes(1)
+      ->willReturn(true);
+    $this->searchEngine->update(array("t"=>"nMod"));
   }
 
   /**
