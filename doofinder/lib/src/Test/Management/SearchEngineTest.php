@@ -19,10 +19,11 @@ class SearchEngineTest extends \PHPUnit_Framework_TestCase
     // Set up the expectation for the managemetApiCall() method
     // to be called only once and with the strings 'GET' and 'testHashid/types'
     // as its parameters.
-    $this->client->managementApiCall('GET', 'testHashid/types')->shouldBeCalledTimes(2);
+    $this->client->managementApiCall('GET', 'testHashid/types')->shouldBeCalledTimes(3);
 
     $this->searchEngine->getTypes();
-    $this->searchEngine->getDataTypes();
+    $this->searchEngine->getInternalTypes();
+    $this->searchEngine->getAllTypes();
   }
 
   public function testAddTypesApiCall()
@@ -49,7 +50,7 @@ class SearchEngineTest extends \PHPUnit_Framework_TestCase
 
   public function testItemsReturnsScrollIterator()
   {
-    $scrollIterator = $this->searchEngine->items('newType');
+    $scrollIterator = $this->searchEngine->getItems('newType');
     // returns a ScrollIterator
     $this->assertInstanceOf('\Doofinder\WP\Api\Management\ScrollIterator', $scrollIterator);
     // for the right Datatype
@@ -130,6 +131,20 @@ class SearchEngineTest extends \PHPUnit_Framework_TestCase
     $this->assertTrue($this->searchEngine->updateItem('newType', 'idx', $item));
   }
 
+  public function testPartialUpdateItemApiCall()
+  {
+    $item = array("id"=>"id1", "title"=>"title1", "cats"=>array("cat1", "cat2"));
+    $this->client->managementApiCall(
+      'PATCH',
+      'testHashid/items/newType/idx',
+      null,
+      json_encode($item)
+    )->shouldBeCalledTimes(1)->willReturn(
+      array('statusCode' => 200));
+
+    $this->assertTrue($this->searchEngine->updateItem('newType', 'idx', $item, true));
+  }
+
   public function testUpdateItemsApiCall()
   {
     $items = array(
@@ -141,6 +156,19 @@ class SearchEngineTest extends \PHPUnit_Framework_TestCase
     )->willReturn(array('statusCode'=>200));
 
     $this->assertTrue($this->searchEngine->updateItems('newType', $items));
+  }
+
+  public function testPartialUpdateItemsApiCall()
+  {
+    $items = array(
+      array('id'=>'id1', 't'=>'t1', 'cats'=>array('cat1', 'cat2')),
+      array('id'=>'id2', 't'=>'t2', 'cats'=>array('cat1', 'cat2'))
+    );
+    $this->client->managementApiCall(
+      'PATCH', 'testHashid/items/newType', null, json_encode($items)
+    )->willReturn(array('statusCode'=>200));
+
+    $this->assertTrue($this->searchEngine->updateItems('newType', $items, true));
   }
 
   public function testDeleteItemApiCall()
@@ -334,6 +362,22 @@ class SearchEngineTest extends \PHPUnit_Framework_TestCase
                    )
                  );
     $this->assertEquals($this->searchEngine->logs(), array('a', 'response'));
+  }
+
+  public function testDelete()
+  {
+    $this->client->deleteSearchEngine('testHashid')
+      ->shouldBeCalledTimes(1)
+      ->willReturn(true);
+    $this->assertEquals($this->searchEngine->delete(), true);
+  }
+
+  public function testUpdate()
+  {
+    $this->client->updateSearchEngine('testHashid', array("t"=>"nMod"))
+      ->shouldBeCalledTimes(1)
+      ->willReturn(true);
+    $this->searchEngine->update(array("t"=>"nMod"));
   }
 
   /**

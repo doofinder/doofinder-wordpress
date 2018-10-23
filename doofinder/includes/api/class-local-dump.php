@@ -119,13 +119,13 @@ class Local_Dump implements Api_Wrapper {
 	/**
 	 * @inheritdoc
 	 */
-	public function remove_type( $type ) {
+	public function remove_types() {
 		// Fail the API call if we want to test something.
 		if ( $this->should_fail ) {
 			return Api_Status::$unknown_error;
 		}
 
-		$this->log->log( "Removing $type" );
+		$this->log->log('- Removing all post types -');
 
 		return Api_Status::$success;
 	}

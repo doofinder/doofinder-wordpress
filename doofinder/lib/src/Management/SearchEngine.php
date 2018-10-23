@@ -18,11 +18,18 @@ class SearchEngine {
   public $name = null;
   public $hashid = null;
   public $client = null;
+  public $site_url = null;
+  public $language = null;
+  public $currency = null;
 
-  public function __construct(Client $client, $hashid, $name) {
+
+  public function __construct(Client $client, $hashid, $name, $options = array()) {
     $this->name = $name;
     $this->hashid = $hashid;
     $this->client = $client;
+    $this->site_url = array_key_exists('site_url', $options) ? $options['site_url'] : null;
+    $this->language = array_key_exists('language', $options) ? $options['language'] : null;
+    $this->currency = array_key_exists('currency', $options) ? $options['currency'] : null;
   }
 
   /**
@@ -31,15 +38,46 @@ class SearchEngine {
    * @return array list of types
    */
   public function getDatatypes() {
+    trigger_error('SearchEngine.getDatatypes() is deprecated and will be removed, use SearchEngine.getTypes() instead', E_USER_NOTICE);
     return $this->getTypes();
   }
 
   /**
-   * Get a list of searchengine's types
+   * Get a list of search engine's user types.
+   *
+   * Some types are internal (their name starts by 'df_') and this method does
+   * not return them.
    *
    * @return array list of types
    */
   public function getTypes() {
+    $lambda = function($name) {
+      return strpos($name, 'df_') !== 0;
+    };
+    return array_filter((array) $this->getAllTypes(), $lambda);
+  }
+
+  /**
+   * Get a list of Doofinder's internal types for the current search engine.
+   *
+   * WARNING: These datatypes are not intended to be manipulated by users but
+   * you can if you want. Don't complain if something bad happens ;-)
+   *
+   * @return arrat list of types
+   */
+  public function getInternalTypes() {
+    $lambda = function($name) {
+      return strpos($name, 'df_') === 0;
+    };
+    return array_filter((array) $this->getAllTypes(), $lambda);
+  }
+
+  /**
+   * Get a list of all search engine's types (both user and internal types).
+   *
+   * @return array list of types
+   */
+  public function getAllTypes() {
     $result = $this->client->managementApiCall('GET', "{$this->hashid}/types");
     return $result['response'];
   }
@@ -63,11 +101,17 @@ class SearchEngine {
    * @return boolean true on success
    */
   public function deleteType($datatype) {
-    $result = $this->client->managementApiCall('DELETE', "{$this->hashid}/types/{$datatype}");
+    $datatype_list = implode(",", (array) $datatype);
+    $result = $this->client->managementApiCall('DELETE', "{$this->hashid}/types/{$datatype_list}");
     return $result['statusCode'] == 202;
   }
 
   public function items($datatype) {
+    trigger_error('SearchEngine.items() is deprecated and will be removed, use SearchEngine.getItems() instead', E_USER_NOTICE);
+    return $this->getItems($datatype);
+  }
+
+  public function getItems($datatype) {
     return new ScrollIterator($this, $datatype);
   }
 
@@ -126,10 +170,12 @@ class SearchEngine {
    * @param string $datatype  type of the Item.
    * @param string $itemId  Id of the item to be updated/added
    * @param array $itemDescription Assoc array representating the item.
+   * @param boolean $partial whether or not do a partial update
    * @return boolean true on success.
    */
-  public function updateItem($datatype, $itemId, $itemDescription) {
-    $result = $this->client->managementApiCall('PUT', "{$this->hashid}/items/{$datatype}/{$itemId}", null, json_encode($itemDescription));
+  public function updateItem($datatype, $itemId, $itemDescription, $partial = false) {
+    $method = $partial ? 'PATCH' : 'PUT';
+    $result = $this->client->managementApiCall($method, "{$this->hashid}/items/{$datatype}/{$itemId}", null, json_encode($itemDescription));
     return $result['statusCode'] == 200;
   }
 
@@ -140,10 +186,12 @@ class SearchEngine {
    *
    * @param string $datatype type of the items.
    * @param array $itemsDescription List of assoc array representing items
+   * @param boolean $partial whether or not do a partial update
    * @return boolean true on success
    */
-  public function updateItems($datatype, $itemsDescription) {
-    $result = $this->client->managementApiCall('PUT', "{$this->hashid}/items/{$datatype}", null, json_encode($itemsDescription));
+  public function updateItems($datatype, $itemsDescription, $partial = false) {
+    $method = $partial ? 'PATCH' : 'PUT';
+    $result = $this->client->managementApiCall($method, "{$this->hashid}/items/{$datatype}", null, json_encode($itemsDescription));
     return $result['statusCode'] == 200;
   }
 
@@ -254,6 +302,25 @@ class SearchEngine {
   public function logs() {
     $result = $this->client->managementApiCall("GET", "{$this->hashid}/logs");
     return $result['response'];
+  }
+
+  /**
+   * Delete SearchEngine
+   *
+   * @return boolean true if successful
+   */
+  public function delete() {
+    return $this->client->deleteSearchEngine($this->hashid);
+  }
+
+  /**
+   * Update SearchEngine
+   *
+   * @param array $attributes attributes to update
+   * @return $this the searchEngine object, updated
+   */
+  public function update($attributes){
+    return $this->client->updateSearchEngine($this->hashid, $attributes);
   }
 
   /**

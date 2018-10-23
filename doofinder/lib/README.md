@@ -261,19 +261,21 @@ dfParam_filter = array(
 
 As with other params, the parameters must be prefixed with the `prefix` specified in `$client` constructor (default: `dfParam_`).
 
-If you sorting for one field in ascending order, you can simply send the `sort` parameter with the name of the field to sort by as value:
+If you're by only one field and in ascending order, you can simply send the `sort` parameter with the name of the field to sort by as value:
 
 ```html
 <input name="dfParam_sort" value="price">
 ```
 
-If you want to specify the sort direction, you'll have to to send, for the `sort` param, an array, being the key the field to sort on and the value either `asc` or `desc`:
+If you want to sort by one field and specify the sort direction, you'll have to to send, for the `sort` param, an array, being the key the field to sort on and the value either `asc` or `desc`:
 
 ```html
 <input name="dfParam_sort[price]" value="desc".
 ```
 
 If you want to sort by several fields, just compound the previous definition in an array.
+
+__Note:__ When sorting for several fields, sort direction must be specified for every one.
 
 __Example:__ sort in descending order by price and if same price, sort by title in ascending order.
 
@@ -287,7 +289,7 @@ This constructs the array:
 ```php
 dfParam_sort = array(
   array('price' => 'desc'),
-  array('title', 'asc')
+  array('title' => 'asc')
 );
 ```
 
@@ -530,20 +532,60 @@ define('API_KEY', 'eu1-384fdag73c7ff0a59g589xf9f4083bxb9727f9c3')
 // Instantiate the object, use your Doofinder's API_KEY.
 $client = new \Doofinder\Api\Management\Client(API_KEY);
 
+// Create a search engine
+$newSearchEngine = $client->addSearchEngine(
+  'my new se', array('language'=>'es', 'site_url'=>'http://www.example.com')
+);
+
+// Update search engine via the client ...
+$updateSearchEngine = $client->updateSearchEngine(
+  '595b37610d5fc780d510595eaa301213', array('currency'=>'USD')
+);
+// ... or the search engine itself
+$re_updateSearchEngine = $updateSearchEngine->update(array("name"=>"yet another update"));
+
 // Get a list of search engines
 $searchEngines = $client->getSearchEngines();
 // From the list, we will choose the first one
 $mySearchEngine = $searchEngines[0];
+
+// Delete search engine via the client
+$client->deleteSearchEngine('7f98f789d7a3c8bbd56a635bf0bd09fe');
+// o... or the searchnengine itself
+$mySearchEngine->delete();
 ```
+
+#### SearchEngines management
+
+```php
+// adding
+$newSearchEngine = $client->addSearchEngine(
+  'new SE',
+  array('language'=>'es', 'currency'=>'EUR', 'site_url'-=>'http://www.apple.com')
+);
+// updating
+$updateSearchEngine = $client->updateSearchEngine(
+  '595b37610d5fc780d510595eaa301213', array('name'=>'updated Name')
+);
+// deletion
+$client->deleteSearchEngine('595b37610d5fc780d510595eaa301213');
+// also update & delete on the searchEngine object itself
+$updateSearchEngine = $mySearchEngine->update(array('language'=>'en'));
+$success = $mySearchEngine->delete();
+```
+------------------------------------
 
 The `SearchEngine` object gives you methods to manage a search engine.
 
 #### Types Management
 
 ```php
-$types = $mySearchEngine->getTypes();             // Obtain search engine's datatypes
+$types = $mySearchEngine->getTypes();             // Obtain search engine's user data types
+$types = $mySearchEngine->getInternalTypes();     // Obtain search engine's internal data types
+$types = $mySearchEngine->getAllTypes();          // Obtain all search engine's data types
 $new_types = $mySearchEngine->addType('product'); // Add new type
 $mySearchEngine->deleteType('product');           // Remove the type and all items within it.
+$mySearchEngine->deleteType(array('product', 'category')); // Remove multiple types at once.
 ```
 
 **Warning:** Type deletion is an *asynchronous operation*, that keeps going after the `deleteType` method has returned `true`. If you try to perform `addItem`, `deleteItem`, `updateItem` or `updateItems` right after a `deleteType` operation, chances are you get an `IndexingInProgress` exception, because those ops aren't allowed while the `deleteType` is still in progress. If that happens, just wait a little and try again.
@@ -573,17 +615,25 @@ $item = $mySearchEngine->getItem('product', '888493');
 $added_item = $mySearchEngine->addItem('product', array('id'=> 'newid', 'title'=>'a title'));
 // Remove item
 $mySearchEngine->deleteItem('product', 'newid');
-// Update the '888493' item belonging to the 'product' type.
-$mySearchEngine->updateItem('product', '888493', array('title'=>'modifiled title'));
+// Completely Update the '888493' item belonging to the 'product' type, overwriting the item
+$mySearchEngine->updateItem('product', '888493', array('title'=>'modifiled title', 'body' => 'extra' ));
+// Partially Update the '888493' item, leaving unspecified fields untouched
+$mySearchEngine->updateItem('product', '88493', array('extra' => 'extra_value'), true);
 ```
 
 ##### Bulk Add/Update/Delete
 
 ```php
+// update items overwriting them completely
 $mySearchEngine->updateItems('product', array(
   array('title' => 'first item', 'id' => 'id1'),
   array('title' => 'second item', 'id' => 'id2'),
 ));
+// partially update items leaving unspecified fields untouched
+$mySearchEngine->updateItems('product', array(
+  array('extra' => 'new value', 'id' => 'id1'),
+  array('extra_field' => 'second item', 'id' => 'id2'),
+), true);
 
 $mySearchEngine->addItems('product', array(
   array('title' => 'first item', 'id' => 'newid1'),

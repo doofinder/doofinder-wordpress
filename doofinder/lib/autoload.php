@@ -1,22 +1,22 @@
 <?php
 
-spl_autoload_register( 'autoloader_doofinder_wp_api_classes' );
+spl_autoload_register('autoload_doofinder_wp_api_classes');
 
-function autoloader_doofinder_wp_api_classes( $className ) {
-	$libraryPrefix    = 'Doofinder\\WP\\Api\\';
-	$libraryDirectory = __DIR__ . '/src/';
+function autoload_doofinder_wp_api_classes($className) {
+  $libraryPrefix = 'Doofinder\\WP\\Api\\';
+  $libraryDirectory = __DIR__ . '/src/';
 
-	$len = strlen( $libraryPrefix );
+  $len = strlen($libraryPrefix);
 
-	// Binary safe comparison of $len first characters
-	if ( strncmp( $libraryPrefix, $className, $len ) !== 0 ) {
-		return;
-	}
+  // Binary safe comparison of $len first characters
+  if (strncmp($libraryPrefix, $className, $len) !== 0) {
+    return;
+  }
 
-	$classPath = str_replace( '\\', '/', substr( $className, $len ) ) . '.php';
-	$file      = $libraryDirectory . $classPath;
+  $classPath = str_replace('\\', '/', substr($className, $len)) . '.php';
+  $file = $libraryDirectory . $classPath;
 
-	if ( file_exists( $file ) ) {
-		require $file;
-	}
+  if (file_exists($file)) {
+    require $file;
+  }
 }
