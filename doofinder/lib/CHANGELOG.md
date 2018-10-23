@@ -1,106 +1,115 @@
-Version 5.
-----------
+# Changelog
+All notable changes to this project will be documented in this file.
 
-v5.7.2
-======
-  - Added version to composer.json
+The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
+and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-v5.7.1
-======
-  - Restore redirection in the response
+## [Unreleased]
 
-v5.7.0
-======
-  - Throw exception when api key is not correctly set
+## [5.7.6] - 2018-09-12
+### Added
+  - SearchEngines CRUD
+  - Support for multiple types deletion in a single request.
 
-v5.6.3
-======
-  - force http_buid_query to use & separator
+### Changed
+  - Small refactoring to allow changing the endpoint easily for dev.
 
-v5.6.2
-======
-  - Fixed bug reading error response details.
+## [5.7.5] - 2018-09-03
+### Added
+  - Support for partial updates.
 
-v5.6.1
-======
-  * New features
-    - added support for exclusion filters (thanks to @sPooKee).
+## [5.7.4] - 2018-06-13
+### Added
+  - TypeAlreadyExists error.
 
-v5.6.0
-======
-  * Breaking changes
-    - getFacet method return array simplified
-    - former 'getFacet' method is now called 'getLegacyFacet'
+## [5.7.3] - 2018-02-20
+### Added
+  - Stats endpoint.
 
-v5.5.1
-======
-  * New features
-    - added deleteItems method
+## [5.7.2]
+### Fixed
+  - Version in `composer.json`.
 
-v5.5.0
-======
-  * New features
-    - Added phpunit tests
-  * Other stuff
-    - some small refactoring
+## [5.7.1]
+### Fixed
+  - Restored redirection in the response.
 
-v5.4.3
-======
-  * New Features
-    - autoload for those not using composes
-  * Other stuff
-    - bugfixes
-    - decent formatting
+## [5.7.0]
+### Added
+  - Throw exception when api key is not correctly set.
 
-v5.3.1
-======
-  * Breaking changes
-    - complete rewrite of the file structure: psr4 compliant
-  * New Features
-    - added to the composer repository
+## [5.6.3]
+### Fixed
+  - Force `http_buid_query` to use `&` separator.
 
-v5.2.6
-======
-  * New Features
-    - added sort parameter.
+## [5.6.2]
+### Fixed
+  - Bug reading error response details.
 
-v5.2.5
-======
-  * New features
-    - stats retrieval
+## [5.6.1]
+### Added
+  - Support for exclusion filters (thanks to @sPooKee).
 
-v5.2.4
-======
-  * Other stuff
-    - bugfixes
+## [5.6.0]
+### Changed
+  - `getFacet` method returns simplified array. **BREAKING**
+  - Former `getFacet` method is now called `getLegacyFacet`. **BREAKING**
 
-v5.2.3
-======
-  * Other stuff
-    - bugfixes
+## [5.5.1]
+### Added
+  - Added `deleteItems` method.
 
-v5.2.2
-======
-  * mainteinance release
+## [5.5.0]
+### Added
+  - Added phpUnit tests.
 
-v5.2.1
-======
-  * new features
-    - Search Client: getOptions method
-  * Breaking changes
-    - Search Client: https mandatory
+### Changed
+  - Some small refactoring
 
-v5.*
-====
-  * New features
-    - Allow unprefixed params
-    - Allow custom query parameter name
-  * Breaking changes
-    - API Key Authorization. API Key required in client constructor
+## [5.4.3]
+### Added
+  - Autoload for those not using Composer.
 
-Version 4.
-----------
+### Changed
+  - Some bugfixes.
+  - Decent formatting.
 
- - CamelCase convention for everything. "has_next(0" is now "hasNext()"
- - And empty query() prompts a "match all" query
- - Facets/Filtering support
+## [5.3.1]
+### Added
+  - Added to the Composer repository.
+
+### Changed
+  - Complete rewrite of the file structure: PSR-4 compliant.
+
+## [5.2.6]
+### Added
+  - Added sort parameter.
+
+## [5.2.5]
+### Added
+  - Stats retrieval.
+
+## [5.2.4]
+### Changed
+  - Bugfixes.
+
+## [5.2.3]
+### Changed
+  - Bugfixes.
+
+## [5.2.2]
+### Changed
+  - Mainteinance release.
+
+## [5.2.1]
+### Added
+  - Search Client: `getOptions` method.
+
+### Changed
+  - Search Client: HTTPS is mandatory now. **BREAKING**
+
+## [5.1]
+### Added
+  - Allow unprefixed parameters.
+  - Allow custom query parameter name.
+  - API Key Authorization. API Key required in client constructor. **BREAKING**

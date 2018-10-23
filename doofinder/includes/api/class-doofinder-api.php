@@ -207,29 +207,23 @@ class Doofinder_Api implements Api_Wrapper {
 	/**
 	 * @inheritdoc
 	 */
-	public function remove_type( $type ) {
+	public function remove_types() {
+		if ( ! $this->search_engine ) {
+			$this->log->log( 'Invalid search engine.' );
+
+			return Api_Status::$invalid_search_engine;
+		}
+
 		// Doofinder API will throw an exception in case of invalid token
 		// or something like that.
 		try {
-			if ( ! $this->search_engine ) {
-				$this->log->log( 'Invalid search engine.' );
-
-				return Api_Status::$invalid_search_engine;
-			}
-
-			$this->search_engine->deleteType( $type );
-
-			return Api_Status::$success;
-		} catch ( NotFound $exception ) {
-			// We cannot remove the type because it doesn't exist.
-			// That's not really an error, that's expected if we're trying
-			// to add a new type.
+			$this->search_engine->deleteType( $this->search_engine->getTypes() );
 
 			return Api_Status::$success;
 		} catch ( IndexingInProgress $exception ) {
-			// We requested deletion of the post type and the server
-			// is still processing that request.
-			// We should retry the request in a moment.
+			// This exception is thrown after we've sent request to delete a type
+			// and the server is not finished processing it yet.
+			// We'll have to retry the request in a moment.
 
 			$this->log->log( $exception );
 

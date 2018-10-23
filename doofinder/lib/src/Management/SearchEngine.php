@@ -18,11 +18,18 @@ class SearchEngine {
   public $name = null;
   public $hashid = null;
   public $client = null;
+  public $site_url = null;
+  public $language = null;
+  public $currency = null;
 
-  public function __construct(Client $client, $hashid, $name) {
+
+  public function __construct(Client $client, $hashid, $name, $options = array()) {
     $this->name = $name;
     $this->hashid = $hashid;
     $this->client = $client;
+    $this->site_url = array_key_exists('site_url', $options) ? $options['site_url'] : null;
+    $this->language = array_key_exists('language', $options) ? $options['language'] : null;
+    $this->currency = array_key_exists('currency', $options) ? $options['currency'] : null;
   }
 
   /**
@@ -63,7 +70,8 @@ class SearchEngine {
    * @return boolean true on success
    */
   public function deleteType($datatype) {
-    $result = $this->client->managementApiCall('DELETE', "{$this->hashid}/types/{$datatype}");
+    $datatype_list = implode(",", (array) $datatype);
+    $result = $this->client->managementApiCall('DELETE', "{$this->hashid}/types/{$datatype_list}");
     return $result['statusCode'] == 202;
   }
 
@@ -126,10 +134,12 @@ class SearchEngine {
    * @param string $datatype  type of the Item.
    * @param string $itemId  Id of the item to be updated/added
    * @param array $itemDescription Assoc array representating the item.
+   * @param boolean $partial whether or not do a partial update
    * @return boolean true on success.
    */
-  public function updateItem($datatype, $itemId, $itemDescription) {
-    $result = $this->client->managementApiCall('PUT', "{$this->hashid}/items/{$datatype}/{$itemId}", null, json_encode($itemDescription));
+  public function updateItem($datatype, $itemId, $itemDescription, $partial = false) {
+    $method = $partial ? 'PATCH' : 'PUT';
+    $result = $this->client->managementApiCall($method, "{$this->hashid}/items/{$datatype}/{$itemId}", null, json_encode($itemDescription));
     return $result['statusCode'] == 200;
   }
 
@@ -140,10 +150,12 @@ class SearchEngine {
    *
    * @param string $datatype type of the items.
    * @param array $itemsDescription List of assoc array representing items
+   * @param boolean $partial whether or not do a partial update
    * @return boolean true on success
    */
-  public function updateItems($datatype, $itemsDescription) {
-    $result = $this->client->managementApiCall('PUT', "{$this->hashid}/items/{$datatype}", null, json_encode($itemsDescription));
+  public function updateItems($datatype, $itemsDescription, $partial = false) {
+    $method = $partial ? 'PATCH' : 'PUT';
+    $result = $this->client->managementApiCall($method, "{$this->hashid}/items/{$datatype}", null, json_encode($itemsDescription));
     return $result['statusCode'] == 200;
   }
 
@@ -254,6 +266,25 @@ class SearchEngine {
   public function logs() {
     $result = $this->client->managementApiCall("GET", "{$this->hashid}/logs");
     return $result['response'];
+  }
+
+  /**
+   * Delete SearchEngine
+   *
+   * @return boolean true if successful
+   */
+  public function delete() {
+    return $this->client->deleteSearchEngine($this->hashid);
+  }
+
+  /**
+   * Update SearchEngine
+   *
+   * @param array $attributes attributes to update
+   * @return $this the searchEngine object, updated
+   */
+  public function update($attributes){
+    return $this->client->updateSearchEngine($this->hashid, $attributes);
   }
 
   /**

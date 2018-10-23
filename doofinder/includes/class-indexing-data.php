@@ -138,6 +138,13 @@ class Indexing_Data {
 			return;
 		}
 
+		// If both the option and value are arrays - merge.
+		if ( is_array( $this->data[ $option_name ] ) && is_array( $value ) ) {
+			$this->data[ $option_name ] = array_merge( $this->data[ $option_name ], $value );
+
+			return;
+		}
+
 		// If the option is an array - add the value.
 		if ( is_array( $this->data[ $option_name ] ) ) {
 			$this->data[ $option_name ][] = $value;

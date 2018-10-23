@@ -291,7 +291,7 @@ class Post {
 			'id'        => $this->post->ID,
 			'title'     => $this->post->post_title,
 			'link'      => get_the_permalink( $this->post ),
-			'post_date' => $this->post->post_date
+			'post_date' => $this->get_post_date()
 		);
 
 		// Post content.
@@ -349,6 +349,16 @@ class Post {
 		}
 
 		return $meta;
+	}
+
+	/**
+     * Return the date of the post in the following format:
+     * 2018-09-18T15:27:00Z
+     *
+	 * @return string
+	 */
+	public function get_post_date() {
+		return date( 'Y-m-d\TH:i:s\Z', strtotime( $this->post->post_date ) );
 	}
 
 	/**
