@@ -177,7 +177,7 @@ class Post {
 	 * that the post should not be indexed.
 	 *
 	 * @param \WP_Post $post
-	 * @param bool     $updated
+	 * @param bool $updated
 	 */
 	private static function webhook_update_post( $post, $updated ) {
 		$api            = Api_Factory::get();
@@ -207,7 +207,7 @@ class Post {
 	 * Post constructor.
 	 *
 	 * @param \WP_Post|int $post
-	 * @param \stdClass[]  $meta
+	 * @param \stdClass[] $meta
 	 */
 	public function __construct( $post, $meta = null ) {
 		if ( $meta !== null ) {
@@ -319,7 +319,97 @@ class Post {
 			$data = array_merge( $data, $meta );
 		}
 
+		// Add categories.
+		if ( Settings::get_index_categories() ) {
+			$data['categories'] = $this->get_categories();
+		}
+
+		// Add tags.
+		if ( Settings::get_index_tags() ) {
+			$data['tags'] = $this->get_tags();
+		}
+
+		// Add additional attributes.
+		if ( Settings::get_additional_attributes() ) {
+			$data = array_merge(
+				$data,
+				$this->get_additional_attributes()
+			);
+		}
+
 		return $data;
+	}
+
+	/**
+	 * Retrieve categories for the current post in the following format:
+	 * parent category > child category > child of child
+	 *
+	 * @return string[]
+	 */
+	private function get_categories() {
+		$all_categories       = get_categories();
+		$post_categories      = wp_get_post_categories( $this->post->ID, array( 'fields' => 'all' ) );
+		$formatted_categories = array();
+
+		// We have categories as a regular array. Remap to associative
+		// array indexed by Term ID for easier lookup.
+		$categories = array();
+
+		/** @var \WP_Term $term */
+		foreach ( $all_categories as $term ) {
+			$categories[ $term->term_id ] = $term;
+		}
+
+		foreach ( $post_categories as $category ) {
+			$formatted_categories[] = join(
+				' > ',
+				array_reverse( $this->get_category_full_path(
+					$categories,
+					$category
+				) )
+			);
+		}
+
+		return $formatted_categories;
+	}
+
+	/**
+	 * From a given category this function recursively follows the parents,
+	 * and generates array representing chain of parents of categories.
+	 *
+	 * @param \WP_Term[] $categories
+	 * @param \WP_Term $category
+	 *
+	 * @return string[]
+	 */
+	private function get_category_full_path( $categories, $category ) {
+		$path = array( $category->name );
+
+		if ( $category && $category->parent ) {
+			return array_merge(
+				$path,
+				$this->get_category_full_path(
+					$categories,
+					$categories[ $category->parent ]
+				)
+			);
+		}
+
+		return $path;
+	}
+
+	/**
+	 * Generate a list of tags of the current post to send to the API.
+	 *
+	 * @return string[]
+	 */
+	private function get_tags() {
+		return array_map(
+			function ( $tag ) {
+				return $tag->name;
+			},
+			wp_get_post_tags( $this->post->ID )
+		);
 	}
 
 	/**
@@ -352,9 +442,9 @@ class Post {
 	}
 
 	/**
-     * Return the date of the post in the following format:
-     * 2018-09-18T15:27:00Z
-     *
+	 * Return the date of the post in the following format:
+	 * 2018-09-18T15:27:00Z
+	 *
 	 * @return string
 	 */
 	public function get_post_date() {
@@ -453,6 +543,50 @@ class Post {
 		}
 
 		$this->meta = $filtered_meta;
+	}
+
+	/**
+     * Generate array of values generated from additional attributes settings.
+     * These are configured by the user, so won't be exactly the same
+     * in every installation.
+     *
+	 * @return array
+	 */
+	private function get_additional_attributes() {
+		$additional_attributes = Settings::get_additional_attributes();
+		$output                = array();
+
+		foreach ( $additional_attributes as $attribute ) {
+			$value = null;
+
+			switch ( $attribute['attribute'] ) {
+				case 'post_title':
+					$value = $this->post->post_title;
+					break;
+
+				case 'post_content':
+					$value = $this->get_content();
+					break;
+
+				case 'excerpt':
+					$value = $this->get_excerpt();
+					break;
+
+				case 'permalink':
+					$value = get_the_permalink( $this->post );
+					break;
+
+				case 'thumbnail':
+					$value = $this->get_thumbnail();
+					break;
+			}
+
+			if ( $value ) {
+				$output[ $attribute['field'] ] = $value;
+			}
+		}
+
+		return $output;
 	}
 
 	/**
