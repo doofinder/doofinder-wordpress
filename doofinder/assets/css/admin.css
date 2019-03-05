@@ -162,3 +162,16 @@ p.description {
 .custom-list li::before {
 	content: '- ';
 }
+
+/* Custom attributes */
+
+.doofinder-for-wp-attributes th,
+.doofinder-for-wp-attributes td {
+	padding: 0 10px 0 0;
+}
+
+.doofinder-for-wp-attributes [type=text],
+.doofinder-for-wp-attributes select {
+	display: block;
+	width: 100%;
+}
