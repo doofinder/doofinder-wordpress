@@ -1,7 +1,7 @@
 === Doofinder ===
 Contributors: doofinder, chopchoporg
 Tags: search, autocomplete
-Version: 0.2.0
+Version: 0.3.0
 Requires at least: 4.1
 Tested up to: 4.9.6
 Stable tag: trunk
@@ -111,6 +111,14 @@ Just send your questions to <mailto:support@doofinder.com> and we will try to an
 
 
 == Changelog ==
+
+= 0.3.0 =
+- Refactoring of the Admin UI.
+- Index tags, categories and custom attributes.
+- Enable loading the layer script from Doofinder.
+
+= 0.2.0 =
+Updated Doofinder Library to the latest version.
 
 = 0.1.1 =
 Post date is indexed for all data types.
