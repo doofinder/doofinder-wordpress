@@ -24,6 +24,24 @@ trait Register_Settings {
 	 */
 	private function add_plugin_settings() {
 		add_action( 'admin_init', function () {
+			// When saving settings make sure not to register settings if we are not
+			// saving our own settings page. If the current action is called on
+			// the settings page of another plugin it might cause conflicts.
+			if (
+				// If we are saving the settings...
+				$_SERVER['REQUEST_METHOD'] === 'POST'
+				&& (
+					// ...and "option_page" is either not present...
+					! isset( $_POST['option_page'] )
+
+					// ...or is set to something else than our custom page.
+					|| $_POST['option_page'] !== self::$top_level_menu
+				)
+			) {
+				return;
+			}
+
+			// Figure out which tab is open / which tab is being saved.
 			if ( $_SERVER['REQUEST_METHOD'] === 'POST' ) {
 				$selected_tab = $_POST['doofinder_for_wp_selected_tab'];
 			} elseif ( isset( $_GET['tab'] ) ) {
