@@ -59,12 +59,9 @@ class Internal_Search {
 	 * Hook into the query, and replace results with results from Doofinder Search.
 	 */
 	private function filter_search_query() {
-		add_filter( 'posts_pre_query', function ( $posts ) {
-			/** @var \WP_Query $wp_query */
-			global $wp_query;
-
+		add_filter( 'posts_pre_query', function ( $posts, $query ) {
 			// Only run it for search.
-			if ( ! $wp_query->is_search() ) {
+			if ( ! $query->is_search() ) {
 				return $posts;
 			}
 
@@ -73,28 +70,28 @@ class Internal_Search {
 				return $posts;
 			}
 
-			if ( isset( $wp_query->query['post_type'] ) && $wp_query->query['post_type'] === 'product' ) {
+			if ( isset( $query->query['post_type'] ) && $query->query['post_type'] === 'product' ) {
 				return $posts;
 			}
 
 			// Don't fetch default WP results.
-			$search_query = $wp_query->get( 's' );
-			$wp_query->set( 's', false );
+			$search_query = $query->get( 's' );
+			$query->set( 's', false );
 
 			// Search Doofinder, and override the query.
 			$search = new Doofinder_Search();
 			if ( $search->is_ok() ) {
 				// Determine how many posts per page.
-				if ( $wp_query->get( 'posts_per_page' ) ) {
-					$per_page = (int) $wp_query->get( 'posts_per_page' );
+				if ( $query->get( 'posts_per_page' ) ) {
+					$per_page = (int) $query->get( 'posts_per_page' );
 				} else {
 					$per_page = (int) get_option( 'posts_per_page' );
 				}
 
 				// Which page of results to show?
 				$page = 1;
-				if ( $wp_query->get( 'paged' ) ) {
-					$page = (int) $wp_query->get( 'paged' );
+				if ( $query->get( 'paged' ) ) {
+					$page = (int) $query->get( 'paged' );
 				}
 
 				$search->search( $search_query, $page, $per_page );
@@ -102,8 +99,8 @@ class Internal_Search {
 
 			// Doofinder found some results.
 			if ( $search->get_ids() ) {
-				$wp_query->found_posts   = $search->get_total_posts();
-				$wp_query->max_num_pages = $search->get_total_pages();
+				$query->found_posts   = $search->get_total_posts();
+				$query->max_num_pages = $search->get_total_pages();
 
 				return $search->get_ids();
 			}
@@ -111,9 +108,9 @@ class Internal_Search {
 			// Doofinder returned no results.
 			// We should make sure that the query returns no results.
 			// If we ignore this, or set empty array, ALL posts would be returned.
-			$wp_query->found_posts = 0;
-			$wp_query->max_num_pages = 0;
+			$query->found_posts = 0;
+			$query->max_num_pages = 0;
 			return null;
-		} );
+		}, 10, 2 );
 	}
 }
