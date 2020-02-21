@@ -217,7 +217,7 @@ class Doofinder_Api implements Api_Wrapper {
 		// Doofinder API will throw an exception in case of invalid token
 		// or something like that.
 		try {
-			$this->search_engine->deleteType( $this->search_engine->getTypes() );
+			$this->search_engine->deleteType( Settings::get_post_types_to_index() );
 
 			return Api_Status::$success;
 		} catch ( IndexingInProgress $exception ) {
