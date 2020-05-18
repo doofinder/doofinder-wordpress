@@ -1,7 +1,7 @@
 === Doofinder ===
 Contributors: doofinder, chopchoporg
 Tags: search, autocomplete
-Version: 0.3.2
+Version: 0.3.3
 Requires at least: 4.1
 Tested up to: 5.2.3
 Stable tag: trunk
@@ -111,6 +111,9 @@ Just send your questions to <mailto:support@doofinder.com> and we will try to an
 
 
 == Changelog ==
+
+= 0.3.3 =
+- Prevent deleting all types from Doofinder when indexing, delete only those managed by the module.
 
 = 0.3.2 =
 - Fixed a bug that made search results sometimes leak into menus.
