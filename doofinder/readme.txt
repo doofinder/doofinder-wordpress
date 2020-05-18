@@ -1,9 +1,9 @@
 === Doofinder ===
 Contributors: doofinder, chopchoporg
 Tags: search, autocomplete
-Version: 0.3.3
+Version: 0.3.4
 Requires at least: 4.1
-Tested up to: 5.2.3
+Tested up to: 5.4.1
 Stable tag: trunk
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -111,6 +111,9 @@ Just send your questions to <mailto:support@doofinder.com> and we will try to an
 
 
 == Changelog ==
+
+= 0.3.4 =
+- Reset if processing is in progress and there are errors in configuration.
 
 = 0.3.3 =
 - Prevent deleting all types from Doofinder when indexing, delete only those managed by the module.
