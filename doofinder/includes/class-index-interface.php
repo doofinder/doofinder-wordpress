@@ -207,6 +207,8 @@ class Index_Interface {
 	 * Generate the HTML of the indexing page.
 	 */
 	private function render_html_subpage() {
+		$status = $this->indexing_data->get( 'status' );
+
 		?>
 
         <div class="wrap">
@@ -214,8 +216,30 @@ class Index_Interface {
 
 			<?php
 
-			// If multilanguage is active, but there is no active language selected.
-			if ( $this->is_language_selected() && $this->are_api_keys_present() ) {
+			// We have the multilanguage plugin, but no language is selected.
+			if ( ! $this->is_language_selected() ) {
+				$this->render_html_select_language();
+
+			// API keys are not present.
+			} else if ( ! $this->are_api_keys_present() ) {
+				$this->render_html_missing_api_keys();
+
+				// Generally it should not be possible that we are in
+				// the middle of processing if keys are invalid, but some
+				// people have experienced that. Probably because of some
+				// DB shenanigans? In any case, if the index is being
+				// processed and we have no API keys that's probably and error
+				// so we should reset the processing.
+				if ( $status === 'processing' ) {
+					$this->indexing_data->set( 'status', 'new' );
+					$this->indexing_data->save();
+
+					$this->render_html_indexing_reset();
+				}
+
+			// Settings are ok, we have API keys, etc.
+			// We can render the indexing interface.
+			} else {
 				$this->render_html_wp_debug_warning();
 				$this->render_html_processing_status();
 				$this->render_html_progress_bar();
@@ -223,27 +247,12 @@ class Index_Interface {
 				$this->render_html_indexing_messages();
 				$this->render_html_indexing_error();
 				$this->render_html_index_button();
-			} else {
-				$this->render_html_settings_error();
 			}
 
 			?>
         </div>
 
 		<?php
-	}
-
-	/**
-	 * Ask user to select a language.
-	 */
-	private function render_html_settings_error() {
-		if ( ! $this->is_language_selected() ) {
-			$this->render_html_select_language();
-
-			return;
-		}
-
-		$this->render_html_missing_api_keys();
 	}
 
 	/**
@@ -268,6 +277,19 @@ class Index_Interface {
 
         <div class="notice notice-error">
             <p><?php _e( 'API Key and/or Search Engine Hash ID are not set in Doofinder Settings for the selected language.', 'doofinder_for_wp' ); ?></p>
+        </div>
+
+		<?php
+	}
+
+	/**
+	 * Render a warning that we have just reset the indexing.
+	 */
+	private function render_html_indexing_reset() {
+		?>
+
+        <div class="notice notice-warning">
+            <p><?php _e( 'Indexing was in progress despite errors in configuration. Indexing has been reset.', 'doofinder_for_wp' ); ?></p>
         </div>
 
 		<?php
