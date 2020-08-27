@@ -124,6 +124,37 @@ trait Register_Settings {
 			$this,
 			'validate_search_engine_hash',
 		) );
+
+		add_settings_section(
+			'doofinder-for-wp-debug-mode',
+			__( 'Debug mode', 'doofinder_for_wp' ),
+			function () { },
+			self::$top_level_menu
+		);
+
+		// Disable debug mode
+		$disable_debug_mode_option_name = 'doofinder_for_wp_disable_debug_mode';
+		add_settings_field(
+			$disable_debug_mode_option_name,
+			__( 'Disable debug mode', 'doofinder_for_wp' ),
+			function () use ( $is_indexing, $disable_debug_mode_option_name ) {
+				if ( $is_indexing ) {
+					$this->render_html_indexing_in_progress();
+
+					return;
+				}
+
+				echo $this->render_html_disable_debug_mode( $disable_debug_mode_option_name );
+			},
+			self::$top_level_menu,
+			'doofinder-for-wp-debug-mode'
+		);
+
+		register_setting(
+			self::$top_level_menu,
+			$disable_debug_mode_option_name,
+			array( $this, 'validate_api_key' )
+		);
 	}
 
 	/**
