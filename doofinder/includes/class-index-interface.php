@@ -300,7 +300,7 @@ class Index_Interface {
 	 * to the API, let's display the warning so the user knows what's going on.
 	 */
 	private function render_html_wp_debug_warning() {
-		if ( ! WP_DEBUG ) {
+		if ( ! Helpers::is_debug_mode() ) {
 			return;
 		}
 

@@ -211,6 +211,30 @@ trait Renderers {
 	}
 
 	/**
+	 * Print HTML for the "Disable debug mode" option.
+	 *
+	 * @param string $option_name
+	 */
+	private function render_html_disable_debug_mode( $option_name ) {
+		$saved_value = get_option( $option_name );
+
+		?>
+
+		<span class="doofinder-tooltip"><span><?php _e( 'Checking this will make indexing possible on staging (it will disable the debug mode).',
+					'doofinder_for_wp' ); ?></span></span>
+
+		<input
+			type="checkbox"
+			name="<?php echo $option_name ?>"
+			<?php if ( $saved_value ): ?>
+				checked="checked"
+			<?php endif ;?>
+		>
+
+		<?php
+	}
+
+	/**
 	 * Print HTML with checkboxes where user can select
 	 * which post types to index.
 	 *

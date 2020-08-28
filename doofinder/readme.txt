@@ -1,9 +1,9 @@
 === Doofinder ===
 Contributors: doofinder, chopchoporg
 Tags: search, autocomplete
-Version: 0.3.4
+Version: 0.3.5
 Requires at least: 4.1
-Tested up to: 5.4.1
+Tested up to: 5.4.2
 Stable tag: trunk
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -111,6 +111,9 @@ Just send your questions to <mailto:support@doofinder.com> and we will try to an
 
 
 == Changelog ==
+
+= 0.3.5 =
+- Add option to index even with WP_DEBUG enabled.
 
 = 0.3.4 =
 - Reset if processing is in progress and there are errors in configuration.
