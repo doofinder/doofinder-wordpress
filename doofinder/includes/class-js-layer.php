@@ -31,7 +31,13 @@ class JS_Layer {
 	}
 
 	private function __construct() {
-		if ( ! Settings::is_js_layer_enabled() || ! Settings::get_js_layer() ) {
+		if (
+			! Settings::is_js_layer_enabled() ||
+			(
+				! Settings::get_js_layer() &&
+				! Settings::is_js_layer_from_doofinder_enabled()
+			)
+		) {
 			return;
 		}
 

@@ -78,6 +78,23 @@ trait Accessors {
 	}
 
 	/**
+	 * Returns `true` if debug mode is disabled, `false` otherwise.
+	 *
+	 * Just an alias for "get_option" to avoid repeating the string
+	 * (option name) in multiple files.
+	 *
+	 * @param string $language Language code to retrieve the hash for.
+	 *
+	 * @return string
+	 */
+	public static function get_disable_debug_mode( $language = '' ) {
+		return (bool) get_option( self::option_name_for_language(
+			'doofinder_for_wp_disable_debug_mode',
+			$language
+		) );
+	}
+
+	/**
 	 * Retrieve all the post types that the user chose to index.
 	 *
 	 * Just an alias for "get_option", because ideally we don't
