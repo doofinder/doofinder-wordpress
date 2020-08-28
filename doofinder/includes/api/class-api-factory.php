@@ -2,6 +2,8 @@
 
 namespace Doofinder\WP\Api;
 
+use Doofinder\WP\Helpers;
+
 defined( 'ABSPATH' ) or die();
 
 /**
@@ -32,7 +34,7 @@ class Api_Factory {
 
 		// Use real API in production.
 		// Dump data to local log file when in development.
-		if ( WP_DEBUG ) {
+		if ( Helpers::is_debug_mode() ) {
 			self::$instance = new Local_Dump();
 		} else {
 			self::$instance = new Doofinder_Api();
