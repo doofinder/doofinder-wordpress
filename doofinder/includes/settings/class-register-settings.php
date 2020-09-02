@@ -133,7 +133,8 @@ trait Register_Settings {
 		);
 
 		// Disable debug mode
-		$disable_debug_mode_option_name = 'doofinder_for_wp_disable_debug_mode';
+		$disable_debug_mode_option_name =
+			$this->language->get_option_name( 'doofinder_for_wp_disable_debug_mode' );
 		add_settings_field(
 			$disable_debug_mode_option_name,
 			__( 'Disable debug mode', 'doofinder_for_wp' ),
