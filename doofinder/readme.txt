@@ -1,7 +1,7 @@
 === Doofinder ===
 Contributors: doofinder, chopchoporg
 Tags: search, autocomplete
-Version: 0.3.5
+Version: 0.3.6
 Requires at least: 4.1
 Tested up to: 5.4.2
 Stable tag: trunk
@@ -111,6 +111,9 @@ Just send your questions to <mailto:support@doofinder.com> and we will try to an
 
 
 == Changelog ==
+
+= 0.3.6 =
+- Fix problem with debug mode in ML.
 
 = 0.3.5 =
 - Add option to index even with WP_DEBUG enabled.
