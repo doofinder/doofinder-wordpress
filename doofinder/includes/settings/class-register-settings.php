@@ -101,6 +101,26 @@ trait Register_Settings {
 
 		register_setting( self::$top_level_menu, $api_key_option_name, array( $this, 'validate_api_key' ) );
 
+        // API Host
+		$api_host_option_name = 'doofinder_for_wp_api_host';
+		add_settings_field(
+			$api_host_option_name,
+			__( 'API Host', 'doofinder_for_wp' ),
+			function () use ( $is_indexing, $api_host_option_name ) {
+				if ( $is_indexing ) {
+					$this->render_html_indexing_in_progress();
+
+					return;
+				}
+
+				$this->render_html_api_key( $api_host_option_name );
+			},
+			self::$top_level_menu,
+			'doofinder-for-wp-keys'
+		);
+
+		register_setting( self::$top_level_menu, $api_host_option_name, array( $this, 'validate_api_host' ) );
+
 		// Search engine hash
 		$search_engine_hash_option_name =
 			$this->language->get_option_name( 'doofinder_for_wp_search_engine_hash' );
@@ -381,6 +401,22 @@ trait Register_Settings {
 		if ( null == $input ) {
 			add_settings_error( 'doofinder_for_wp_messages', 'doofinder_for_wp_message_api_key',
 				__( 'API Key is mandatory.', 'doofinder_for_wp' ) );
+		}
+
+		return $input;
+	}
+
+    /**
+	 * Validate api host.
+	 *
+	 * @param string
+	 *
+	 * @return string
+	 */
+	function validate_api_host( $input ) {
+		if ( null == $input ) {
+			add_settings_error( 'doofinder_for_wp_messages', 'doofinder_for_wp_message_api_host',
+				__( 'API Host is mandatory.', 'doofinder_for_wp' ) );
 		}
 
 		return $input;
