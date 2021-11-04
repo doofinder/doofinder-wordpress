@@ -127,4 +127,26 @@ class Local_Dump implements Api_Wrapper {
 
 		return Api_Status::$success;
 	}
+
+	/**
+	 * @inheritdoc
+	 */
+	public function replace_index( $index_name ) {
+		// Fail the API call if we want to test something.
+		if ( $this->should_fail ) {
+			return Api_Status::$unknown_error;
+		}
+
+		$this->log->log( 'Replace Index' );
+
+		$indexing_data = Indexing_Data::instance();
+
+		// Clear internal status of the temp index
+		$indexing_data->set( 'temp_index', [] );
+
+		$this->log->log('- Replacing real index with temp index -');
+		$this->log->log('- Deleting temp index -');
+
+		return Api_Status::$success;
+	}
 }
