@@ -45,6 +45,24 @@ class Indexing_Data {
 		// Post type currently being indexed.
 		'post_type'          => '',
 
+		// Should we index all languages at once or not
+		'process_all_languages' => false,
+
+		// How many posts were processed/indexed in current batch
+		'current_progress' => 0,
+
+		// How many posts were processed/indexed overall
+		'processed_posts_count' => 0,
+
+		// How many posts in total to process
+		'all_posts_count' => 0,
+
+		// Array of site languages if multisite
+		'languages' => array(),
+
+		// Language code of currently processed language. Empty string for no language.
+		'lang' => '',
+
 		// We remove the type from the index before sending posts
 		// of a given type. This tracks what types we've already removed.
 		'post_types_removed' => array(),
@@ -52,7 +70,10 @@ class Indexing_Data {
 		// We want to keep track of what post types we are adding
 		// after we remove them in order to avoid making additional requests
 		// to the Doofinder API.
-		'post_types_readded' => array()
+		'post_types_readded' => array(),
+
+		// Array of temporal indexes currently being processed
+		'temp_index' => array()
 	);
 
 	/**
@@ -130,8 +151,9 @@ class Indexing_Data {
 	 *
 	 * @param string $option_name
 	 * @param mixed  $value
+	 * @param bool $overwrite Set to true to overwrite data instead of merging
 	 */
-	public function set( $option_name, $value ) {
+	public function set( $option_name, $value, $overwrite = false ) {
 		// Only save value for the options that already exist.
 		// That makes sure we don't write anything unexpected there.
 		if ( ! isset( $this->data[ $option_name ] ) ) {
@@ -139,14 +161,14 @@ class Indexing_Data {
 		}
 
 		// If both the option and value are arrays - merge.
-		if ( is_array( $this->data[ $option_name ] ) && is_array( $value ) ) {
+		if ( is_array( $this->data[ $option_name ] ) && is_array( $value ) && !$overwrite ) {
 			$this->data[ $option_name ] = array_merge( $this->data[ $option_name ], $value );
 
 			return;
 		}
 
 		// If the option is an array - add the value.
-		if ( is_array( $this->data[ $option_name ] ) ) {
+		if ( is_array( $this->data[ $option_name ] ) && !$overwrite ) {
 			$this->data[ $option_name ][] = $value;
 
 			return;
@@ -155,6 +177,7 @@ class Indexing_Data {
 		// Otherwise, just set the value.
 		$this->data[ $option_name ] = $value;
 	}
+
 
 	/**
 	 * Rested the indexing data to default.

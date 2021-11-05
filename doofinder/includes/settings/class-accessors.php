@@ -45,6 +45,30 @@ trait Accessors {
 	}
 
 	/**
+	 * Retrieve the API Host.
+	 *
+	 * Just an alias for "get_option" to avoid repeating the string
+	 * (option name) in multiple files.
+	 *
+	 * @return string
+	 */
+	public static function get_api_host() {
+		return get_option( 'doofinder_for_wp_api_host' );
+	}
+
+	/**
+	 * Set the value of the API Host.
+	 *
+	 * Just an alias for "update_option" to avoid repeating the string
+	 * (option name) in multiple files.
+	 *
+	 * @param string $api_key
+	 */
+	public static function set_api_host( $api_key ) {
+		update_option( 'doofinder_for_wp_api_host', $api_key );
+	}
+
+	/**
 	 * Retrieve the hash of the chosen Search engine.
 	 *
 	 * Just an alias for "get_option" to avoid repeating the string
@@ -358,5 +382,38 @@ trait Accessors {
 		}
 
 		return $option_name;
+	}
+
+	/**
+	 * Retrieve last modified date for index (in Doofinder)
+	 *
+	 * Just an alias for "get_option", because ideally we don't
+	 * want to replace the option name in multiple files.
+	 *
+	 * @param string $language Language code.
+	 */
+	public static function get_last_modified_index( $language = '' ) {
+		return get_option( self::option_name_for_language(
+			'woocommerce_doofinder_last_modified_index',
+			$language
+		) );
+	}
+
+	/**
+	 * Set last modified date for index (in Doofinder)
+	 *
+	 * Just an alias for "update_option", because ideally we don't
+	 * want to replace the option name in multiple files.
+	 *
+	 * @param string $language Language code.
+	 * @param int $update_time Timestamp of the update time
+	 */
+	public static function set_last_modified_index( $language = '', $update_time = null ) {
+		$update_time = $update_time ?: time();
+
+		update_option( self::option_name_for_language(
+			'woocommerce_doofinder_last_modified_index',
+			$language
+		), $update_time);
 	}
 }
