@@ -353,4 +353,89 @@ class Setup_Wizard {
 
 		self::next_step();
 	}
+
+	/**
+	 * Check if we should migrate settings
+	 *
+	 * @return bool
+	 */
+	public static function should_migrate() {
+		$log = new Log();
+		$log->log( 'Check migration possible...' );
+
+		if (Settings::get_api_key()) {
+			$log->log( 'Should migrate - Migration Possible - Api Key Exist' );
+			return true;
+		}
+
+		$log->log( 'Should migrate - Migration Not Possible - No Api Key' );
+
+		return false;
+	}
+
+	/**
+	 * Try migrating old settings
+	 */
+
+	public static function migrate() {
+		$log = new Log();
+		$log->log( 'Migrate - Start' );
+
+		$api_key = Settings::get_api_key();
+
+		if (preg_match('@-@', $api_key)) {
+			$arr = explode('-',$api_key);
+		} else {
+			$log->log( 'Migrate - Migration Not Possible / Not Needed - No Prefix' );
+
+			return false;
+		}
+
+		$api_key_prefix = $arr[0] ?? null;
+		$api_key_value = $arr[1] ?? null;
+
+		// All good, save api key value
+		$log->log( 'Migrate - Set Api key' );
+
+		// Old API key prefix should be removed since new API version is not containing prefixes
+		if($api_key_value) {
+			Settings::set_api_key($api_key_value);
+		} else {
+			Settings::set_api_key($api_key);
+		}
+
+		/*
+		 * Since there may be two different scenarios during plugin migration,
+		 * first if user migrating from older version where api host is not containing 'https://' protocol and
+		 * second scenario if user is migirating form newer version where 'https://' protocol exisist in settings,
+		 * we need to check both cases to isolate prefix.
+		*/
+		$api_host = Settings::get_api_host();
+
+		// Check if api host contains prefix, then isolate prefix
+		if(preg_match('@-@', $api_host)) {
+			$arr = explode('-',$api_host);
+		}
+
+		$api_host_prefix = $arr[0] ?? null;
+
+		// Check if prefix contains protocol, then isolate prefix
+		if(preg_match("#^((https?://)|www\.?)#i", $api_host_prefix)) {
+			$arr = preg_split("#^((https?://)|www\.?)#i",$api_host_prefix);
+			$api_host_prefix = $arr[1] ?? null;
+		}
+
+		$log->log( 'Host: ' . $api_host );
+		$log->log( 'Host prefix: ' . $api_host_prefix );
+
+		// Check and update api host
+		$api_host_base = '-api.doofinder.com';
+		if(!$api_host || !preg_match("@$api_host_prefix-api@", $api_host) || !preg_match("#^((https?://)|www\.?)#i", $api_host)) {
+			$log->log( 'Migrate - Set Api Host' );
+			Settings::set_api_host('https://' . $api_host_prefix . $api_host_base);
+		}
+
+		// Migration completed
+		$log->log( 'Migrate - Migration Completed' );
+	}
 }

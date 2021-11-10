@@ -210,6 +210,13 @@ if ( ! class_exists( '\Doofinder\WP\Doofinder_For_WordPress' ) ):
 			self::autoload( self::plugin_path() . 'includes/' );
 			self::register_urls();
 			flush_rewrite_rules();
+
+			$log = new Log();
+			$log->log('Plugin enabled');
+
+			if ( Setup_Wizard::should_migrate() ) {
+				Setup_Wizard::migrate();
+			}
 		}
 
 		/**

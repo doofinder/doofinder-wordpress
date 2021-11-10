@@ -404,7 +404,7 @@ trait Register_Settings {
 		}
 
 		/**
-		 * Old API keys use prefixes like eu1- and us1-, 
+		 * Old API keys use prefixes like eu1- and us1-,
 		 * in api 2.0 there aren't needed.
 		 */
 		if ( strpos( $input, '-' ) ) {
@@ -430,14 +430,16 @@ trait Register_Settings {
 		/**
 		 * New API host must include https:// protocol.
 		 */
-		$url = parse_url( $input );
+		if( !empty( $input ) ) {
+			$url = parse_url( $input );
 
-        if ( $url['scheme'] !== 'https' && $url['scheme'] !== 'http' ) {
-            return 'https://' . $input;
-        } elseif( $url['scheme'] == 'http') {
-            return 'https://' . substr( $input, 7 );
-		} else {
-			return $input;
+			if ( $url['scheme'] !== 'https' && $url['scheme'] !== 'http' ) {
+				return 'https://' . $input;
+			} elseif( $url['scheme'] == 'http') {
+				return 'https://' . substr( $input, 7 );
+			} else {
+				return $input;
+			}
 		}
 
 	}
