@@ -4,6 +4,7 @@ namespace Doofinder\WP\Settings;
 
 use Doofinder\WP\Indexing_Data;
 use Doofinder\WP\Multilanguage\Language_Plugin;
+use Doofinder\WP\Log;
 
 defined( 'ABSPATH' ) or die();
 
@@ -101,6 +102,26 @@ trait Register_Settings {
 
 		register_setting( self::$top_level_menu, $api_key_option_name, array( $this, 'validate_api_key' ) );
 
+        // API Host
+		$api_host_option_name = 'doofinder_for_wp_api_host';
+		add_settings_field(
+			$api_host_option_name,
+			__( 'API Host', 'doofinder_for_wp' ),
+			function () use ( $is_indexing, $api_host_option_name ) {
+				if ( $is_indexing ) {
+					$this->render_html_indexing_in_progress();
+
+					return;
+				}
+
+				$this->render_html_api_host( $api_host_option_name );
+			},
+			self::$top_level_menu,
+			'doofinder-for-wp-keys'
+		);
+
+		register_setting( self::$top_level_menu, $api_host_option_name, array( $this, 'validate_api_host' ) );
+
 		// Search engine hash
 		$search_engine_hash_option_name =
 			$this->language->get_option_name( 'doofinder_for_wp_search_engine_hash' );
@@ -153,8 +174,7 @@ trait Register_Settings {
 
 		register_setting(
 			self::$top_level_menu,
-			$disable_debug_mode_option_name,
-			array( $this, 'validate_api_key' )
+			$disable_debug_mode_option_name
 		);
 	}
 
@@ -383,7 +403,45 @@ trait Register_Settings {
 				__( 'API Key is mandatory.', 'doofinder_for_wp' ) );
 		}
 
-		return $input;
+		/**
+		 * Old API keys use prefixes like eu1- and us1-,
+		 * in api 2.0 there aren't needed.
+		 */
+		if ( strpos( $input, '-' ) ) {
+			return substr( $input, 4 );
+		} else {
+			return $input;
+		}
+	}
+
+    /**
+	 * Validate api host.
+	 *
+	 * @param string
+	 *
+	 * @return string
+	 */
+	function validate_api_host( $input ) {
+		if ( null == $input ) {
+			add_settings_error( 'doofinder_for_wp_messages', 'doofinder_for_wp_message_api_host',
+				__( 'API Host is mandatory.', 'doofinder_for_wp' ) );
+		}
+
+		/**
+		 * New API host must include https:// protocol.
+		 */
+		if( !empty( $input ) ) {
+			$url = parse_url( $input );
+
+			if ( $url['scheme'] !== 'https' && $url['scheme'] !== 'http' ) {
+				return 'https://' . $input;
+			} elseif( $url['scheme'] == 'http') {
+				return 'https://' . substr( $input, 7 );
+			} else {
+				return $input;
+			}
+		}
+
 	}
 
 	/**

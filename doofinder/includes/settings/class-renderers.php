@@ -171,7 +171,31 @@ trait Renderers {
 
 		?>
 
-        <span class="doofinder-tooltip"><span><?php _e( 'The secret token used to authenticate requests.',
+        <span class="doofinder-tooltip"><span><?php _e( 'The secret token is used to authenticate requests. Don`t need to use eu1- or us1- prefix.',
+					'doofinder_for_wp' ); ?></span></span>
+        <input type="text"
+               name="<?php echo $option_name; ?>"
+               class="widefat"
+
+			<?php if ( $saved_value ): ?>
+                value="<?php echo $saved_value; ?>"
+			<?php endif; ?>
+        >
+
+		<?php
+	}
+	
+	/**
+	 * Print HTML for the "API Host" option.
+	 *
+	 * @param string $option_name
+	 */
+	private function render_html_api_host( $option_name ) {
+		$saved_value = get_option( $option_name );
+
+		?>
+
+        <span class="doofinder-tooltip"><span><?php _e( 'The API host should contain https://, ex. https://eu1-api.doofinder.com',
 					'doofinder_for_wp' ); ?></span></span>
         <input type="text"
                name="<?php echo $option_name; ?>"
@@ -195,7 +219,7 @@ trait Renderers {
 
 		?>
 
-        <span class="doofinder-tooltip"><span><?php _e( 'The id of a search engine in your Doofinder Account.',
+        <span class="doofinder-tooltip"><span><?php _e( 'The Hash id of a search engine in your Doofinder Account.',
 					'doofinder_for_wp' ); ?></span></span>
 
         <input type="text"
@@ -359,13 +383,15 @@ trait Renderers {
             <tbody>
 			<?php
 
-			foreach ( $saved_attributes as $index => $attribute ) {
-				$this->render_html_single_additional_attribute(
-					$option_name,
-					$index,
-					$attribute
-				);
-			}
+            if (! empty($saved_attributes)) {
+                foreach ($saved_attributes as $index => $attribute) {
+                    $this->render_html_single_additional_attribute(
+                        $option_name,
+                        $index,
+                        $attribute
+                    );
+                }
+            }
 
 			$this->render_html_single_additional_attribute(
 				$option_name,

@@ -43,4 +43,11 @@ interface Api_Wrapper {
 	 * @return string Status of the operation.
 	 */
 	public function remove_types();
+
+	/**
+	 * Replace real index with temp index
+	 *
+	 * @param string $index_name
+	 */
+	public function replace_index( $index_name );
 }

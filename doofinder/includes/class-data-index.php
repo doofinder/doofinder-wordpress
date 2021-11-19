@@ -2,6 +2,7 @@
 
 namespace Doofinder\WP;
 
+use Doofinder\WP\Log;
 use Doofinder\WP\Api\Api_Factory;
 use Doofinder\WP\Api\Api_Wrapper;
 use Doofinder\WP\Api\Api_Status;
@@ -60,6 +61,13 @@ class Data_Index {
 	private $api;
 
 	/**
+	 * Instance of a class used to log to a file.
+	 *
+	 * @var Log
+	 */
+	private $log;
+
+	/**
 	 * List of posts prepared to be indexed.
 	 *
 	 * @var array[]
@@ -105,6 +113,12 @@ class Data_Index {
 		$this->language      = Multilanguage::instance();
 		$this->indexing_data = Indexing_Data::instance();
 		$this->api           = Api_Factory::get();
+
+		$this->log = new Log( 'api.txt' );
+
+		$this->log->log( '-------------------------------------------------------------------------------------------------------------------------------------' );
+		$this->log->log( '-------------------------------------------------------------------------------------------------------------------------------------' );
+		$this->log->log( '-------------------------------------------------------------------------------------------------------------------------------------' );
 	}
 
 	public function ajax_handler() {
@@ -113,6 +127,7 @@ class Data_Index {
 		// If the indexing has been completed we are reindexing.
 		// Reset the status of indexing.
 		if ( $status === 'completed' ) {
+			$this->log->log( 'Ajax Handler - Reset indexing data ' );
 			$this->indexing_data->reset();
 		}
 
@@ -131,20 +146,26 @@ class Data_Index {
 	 * Get posts from DB, send via API, and return status
 	 * (if the process of indexing has been completed) as JSON.
 	 *
-	 * @since 1.0.0
 	 * @return bool True if the indexing has finished.
+	 * @since 1.0.0
 	 */
 	public function index_posts() {
-		$this->maybe_remove_posts();
+		// $this->log->log( 'Maybe Remove Posts' );
+		// $this->maybe_remove_posts();
 
 		// Load the data that we'll use to fetch posts.
+		$this->log->log( 'Load Post Types' );
 		$this->load_post_types();
+		$this->log->log( $this->post_types );
 
 		// This function also removes the current post type.
 		// This is done because "load_posts_id" can skip a post type
 		// if it contains 0 posts, but we still need to remove
 		// the post type, or the old posts will remain in the DB.
+		$this->log->log( 'Load Post IDs' );
 		$this->load_posts_ids();
+		$this->log->log( 'Post IDs : ' );
+		$this->log->log( $this->posts_ids );
 
 		// We fetch next batch of post IDs, from the current post type,
 		// but advance to the next post type, if there are no more posts.
@@ -152,6 +173,7 @@ class Data_Index {
 		// post type, advanced to the next one, there was none, which
 		// means we are done.
 		if ( $this->post_count === 0 ) {
+			$this->call_replace_index();
 			$this->indexing_data->set( 'status', 'completed' );
 
 			return true;
@@ -169,10 +191,7 @@ class Data_Index {
 		// we'll advance the "pointer" pointing to the last
 		// indexed post.
 		if ( $this->items ) {
-			$sent_to_api = $this->api->send_batch(
-				$this->indexing_data->get( 'post_type' ),
-				$this->items
-			);
+			$sent_to_api = $this->api->send_batch( $this->indexing_data->get( 'post_type' ), $this->items, $this->indexing_data->get( 'lang' ) );
 
 			if ( $sent_to_api !== Api_Status::$success ) {
 				$post_type = $this->get_post_type_name( $this->indexing_data->get( 'post_type' ) );
@@ -202,24 +221,25 @@ class Data_Index {
 
 	/**
 	 * Remove all post types, but only once, at the beginning of indexing process.
+	 * No need to use in api v2.0
 	 */
-	private function maybe_remove_posts() {
-		if ( $this->indexing_data->get( 'status' ) === 'processing' ) {
-			return;
-		}
+	// private function maybe_remove_posts() {
+	// 	if ( $this->indexing_data->get( 'status' ) === 'processing' ) {
+	// 		return;
+	// 	}
 
-		$types_removed = $this->api->remove_types();
-		$this->indexing_data->set( 'status', 'processing' );
+	// 	$types_removed = $this->api->remove_types();
+	// 	$this->indexing_data->set( 'status', 'processing' );
 
-		if ( $types_removed !== Api_Status::$success ) {
-			$this->ajax_response_error( array(
-				'status'  => $types_removed,
-				'message' => __( 'Deleting objects...', 'doofinder_for_wp' ),
-			) );
-		}
+	// 	if ( $types_removed !== Api_Status::$success ) {
+	// 		$this->ajax_response_error( array(
+	// 			'status'  => $types_removed,
+	// 			'message' => __( 'Deleting objects...', 'doofinder_for_wp' ),
+	// 		) );
+	// 	}
 
-		$this->indexing_data->set( 'post_types_removed', Settings::get_post_types_to_index() );
-	}
+	// 	$this->indexing_data->set( 'post_types_removed', Settings::get_post_types_to_index() );
+	// }
 
 	/**
 	 * Load post types from DB, and set current post type if is not defined.
@@ -246,12 +266,7 @@ class Data_Index {
 		$post_type      = $this->indexing_data->get( 'post_type' );
 		$posts_per_page = self::$posts_per_page;
 
-		$this->posts_ids = $this->language->get_posts_ids(
-			$this->language->get_active_language(),
-			$post_type,
-			$last_id,
-			$posts_per_page
-		);
+		$this->posts_ids = $this->language->get_posts_ids( $this->language->get_active_language(), $post_type, $last_id, $posts_per_page );
 
 		$this->post_count = count( $this->posts_ids );
 
@@ -311,10 +326,10 @@ class Data_Index {
 		$query            = "
 			SELECT post_id, meta_key, meta_value
 			FROM $wpdb->postmeta
-			WHERE $wpdb->postmeta.post_id IN ($posts_ids_list) 
+			WHERE $wpdb->postmeta.post_id IN ($posts_ids_list)
 			AND (
               $wpdb->postmeta.meta_key NOT LIKE '\_%' OR
-              $wpdb->postmeta.meta_key = '$visibility_meta' OR 
+              $wpdb->postmeta.meta_key = '$visibility_meta' OR
               $wpdb->postmeta.meta_key = '$yoast_visibility'
             )
 			ORDER BY $wpdb->postmeta.post_id
@@ -364,26 +379,38 @@ class Data_Index {
 			return;
 		}
 
-		$this->indexing_data->set(
-			'post_id',
-			$this->posts_ids[ count( $this->posts_ids ) - 1 ]
-		);
+		$this->indexing_data->set( 'post_id', $this->posts_ids[ count( $this->posts_ids ) - 1 ] );
 	}
 
 	/**
-	 * Check and set next post type from the post types list.
-	 * If next post type does not exist, then simple return false, otherwise true.
+	 * Wrapper function for check and set next item from the container list.
+	 * If next item does not exist, then simple return false, otherwise true.
 	 *
 	 * @since 1.0.0
 	 * @return bool
 	 */
-	private function check_next_post_type() {
-		$current_post_type_index = array_search( $this->indexing_data->get( 'post_type' ), $this->post_types );
-		$next_post_type_index    = $current_post_type_index + 1;
+	private function check_next_($item, $container, $get_new_api = false, $skip_replace_index = false)
+	{
+		$current_item_index = array_search($this->indexing_data->get($item), $container);
+		$next_item_index    = $current_item_index + 1;
 
-		if ( isset( $this->post_types[ $next_post_type_index ] ) && $this->post_types[ $next_post_type_index ] ) {
-			$this->indexing_data->set( 'post_type', $this->post_types[ $next_post_type_index ] );
-			$this->indexing_data->set( 'post_id', 0 );
+		if (isset($container[$next_item_index]) && $container[$next_item_index]) {
+
+			if (!$skip_replace_index) {
+				// We are done with this batch, replace temp index
+				$this->log->log('Check Next ' . $item . '  - Call replace Index');
+				if ($this->api) {
+					$this->call_replace_index($get_new_api);
+				}
+			}
+
+			$this->indexing_data->set($item, $container[$next_item_index]);
+			$this->indexing_data->set('post_id', 0);
+
+			$current_progress = $this->indexing_data->get('current_progress');
+			$this->log->log('Check Next ' . $item . ' - Current progress: ', $current_progress);
+
+			$this->indexing_data->set('processed_posts_count', $current_progress);
 
 			return true;
 		}
@@ -392,12 +419,25 @@ class Data_Index {
 	}
 
 	/**
+	 * Check and set next post type from the post types list.
+	 * If next post type does not exist, then simple return false, otherwise true.
+	 *
+	 * @return bool
+	 * @since 1.0.0
+	 */
+	private function check_next_post_type($skip_replace_index = false) {
+		return $this->check_next_('post_type', $this->post_types, false, $skip_replace_index);
+
+	}
+
+	/**
 	 * Prepare ajax response.
+	 *
+	 * @param bool $completed Status of indexing posts.
+	 * @param string $message Additional message to pass to front.
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param bool   $completed Status of indexing posts.
-	 * @param string $message Additional message to pass to front.
 	 */
 	private function ajax_response( $completed, $message = '' ) {
 		// We're about to call "die", so we need to make sure our data
@@ -468,10 +508,10 @@ class Data_Index {
 		$query = "
 			SELECT
 			(
-				SELECT COUNT(*) 
-				FROM $wpdb->posts 
+				SELECT COUNT(*)
+				FROM $wpdb->posts
 				WHERE $wpdb->posts.post_type IN ($post_types_list)
-			) 
+			)
 			AS 'all_posts'
 		";
 
@@ -496,9 +536,9 @@ class Data_Index {
 			$query .= "
 				, -- Separates this select from previous
 				(
-					SELECT 
-					COUNT(*) 
-					FROM $wpdb->posts 
+					SELECT
+					COUNT(*)
+					FROM $wpdb->posts
 					WHERE $wpdb->posts.post_type IN ($indexed_post_types_list)
 				)
 			    AS 'already_processed'
@@ -514,7 +554,7 @@ class Data_Index {
 				, -- Separates this select from previous
 				(
 					SELECT COUNT(*)
-					FROM $wpdb->posts 
+					FROM $wpdb->posts
 					WHERE $wpdb->posts.post_type = '$post_type'
 					AND $wpdb->posts.ID <= $last_id
 				)
@@ -576,5 +616,39 @@ class Data_Index {
 		}
 
 		return $post_type->labels->singular_name;
+	}
+
+	/**
+	 * We are done so replace real index with temp one. Call replace temp index API method.
+	 *
+	 */
+	private function call_replace_index( $get_api = false ) {
+
+		if ( $get_api ) {
+			$language = $this->indexing_data->get( 'lang' );
+			//$this->log->log( 'Call Replace Index  - lang: ' . $language );
+			$this->log->log( 'Call Replace Index  - Get API Client Instance' );
+			$this->api = Api_Factory::get( $language );
+		}
+
+		$post_type = $this->indexing_data->get( 'post_type' );
+
+		$api_response = $this->api->replace_index( $post_type );
+
+		$this->log->log( $api_response );
+
+		if ( $api_response !== Api_Status::$success ) {
+
+			$message = __( "Replacing Index \"$post_type\" with temporary one.", 'woocommerce-doofinder' );
+
+			// if ( $sent_to_api === Api_Status::$indexing_in_progress ) {
+			// 	$message = __( "Deleting \"$post_type\" type...", 'woocommerce-doofinder' );
+			// }
+
+			$this->ajax_response_error( array(
+				'status'  => $api_response,
+				'message' => $message,
+			) );
+		}
 	}
 }

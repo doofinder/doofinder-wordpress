@@ -2,8 +2,8 @@
 
 namespace Doofinder\WP\Api;
 
-use Doofinder\WP\Api\Management\Errors\IndexingInProgress;
-use Doofinder\WP\Api\Management\Errors\ThrottledResponse;
+use Doofinder\Api\Management\Errors\IndexingInProgress;
+//use Doofinder\Api\Management\Errors\ThrottledResponse;
 use Doofinder\WP\Log;
 
 /**
@@ -77,21 +77,14 @@ class Throttle {
 	 * @param int    $count
 	 *
 	 * @return mixed
-	 * @throws ThrottledResponse
-	 * @throws IndexingInProgress
+	 * @throws \Exception
+	 *
 	 */
 	private function throttle( $method, array $arguments, $count = 1 ) {
 		$log = new Log();
 
 		try {
 			return call_user_func_array( array( $this->target, $method ), $arguments );
-		} catch ( ThrottledResponse $exception ) {
-			$log->log( "Throttling $method: $count" );
-			if ( $count >= self::MAX_RETRIES ) {
-				throw $exception;
-			}
-
-			sleep( 1 );
 		} catch ( IndexingInProgress $exception ) {
 			$log->log( "Throttling when indexing - $method: $count" );
 			if ( $count >= self::MAX_RETRIES ) {
@@ -99,6 +92,13 @@ class Throttle {
 			}
 
 			sleep( 3 );
+		} catch ( \Exception $exception ) {
+			$log->log( "Throttling $method: $count" );
+			if ( $count >= self::MAX_RETRIES ) {
+				throw $exception;
+			}
+
+			sleep( 1 );
 		}
 
 		return $this->throttle( $method, $arguments, $count + 1 );
