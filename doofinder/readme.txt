@@ -1,9 +1,9 @@
 === Doofinder ===
 Contributors: doofinder, chopchoporg
 Tags: search, autocomplete
-Version: 0.3.6
+Version: 0.4.0
 Requires at least: 4.1
-Tested up to: 5.4.2
+Tested up to: 5.8.2
 Stable tag: trunk
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -48,6 +48,8 @@ The minimum technical equirements are basically the same as the WordPress ones. 
 
 
 == Installation ==
+
+__Important__: If you're upgrading to v0.4.x or greater from v0.3.x or lower, deactivate the plugin and activate again to migrate settings.
 
 Doofinder installation and activation is made [as in any other plugin](https://codex.wordpress.org/Managing_Plugins).
 
@@ -111,6 +113,9 @@ Just send your questions to <mailto:support@doofinder.com> and we will try to an
 
 
 == Changelog ==
+
+= 0.4.0 =
+- Index data through Doofinder Management API v2.
 
 = 0.3.6 =
 - Fix problem with debug mode in ML.
