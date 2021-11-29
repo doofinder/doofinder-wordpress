@@ -3,7 +3,7 @@
  * Plugin Name: Doofinder
  * License: GPLv2 or later
  * License URI: http://www.gnu.org/licenses/gpl-2.0.html
- * Version: 0.4.0
+ * Version: 0.4.1
  * Author: Doofinder
  * Description: Integrate Doofinder Search in your WordPress website.
  *
@@ -30,7 +30,7 @@ if ( ! class_exists( '\Doofinder\WP\Doofinder_For_WordPress' ) ):
 		 *
 		 * @var string
 		 */
-		public static $version = '0.4.0';
+		public static $version = '0.4.1';
 
 		/**
 		 * The only instance of Doofinder_For_WordPress
@@ -228,6 +228,55 @@ if ( ! class_exists( '\Doofinder\WP\Doofinder_For_WordPress' ) ):
 		public static function plugin_disabled() {
 			flush_rewrite_rules();
 		}
+
+		/**
+		 * This function runs when WordPress completes its upgrade process
+		 * It iterates through each plugin updated to see if ours is included
+		 *
+		 * @param array $upgrader_object
+		 * @param array $options
+		*/
+		public static function upgrader_process_complete( $upgrader_object, $options ) {
+			$log = new Log();
+				$log->log('upgrader_process - start');
+				// The path to our plugin's main file
+				$our_plugin = plugin_basename(__FILE__);
+
+				$log->log($our_plugin);
+				$log->log($options);
+
+				// If an update has taken place and the updated type is plugins and the plugins element exists
+				if ($options['action'] == 'update' && $options['type'] == 'plugin') {
+
+					$log->log('upgrader_process - updating plugin');
+
+					if (isset($options['plugins'])) {
+						$plugins = $options['plugins'];
+					} elseif( isset($options['plugin'])) {
+						$plugins = [$options['plugin']] ;
+					}
+
+					$log->log($plugins);
+
+					// Iterate through the plugins being updated and check if ours is there
+					foreach ($plugins as $plugin) {
+						$log->log($plugin);
+
+						if ($plugin == $our_plugin) {
+
+							if ( Setup_Wizard::should_activate() ) {
+								Setup_Wizard::activate();
+							}
+
+							$log->log('upgrader_process - try to migrate');
+							// Try to migrate settings if possible and necessary
+							if ( Setup_Wizard::should_migrate() ) {
+								Setup_Wizard::migrate();
+							}
+						}
+					}
+				}
+		}
 	}
 
 endif;
@@ -236,3 +285,5 @@ register_activation_hook( __FILE__, array( '\Doofinder\WP\Doofinder_For_WordPres
 register_deactivation_hook( __FILE__, array( '\Doofinder\WP\Doofinder_For_WordPress', 'plugin_disabled' ) );
 
 add_action( 'plugins_loaded', array( '\Doofinder\WP\Doofinder_For_WordPress', 'instance' ), 0 );
+
+add_action( 'upgrader_process_complete', array( '\Doofinder\WP\Doofinder_For_WordPress', 'upgrader_process_complete' ), 10, 2 );
