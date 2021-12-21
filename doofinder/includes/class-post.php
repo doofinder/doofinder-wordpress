@@ -288,7 +288,7 @@ class Post {
 		// Base data, that all posts must have.
 		// All other data will be added if present.
 		$data = array(
-			'id'        => $this->post->ID,
+			'id'        => (string) $this->post->ID,
 			'title'     => $this->post->post_title,
 			'link'      => get_the_permalink( $this->post ),
 			'post_date' => $this->get_post_date()
@@ -612,10 +612,10 @@ class Post {
 		$query            = "
 			SELECT post_id, meta_key, meta_value
 			FROM $wpdb->postmeta
-			WHERE $wpdb->postmeta.post_id = $post_id 
+			WHERE $wpdb->postmeta.post_id = $post_id
 			AND (
               $wpdb->postmeta.meta_key NOT LIKE '\_%' OR
-              $wpdb->postmeta.meta_key = '$visibility_meta' OR 
+              $wpdb->postmeta.meta_key = '$visibility_meta' OR
               $wpdb->postmeta.meta_key = '$yoast_visibility'
             )
 			ORDER BY $wpdb->postmeta.post_id
