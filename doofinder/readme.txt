@@ -1,7 +1,7 @@
 === Doofinder ===
 Contributors: doofinder, chopchoporg
 Tags: search, autocomplete
-Version: 0.4.1
+Version: 0.4.2
 Requires at least: 4.1
 Tested up to: 5.8.2
 Stable tag: trunk
@@ -113,6 +113,9 @@ Just send your questions to <mailto:support@doofinder.com> and we will try to an
 
 
 == Changelog ==
+
+= 0.4.2 =
+- Fix problem with id format sending data to API v2.
 
 = 0.4.1 =
 - Try to migrate settings automatically.
