@@ -2,8 +2,9 @@
 
 namespace Doofinder\WP\Api;
 
-use Doofinder\Management\Errors\DoofinderError;
-use Doofinder\Management\Errors\NotAllowed;
+use Doofinder\Management\Errors\DoofinderError; //Why dont exist?
+use Doofinder\WP\Api\Management\Errors\NotAllowed;
+use Doofinder\WP\Api\Management\Errors\BadRequest;
 use Doofinder\WP\Api\Management\Errors\NotFound;
 use Doofinder\WP\Api\Management\SearchEngine;
 use Doofinder\WP\Indexing_Data;
@@ -136,7 +137,7 @@ class Doofinder_Api implements Api_Wrapper {
 		try {
 			$this->search_engine = $this->get_search_engine();
 			$this->log->log( $this->search_engine );
-		} catch ( \Doofinder\Management\Errors\NotFound $exception ) {
+		} catch ( NotFound $exception ) {
 
 			$this->log->log( 'Could not get search engine - Not Found' );
 			$this->log->log( 'Status code: ' . $exception->getCode() );
@@ -217,7 +218,7 @@ class Doofinder_Api implements Api_Wrapper {
 
 			return Api_Status::$success;
 
-		} catch ( \Doofinder\Management\Errors\BadRequest $exception ) {
+		} catch ( BadRequest $exception ) {
 			// If updating item failed it might mean that the post does not exist in the
 			// index yet, so we will try to create it instead
 

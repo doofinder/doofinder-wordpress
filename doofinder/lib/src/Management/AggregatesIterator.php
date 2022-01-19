@@ -4,6 +4,7 @@ namespace Doofinder\WP\Api\Management;
 
 use Doofinder\WP\Api\Management\SearchEngine;
 use Doofinder\WP\Api\Management\ItemsResultSet;
+use Doofinder\WP\Api\Management\Errors\NotFound;
 
 class AggregatesIterator extends ItemsResultSet {
 

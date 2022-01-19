@@ -3,7 +3,7 @@
 namespace Doofinder\WP\Api;
 
 use Doofinder\WP\Api\Management\Errors\Utils;
-use DoofinderManagement\ApiException;
+use DoofinderManagement\ApiException;  //Where? DoofinderManagement? or Doofinder\Management
 use Doofinder\WP\Log;
 use Exception;
 use WP_Error;
@@ -120,6 +120,10 @@ class Management_Api {
 		}
 	}
 
+	public function apiURL($path) {
+		return "{$this->api_host}/api/v2/$path";
+	  }
+
 	/**
 	 * Partially updates item from index by its id. The operation returns the updated item.
 	 *
@@ -132,7 +136,7 @@ class Management_Api {
 	public function updateItem( $item_id, $name, $data ) {
 		$this->log->log( 'Update item' );
 
-		return $this->sendRequest( "$this->api_host/api/v2/search_engines/$this->hash/indices/$name/items/$item_id", array(
+		return $this->sendRequest( $this->apiURL("search_engines/$this->hash/indices/$name/items/$item_id"), array(
 			'headers' => $this->authorization_header,
 			'method'  => 'PATCH',
 			'body'    => $data
@@ -150,7 +154,7 @@ class Management_Api {
 	public function createItem( $name, $data ) {
 		$this->log->log( 'Create item' );
 
-		return $this->sendRequest( "$this->api_host/api/v2/search_engines/$this->hash/indices/$name/items", array(
+		return $this->sendRequest( $this->apiURL("search_engines/$this->hash/indices/$name/items"), array(
 			'headers' => $this->authorization_header,
 			'method'  => 'POST',
 			'body'    => $data
@@ -168,7 +172,7 @@ class Management_Api {
 	public function deleteItem( $item_id, $name ) {
 		$this->log->log( 'Delete item' );
 
-		return $this->sendRequest( "$this->api_host/api/v2/search_engines/$this->hash/indices/$name/items/$item_id", array(
+		return $this->sendRequest( $this->apiURL("search_engines/$this->hash/indices/$name/items/$item_id"), array(
 			'headers' => $this->authorization_header,
 			'method'  => 'DELETE',
 		) );
@@ -184,7 +188,7 @@ class Management_Api {
 	public function createTemporaryIndex( $name ) {
 		$this->log->log( 'Create Temporary Index' );
 
-		return $this->sendRequest( "$this->api_host/api/v2/search_engines/$this->hash/indices/$name/temp", array(
+		return $this->sendRequest( $this->apiURL("search_engines/$this->hash/indices/$name/temp"), array(
 			'headers' => $this->authorization_header,
 			'method'  => 'POST',
 		) );
@@ -201,7 +205,7 @@ class Management_Api {
 	public function deleteTemporaryIndex( $name ) {
 		$this->log->log( 'Delete Temporary Index' );
 
-		return $this->sendRequest( "$this->api_host/api/v2/search_engines/$this->hash/indices/$name/temp", array(
+		return $this->sendRequest( $this->apiURL("search_engines/$this->hash/indices/$name/temp"), array(
 			'headers' => $this->authorization_header,
 			'method'  => 'DELETE',
 		) );
@@ -218,7 +222,7 @@ class Management_Api {
 	public function createIndex( $body ) {
 		$this->log->log( 'Create Index' );
 
-		return $this->sendRequest( "$this->api_host/api/v2/search_engines", array(
+		return $this->sendRequest( $this->apiURL("search_engines"), array(
 			'headers' => $this->authorization_header,
 			'method'  => 'POST',
 			'body'    => $body
@@ -238,7 +242,7 @@ class Management_Api {
 	public function createIndices( $body ) {
 		$this->log->log( 'Create Indice' );
 
-		return $this->sendRequest( "$this->api_host/api/v2/search_engines/$this->hash/indices", array(
+		return $this->sendRequest( $this->apiURL("search_engines/$this->hash/indices"), array(
 			'headers' => $this->authorization_header,
 			'method'  => 'POST',
 			'body'    => $body
@@ -256,7 +260,7 @@ class Management_Api {
 	public function createTempBulk( $name, $items ) {
 		$this->log->log( 'Create Temporary Bulk' );
 
-		return $this->sendRequest( "$this->api_host/api/v2/search_engines/$this->hash/indices/$name/temp/items/_bulk", array(
+		return $this->sendRequest( $this->apiURL("search_engines/$this->hash/indices/$name/temp/items/_bulk"), array(
 			'headers' => $this->authorization_header,
 			'method'  => 'POST',
 			'body'    => $items
@@ -269,7 +273,7 @@ class Management_Api {
 	public function getSearchEngine() {
 		$this->log->log( 'Get Search Engine' );
 
-		return $this->sendRequest( "$this->api_host/api/v2/search_engines/$this->hash", array(
+		return $this->sendRequest( $this->apiURL("search_engines/$this->hash"), array(
 			'headers' => $this->authorization_header,
 			'method'  => 'GET',
 		) );
@@ -281,7 +285,7 @@ class Management_Api {
 	public function listIndices() {
 		$this->log->log( 'List Indices' );
 
-		return $this->sendRequest( "$this->api_host/api/v2/search_engines/$this->hash/indices", array(
+		return $this->sendRequest( $this->apiURL("search_engines/$this->hash/indices"), array(
 			'headers' => $this->authorization_header,
 			'method'  => 'GET',
 		) );
@@ -297,7 +301,7 @@ class Management_Api {
 	public function replace( $name ) {
 		$this->log->log( 'Replace' );
 
-		return $this->sendRequest( "$this->api_host/api/v2/search_engines/$this->hash/indices/$name/_replace_by_temp", array(
+		return $this->sendRequest( $this->apiURL("search_engines/$this->hash/indices/$name/_replace_by_temp"), array(
 			'headers' => $this->authorization_header,
 			'method'  => 'POST',
 		) );

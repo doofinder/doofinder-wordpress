@@ -5,7 +5,7 @@ namespace Doofinder\WP\Api\Management;
 use Doofinder\WP\Api\Management\SearchEngine;
 use Doofinder\WP\Api\Management\AggregatesIterator;
 use Doofinder\WP\Api\Management\Errors\NotProcessedResponse;
-use Doofinder\WP\Api\Management\Errors\MotFound;
+use Doofinder\WP\Api\Management\Errors\NotFound;
 
 class TopTermsIterator extends AggregatesIterator {
 
