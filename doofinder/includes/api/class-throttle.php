@@ -2,7 +2,7 @@
 
 namespace Doofinder\WP\Api;
 
-use Doofinder\Api\Management\Errors\IndexingInProgress;
+use Doofinder\WP\Api\Management\Errors\IndexingInProgress;
 //use Doofinder\Api\Management\Errors\ThrottledResponse;
 use Doofinder\WP\Log;
 
