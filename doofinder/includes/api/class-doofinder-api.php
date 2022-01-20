@@ -480,6 +480,10 @@ class Doofinder_Api implements Api_Wrapper {
 			$this->log->log( get_class( $exception ) );
 			$this->log->log( $exception->getMessage() );
 
+			$this->log->log( 'Empty temporal index when an error occurs. This way the next one does not crash. ' );
+			$indexing_data->set( 'temp_index', [], true );
+			$this->log->log($indexing_data->get( 'temp_index' ));
+
 			if ( $exception instanceof DoofinderError ) {
 				$this->log->log( $exception->getBody() );
 
