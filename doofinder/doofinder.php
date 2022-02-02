@@ -30,7 +30,7 @@ if ( ! class_exists( '\Doofinder\WP\Doofinder_For_WordPress' ) ):
 		 *
 		 * @var string
 		 */
-		public static $version = '0.4.4';
+		public static $version = '0.4.5';
 
 		/**
 		 * The only instance of Doofinder_For_WordPress
