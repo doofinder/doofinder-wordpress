@@ -195,17 +195,16 @@ trait Renderers {
 
 		?>
 
-        <span class="doofinder-tooltip"><span><?php _e( 'The API host should contain https://, ex. https://eu1-api.doofinder.com',
+        <span class="doofinder-tooltip"><span><?php _e( 'The host API must contain point to the server where you have registered.',
 					'doofinder_for_wp' ); ?></span></span>
-        <input type="text"
-               name="<?php echo $option_name; ?>"
-               class="widefat"
 
-			<?php if ( $saved_value ): ?>
-                value="<?php echo $saved_value; ?>"
-			<?php endif; ?>
-        >
-
+		<select name="<?php echo $option_name; ?>" class="widefat">
+			<option disabled selected>
+				<?php if ( $saved_value ): echo $saved_value; endif; ?>
+			</option>
+			<option value="https://eu1-api.doofinder.com">Europa - https://eu1-api.doofinder.com</option>
+			<option value="https://us1-api.doofinder.com">USA - https://us1-api.doofinder.com</option>
+		</select>
 		<?php
 	}
 
