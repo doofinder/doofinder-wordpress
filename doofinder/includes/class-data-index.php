@@ -251,8 +251,9 @@ class Data_Index {
 		$this->post_types = $post_types->get_indexable();
 
 		// if we start indexing, then post type is not set, so we get first post type from list
+		// Replace invalid characters with valid ones
 		if ( ! $this->indexing_data->get( 'post_type' ) ) {
-			$this->indexing_data->set( 'post_type', $this->post_types[0] );
+			$this->indexing_data->set( 'post_type', str_replace('-', '_', $this->post_types[0]) );
 		}
 	}
 
@@ -630,8 +631,8 @@ class Data_Index {
 			$this->log->log( 'Call Replace Index  - Get API Client Instance' );
 			$this->api = Api_Factory::get( $language );
 		}
-
-		$post_type = $this->indexing_data->get( 'post_type' );
+		// Replace invalid characters with valid ones
+		$post_type = str_replace('-', '_', $this->indexing_data->get( 'post_type' ));
 
 		$api_response = $this->api->replace_index( $post_type );
 
