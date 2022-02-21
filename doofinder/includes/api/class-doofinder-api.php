@@ -333,6 +333,8 @@ class Doofinder_Api implements Api_Wrapper {
 		$this->log->log( 'Send batch - items type: "' . $items_type . '"' );
 		$this->log->log( 'Send batch - language: "' . $language . '"' );
 
+		$items_type = str_replace('-', '_', $items_type);
+		$this->log->log( 'Send batch - items type modified to comply with validations: "' . $items_type . '"' );
 		// Doofinder API will throw an exception in case of invalid token
 		// or something like that.
 
@@ -399,6 +401,12 @@ class Doofinder_Api implements Api_Wrapper {
 						$this->log->log( 'Send batch - Real Index NOT Created' . "\n" );
 						$this->log->log( get_class( $exception ) );
 						$this->log->log( $exception->getMessage() );
+
+						$this->log->log( 'Reset post_type data to start indexing in a clean environment ' );
+						$indexing_data->set( 'post_type', '');
+			
+						$this->log->log( 'Empty temporal index to start indexing in a clean environment ' );
+						$indexing_data->set( 'temp_index', [], true );
 
 						if ( $exception instanceof DoofinderError ) {
 							$this->log->log( $exception->getBody() );
@@ -649,6 +657,12 @@ class Doofinder_Api implements Api_Wrapper {
 			$this->log->log( 'Replace Index - Exception' . "\n" );
 			$this->log->log( get_class( $exception ) );
 			$this->log->log( $exception->getMessage() );
+
+			$this->log->log( 'Reset post_type data to start indexing in a clean environment ' );
+			$indexing_data->set( 'post_type', '');
+
+			$this->log->log( 'Empty temporal index to start indexing in a clean environment ' );
+			$indexing_data->set( 'temp_index', [], true );
 
 			if ( $exception instanceof DoofinderError ) {
 				$this->log->log( $exception->getBody() );
