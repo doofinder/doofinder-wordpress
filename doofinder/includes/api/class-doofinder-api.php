@@ -664,6 +664,10 @@ class Doofinder_Api implements Api_Wrapper {
 			$this->log->log( 'Empty temporal index to start indexing in a clean environment ' );
 			$indexing_data->set( 'temp_index', [], true );
 
+			$this->log->log( 'Post id:  ' . $indexing_data->get( 'post_id' ));
+			$this->log->log( 'Reset post id to start indexing in a clean environment ' );
+			$indexing_data->set( 'post_id', 0, true );
+
 			if ( $exception instanceof DoofinderError ) {
 				$this->log->log( $exception->getBody() );
 			}
