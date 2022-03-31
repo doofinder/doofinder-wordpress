@@ -1,6 +1,6 @@
 {
   "name": "doofinder-wordpress",
-  "version": "0.4.6",
+  "version": "0.4.7",
   "description": "Integrate Doofinder in your WordPress site with (almost) no effort.",
   "main": "index.js",
   "scripts": {
