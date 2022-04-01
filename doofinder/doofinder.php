@@ -113,10 +113,12 @@ if ( ! class_exists( '\Doofinder\WP\Doofinder_For_WordPress' ) ):
 				JS_Layer::instance();
 				Internal_Search::instance();
 			}
-
-			// Register all custom URLs
+			
 			add_action( 'init', function () use ( $class ) {
+				// Register all custom URLs
 				call_user_func( array( $class, 'register_urls' ) );
+				// Enable excerpt for indexable posts
+				call_user_func( array( $class, 'enable_excerpt' ) );
 			} );
 		}
 
@@ -276,6 +278,17 @@ if ( ! class_exists( '\Doofinder\WP\Doofinder_For_WordPress' ) ):
 						}
 					}
 				}
+		}
+		/**
+		 * This function enables the excerpt for any indexable post.
+		 */
+		public static function enable_excerpt(){
+			$post_types = Post_Types::instance();
+			foreach ($post_types->get_indexable() as $key => $post_type) {
+                if (!post_type_supports($post_type, 'excerpt')) {
+                    add_post_type_support($post_type, 'excerpt');
+                }
+			}
 		}
 	}
 
