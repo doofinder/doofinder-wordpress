@@ -1,7 +1,7 @@
 === Doofinder ===
 Contributors: doofinder, chopchoporg
 Tags: search, autocomplete
-Version: 0.4.7
+Version: 0.4.8
 Requires at least: 4.1
 Tested up to: 5.9
 Stable tag: trunk
@@ -113,6 +113,9 @@ Just send your questions to <mailto:support@doofinder.com> and we will try to an
 
 
 == Changelog ==
+
+= 0.4.8 =
+- Add excerpt field for any indexable post types.
 
 = 0.4.7 =
 - Fix indexation problems while replacing the temp index.
