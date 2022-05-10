@@ -348,11 +348,13 @@ class Post {
 	 */
 	private function get_categories() {
 		$all_categories = get_categories();
-		$all_portf_categories = get_terms('portfolio_category');
+		$try_portfolio_cat = get_terms('portfolio_category');
+		$all_portf_categories = (is_wp_error($try_portfolio_cat) ? [] : $try_portfolio_cat);
 		$all_categories = array_merge($all_categories, $all_portf_categories);
 		
 		$post_categories = wp_get_post_categories($this->post->ID, array('fields' => 'all'));
-		$post_portf_categories = wp_get_object_terms($this->post->ID, 'portfolio_category', array('fields' => 'all'));
+		$try_portfolio_cat = wp_get_object_terms($this->post->ID, 'portfolio_category', array('fields' => 'all'));
+		$post_portf_categories = (is_wp_error($try_portfolio_cat) ? [] : $try_portfolio_cat);
 		$all_post_categories = array_merge($post_categories, $post_portf_categories);
 
 		$formatted_categories = array();
