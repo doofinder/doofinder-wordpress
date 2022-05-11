@@ -320,7 +320,7 @@ class Post {
 		}
 
 		// Add categories.
-		if ( Settings::get_index_categories() ) {
+		if ( Settings::get_index_categories() ) {		
 			$data['categories'] = $this->get_categories();
 		}
 
@@ -347,8 +347,14 @@ class Post {
 	 * @return string[]
 	 */
 	private function get_categories() {
-		$all_categories       = get_categories();
-		$post_categories      = wp_get_post_categories( $this->post->ID, array( 'fields' => 'all' ) );
+		$all_categories = get_categories();
+		$post_categories = wp_get_post_categories($this->post->ID, array('fields' => 'all'));
+
+		if(taxonomy_exists("portfolio_category")){
+			$all_categories = array_merge($all_categories, get_terms('portfolio_category'));
+			$post_categories = array_merge($post_categories, wp_get_object_terms($this->post->ID, 'portfolio_category', array('fields' => 'all')));
+		}
+
 		$formatted_categories = array();
 
 		// We have categories as a regular array. Remap to associative
