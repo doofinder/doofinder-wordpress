@@ -111,6 +111,7 @@ class Management_Api {
 	 */
 	private function sendRequest( $url, $data ) {
 		try {
+			$this->log->log( "Making a request to: $url");
 			return $this->handleError( wp_remote_request( $url, $data ) );
 		} catch ( ApiException $e ) {
 			$statusCode      = $e->getCode();
