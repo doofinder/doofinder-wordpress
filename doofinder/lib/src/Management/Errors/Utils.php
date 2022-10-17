@@ -45,7 +45,7 @@ class Utils {
       return new BadRequest("The client made a bad request: ".Utils::readError($response));
     }
 
-    return false;
+    return new \Exception("An unknown error ocurred. Error code: $statusCode | Error message: " . $response);
   }
 
   private static function readError($response) {

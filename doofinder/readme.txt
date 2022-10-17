@@ -1,7 +1,7 @@
 === Doofinder ===
 Contributors: doofinder, chopchoporg
 Tags: search, autocomplete
-Version: 0.4.9
+Version: 0.5.0
 Requires at least: 4.1
 Tested up to: 6.0
 Stable tag: trunk
@@ -113,6 +113,9 @@ Just send your questions to <mailto:support@doofinder.com> and we will try to an
 
 
 == Changelog ==
+= 0.5.0 =
+- Minor bugfixes.
+
 = 0.4.9 =
 - Added portfolio_categories to the feed indexation
 
