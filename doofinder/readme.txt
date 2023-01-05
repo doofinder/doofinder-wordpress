@@ -1,7 +1,7 @@
 === Doofinder ===
 Contributors: doofinder, chopchoporg
 Tags: search, autocomplete
-Version: 0.5.0
+Version: 0.5.1
 Requires at least: 4.1
 Tested up to: 6.1
 Stable tag: trunk
@@ -113,6 +113,10 @@ Just send your questions to <mailto:support@doofinder.com> and we will try to an
 
 
 == Changelog ==
+
+= 0.5.1 =
+Added release automation
+
 = 0.5.0 =
 - Minor bugfixes.
 
