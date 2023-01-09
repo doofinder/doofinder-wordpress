@@ -1,0 +1,4 @@
+# Files
+/doofinder/.gitignore export-ignore
+/doofinder/lib/.gitignore export-ignore
+/doofinder/lib/.travis.yml export-ignore
