@@ -1,8 +1,6 @@
 name: Deploy to Wordpress and create new release
 on:
-  push:
-    tags:
-    - "v*"
+  workflow_dispatch: {}
 jobs:
   tag:
     name: Create new release
