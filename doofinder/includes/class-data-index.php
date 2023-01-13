@@ -122,6 +122,7 @@ class Data_Index {
 	}
 
 	public function ajax_handler() {
+        $this->log->log( $this->indexing_data->get( 'temp_index' ));
 		$status = $this->indexing_data->get( 'status' );
 
 		// If the indexing has been completed we are reindexing.
@@ -641,6 +642,10 @@ class Data_Index {
 		if ( $api_response !== Api_Status::$success ) {
 
 			$message = __( "Replacing Index \"$post_type\" with temporary one.", 'woocommerce-doofinder' );
+
+            $this->log->log( 'Setting status to completed' );
+            $this->indexing_data->set( 'status', 'completed' );
+			$this->indexing_data->set( 'post_id', 0);
 
 			// if ( $sent_to_api === Api_Status::$indexing_in_progress ) {
 			// 	$message = __( "Deleting \"$post_type\" type...", 'woocommerce-doofinder' );
