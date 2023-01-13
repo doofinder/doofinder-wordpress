@@ -407,6 +407,9 @@ class Doofinder_Api implements Api_Wrapper {
 			
 						$this->log->log( 'Empty temporal index to start indexing in a clean environment ' );
 						$indexing_data->set( 'temp_index', [], true );
+ 
+                        $this->log->log( 'Reset post id to begin with 0 ' );
+                        $indexing_data->set( 'post_id', 0, true);
 
 						if ( $exception instanceof DoofinderError ) {
 							$this->log->log( $exception->getBody() );
@@ -488,9 +491,14 @@ class Doofinder_Api implements Api_Wrapper {
 			$this->log->log( get_class( $exception ) );
 			$this->log->log( $exception->getMessage() );
 
+            $this->log->log( 'Reset post_type data to start indexing in a clean environment ' );
+			$indexing_data->set( 'post_type', '');
+
 			$this->log->log( 'Empty temporal index when an error occurs. This way the next one does not crash. ' );
 			$indexing_data->set( 'temp_index', [], true );
-			$this->log->log($indexing_data->get( 'temp_index' ));
+
+            $this->log->log( 'Reset post id to begin with 0 ' );
+            $indexing_data->set( 'post_id', 0, true);
 
 			if ( $exception instanceof DoofinderError ) {
 				$this->log->log( $exception->getBody() );
@@ -663,6 +671,9 @@ class Doofinder_Api implements Api_Wrapper {
 
 			$this->log->log( 'Empty temporal index to start indexing in a clean environment ' );
 			$indexing_data->set( 'temp_index', [], true );
+            
+			$this->log->log( 'Reset post id to begin with 0 ' );
+            $indexing_data->set( 'post_id', 0, true);
 
 			$this->log->log( 'Post id:  ' . $indexing_data->get( 'post_id' ));
 			$this->log->log( 'Reset post id to start indexing in a clean environment ' );
