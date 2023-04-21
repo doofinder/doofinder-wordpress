@@ -62,18 +62,6 @@ namespace Doofinder\WP;
 
 				?></textarea>
         </div>
-
-        <div class="form-row">
-            <label class="has-checkbox">
-				<?php _e( 'Do you want to enable Internal Search?', 'doofinder_for_wp' ); ?>
-
-                <input type="checkbox" name="enable-internal-search<?php echo $name_suffix; ?>"
-					<?php if ( Settings::is_internal_search_enabled( $options_suffix ) ): ?>
-                        checked
-					<?php endif; ?>
-                >
-            </label>
-        </div>
 	<?php endforeach; ?>
 
     <div>
