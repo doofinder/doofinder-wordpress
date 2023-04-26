@@ -309,21 +309,6 @@ trait Register_Settings {
 			self::$top_level_menu
 		);
 
-		// Enable Internal Search
-		$internal_search_option_name =
-			$this->language->get_option_name( 'doofinder_for_wp_enable_internal_search' );
-		add_settings_field(
-			$internal_search_option_name,
-			__( 'Enable Internal Search', 'doofinder_for_wp' ),
-			function () use ( $internal_search_option_name ) {
-				$this->render_html_enable_internal_search( $internal_search_option_name );
-			},
-			self::$top_level_menu,
-			'doofinder-for-wp-search-settings'
-		);
-
-		register_setting( self::$top_level_menu, $internal_search_option_name );
-
 		// Enable JS Layer
 		$enable_js_layer_option_name =
 			$this->language->get_option_name( 'doofinder_for_wp_enable_js_layer' );
