@@ -1,7 +1,7 @@
 === Doofinder ===
 Contributors: doofinder, chopchoporg
 Tags: search, autocomplete
-Version: 0.5.2
+Version: 0.5.3
 Requires at least: 4.1
 Tested up to: 6.1
 Stable tag: trunk
@@ -113,6 +113,9 @@ Just send your questions to <mailto:support@doofinder.com> and we will try to an
 
 
 == Changelog ==
+
+= 0.5.3 =
+- Remove internal search option
 
 = 0.5.2 =
 - Fix post id not restoring index after failure
