@@ -289,7 +289,7 @@ class Post {
 		// All other data will be added if present.
 		$data = array(
 			'id'        => (string) $this->post->ID,
-			'title'     => $this->post->post_title,
+			'title'     => $this->sanitize_html_entities($this->post->post_title),
 			'link'      => get_the_permalink( $this->post ),
 			'post_date' => $this->get_post_date()
 		);
