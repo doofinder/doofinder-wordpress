@@ -289,7 +289,7 @@ class Post {
 		// All other data will be added if present.
 		$data = array(
 			'id'        => (string) $this->post->ID,
-			'title'     => $this->post->post_title,
+			'title'     => $this->sanitize_html_entities($this->post->post_title),
 			'link'      => get_the_permalink( $this->post ),
 			'post_date' => $this->get_post_date()
 		);
@@ -297,14 +297,14 @@ class Post {
 		// Post content.
 		$content = $this->get_content();
 		if ( $content ) {
-			$data['content'] = $content;
+			$data['content'] = $this->sanitize_html_entities($content);
 		}
 
 		// Post description.
 		// Excerpt serves as a description.
 		$description = $this->get_excerpt();
 		if ( $description ) {
-			$data['description'] = $description;
+			$data['description'] = $this->sanitize_html_entities($description);
 		}
 
 		// Post thumbnail.
@@ -338,6 +338,17 @@ class Post {
 		}
 
 		return $data;
+	}
+
+	/**
+	 * Replaces the html entity of a text with their corresponding character
+	 *
+	 * @param {string} text
+	 *
+	 * @return string
+	 */
+	private function sanitize_html_entities($text){
+		return html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
 	}
 
 	/**
