@@ -11,11 +11,8 @@ use Doofinder\WP\Settings\Accessors;
 class Update_On_Save {
 
     /**
-     * Autoload custom classes. Folders represent namespaces (after the predefined plugin prefix),
-     * The database doofinder_update_on_save is created to register the post_id and the type of each one 
-     * in order to create the bulk.
-     *
-     */
+    * Creates the database table for storing update on save information if it doesn't exist.
+    */
     public static function create_update_on_save_db() {
         global $wpdb;
         $table_name = $wpdb->prefix . 'doofinder_update_on_save';
@@ -47,14 +44,13 @@ class Update_On_Save {
         }, 99, 3);
     }
 
-	/**
-	 * Determine if the current post should be indexed.
-	 *
-	 * All published posts will be indexed, but the setting in metabox
-	 * can override that.
-	 *
-	 * @return bool
-	 */
+    /**
+     * Determines if the current post should be indexed and adds it to the update queue.
+     *
+     * @param int $post_id The ID of the post.
+     * @param WP_Post $post The post object.
+     * @param bool $updated Whether the post has been updated.
+     */
 	public static function add_item_to_update($post_id, $post, $updated) {
 
         $log = new Log( 'update_on_save.txt' );
@@ -69,12 +65,21 @@ class Update_On_Save {
             if(self::allow_process_items()) {
                 $log->log( 'We can send the data. '); 
                 $update_on_save_index->lunch_doofinder_update_on_save();
+                // return self::clean_update_on_save_db();
             }
         }
 
         return;
 	}
 
+    /**
+     * Adds the item to the update queue in the database.
+     *
+     * @param Post $doofinder_post The Doofinder post object.
+     * @param int $post_id The ID of the post.
+     * @param string $status The status of the post.
+     * @param string $type The type of the post.
+     */
     public static function add_item_to_db($doofinder_post, $post_id, $status, $type) {
         $log = new Log( 'update_on_save.txt' );
         if ( $status === 'auto-draft' || $type === "revision") {
@@ -90,9 +95,12 @@ class Update_On_Save {
     }
 
     /**
-	 * Check if post already exists in the database and if not, add it.
-	 *
-	 */
+     * Adds an item to the update queue in the database.
+     *
+     * @param int $post_id The ID of the post.
+     * @param string $post_type The type of the post.
+     * @param string $action The action to perform on the post (update/delete).
+     */
 	public static function add_to_update_on_save_db($post_id, $post_type, $action) {
         global $wpdb;
 
@@ -123,6 +131,11 @@ class Update_On_Save {
         return;
 	}
 
+    /**
+     * Checks if processing of items is allowed based on the configured update frequency.
+     *
+     * @return bool True if processing is allowed, false otherwise.
+     */
     public static function allow_process_items() {
 
         $log = new Log( 'update_on_save.txt' );
@@ -175,6 +188,11 @@ class Update_On_Save {
         return false;
     }
 
+    /**
+     * Cleans the update on save database table by deleting all entries.
+     *
+     * @return bool True if the database table was cleaned successfully, false otherwise.
+     */
     public static function clean_update_on_save_db() {
         global $wpdb;
         $table_name = $wpdb->prefix . 'doofinder_update_on_save';
@@ -187,6 +205,11 @@ class Update_On_Save {
         return true;
 	}
 
+    /**
+     * Deletes the update on save database table.
+     *
+     * @return bool True if the database table was deleted successfully, false otherwise.
+     */
     public static function delete_update_on_save_db() {
         global $wpdb;
         $table_name = $wpdb->prefix . 'doofinder_update_on_save';

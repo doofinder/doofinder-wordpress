@@ -210,8 +210,8 @@ if ( ! class_exists( '\Doofinder\WP\Doofinder_For_WordPress' ) ):
 		 */
 		public static function plugin_disabled() {
 			flush_rewrite_rules();
-			// Update_On_Save::clean_update_on_save_db();
-			// Update_On_Save::delete_update_on_save_db();
+			Update_On_Save::clean_update_on_save_db();
+			Update_On_Save::delete_update_on_save_db();
 		}
 
 		/**

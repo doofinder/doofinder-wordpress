@@ -23,19 +23,8 @@ defined( 'ABSPATH' ) or die;
  * This class does not print any interface, just handles retrieving
  * posts from DB and sending them to Doofinder API.
  *
- * @see Data_Index::ajax_handler()
- * @see Data_Index::index_posts()
- * @see Index_Interface
- * @see Indexing_Data
  */
 class Update_On_Save_Index {
-
-	// /**
-	//  * Number of posts per page.
-	//  *
-	//  * @var int
-	//  */
-	// private static $posts_per_page = 100;
 
 	/**
 	 * Instance of class handling multilanguage environments.
@@ -86,61 +75,71 @@ class Update_On_Save_Index {
 		$this->log 					= new Log( 'update_on_save_api.txt' );
 	}
 
-	public function lunch_doofinder_update_on_save() {
-        $this->log->log( 'Lunch doofinder update on save' );
-
-        $this->update_on_save( 'update' );
-
-        $this->update_on_save( 'delete' );
-
-        // return self::clean_update_on_save_db();
-        return;
-    }
-
 	/**
-	 * Get posts from DB, send via API, and return status
-	 * (if the process of indexing has been completed) as JSON.
+	 * Launches the Doofinder update on save process.
 	 *
-	 * @return bool True if the indexing has finished.
+	 * This method triggers the update on save process by calling the `update_on_save()` method
+	 * for both the "update" and "delete" actions.
+	 *
+	 * @return void
 	 * @since 1.0.0
 	 */
-	public function update_on_save( $action ) {
+	public function launch_doofinder_update_on_save() {
+		$this->log->log('Launch Doofinder update on save');
+
+		$this->update_on_save('update');
+
+		$this->update_on_save('delete');
+	}
+
+	/**
+	 * Perform the update on save operation for the specified action.
+	 *
+	 * @param string $action The action to perform (either "update" or "delete").
+	 * @since 1.0.0
+	 */
+	public function update_on_save($action) {
 		// Load the data that we'll use to fetch posts.
-		$this->log->log( 'update on save is enabled for these types of posts: ' );
-		$this->log->log( $this->post_types );
+		$this->log->log('Update on save is enabled for these types of posts: ');
+		$this->log->log($this->post_types);
 
 		foreach ($this->post_types as $post_type) {
-
-			$this->log->log( 'Posts ids to update for ' . $post_type . ': ' );
-			$posts_ids_to_update = $this->get_posts_ids_by_type_indexation($post_type, $action );
-			$this->log->log( $posts_ids_to_update );
+			$this->log->log('Posts ids to update for ' . $post_type . ': ');
+			$posts_ids_to_update = $this->get_posts_ids_by_type_indexation($post_type, $action);
+			$this->log->log($posts_ids_to_update);
 
 			if (!empty($posts_ids_to_update)) {
 				$url = $this->get_rest_url($post_type);
-			
-				// Llamamos a la función pasando el nombre del post type como parámetro
-				$this->log->log( 'Load Posts ' . $post_type );
+
+				// Call the function passing the post type name as a parameter
+				$this->log->log('Load Posts ' . $post_type);
 				$this->load_posts($posts_ids_to_update, $url);
 
-				// Using empty()
-				if (!empty($this->items) and $action === 'update') {
-					$this->log->log( 'We send the request to UPDATE items with this data:');
-					$this->api->updateBulk( $post_type, $this->items );
+				if (!empty($this->items) && $action === 'update') {
+					$this->log->log('We send the request to UPDATE items with this data:');
+					$this->api->updateBulk($post_type, $this->items);
 					$this->items = array();
-				} elseif (!empty($this->items) and $action === 'delete') {
-					$this->log->log( 'We send the request to DELETE items with this data:');
-					$this->api->deleteBulk( $post_type, $this->items);
+				} elseif (!empty($this->items) && $action === 'delete') {
+					$this->log->log('We send the request to DELETE items with this data:');
+					$this->api->deleteBulk($post_type, $this->items);
 					$this->items = array();
 				} else {
-					$this->log->log( 'We have not been able to obtain data!');
+					$this->log->log('We have not been able to obtain data!');
 				}
-
 			} else {
-				$this->log->log( 'There are no ids to update');
+				$this->log->log('There are no ids to update');
 			}
 		}
 	}
 
+	/**
+	 * Get post IDs by type for indexation.
+	 *
+	 * @param string $post_type The type of posts to retrieve IDs for.
+	 * @param string $action The action type ('update' or 'delete').
+	 * @return array An array of post IDs.
+	 * @since 1.0.0
+	 */
 	public function get_posts_ids_by_type_indexation($post_type, $action ) {
         global $wpdb;
         $table_name = $wpdb->prefix . 'doofinder_update_on_save';
@@ -159,57 +158,67 @@ class Update_On_Save_Index {
 	}
 
 	/**
-	 * Load posts ids from DB.
+	 * Load posts from the WordPress API based on the provided IDs.
 	 *
+	 * @param array  $ids_items An array of post IDs.
+	 * @param string $url       The URL of the WordPress API.
+	 * @return void
 	 * @since 1.0.0
 	 */
 	private function load_posts($ids_items, $url) {
-		// Realizar la solicitud HTTP GET a la API de WordPress
+		// Make the HTTP GET request to the WordPress API
 		$query_params = array(
-			'include' => implode(',', $ids_items), // Convertir la lista de IDs en una cadena separada por comas
-			'per_page' => 100, // Número máximo de productos a obtener por solicitud (ajusta según tus necesidades)
+			'include'   => implode(',', $ids_items), // Convert the IDs list into a comma-separated string
+			'per_page'  => 100, // Maximum number of products to fetch per request (adjust as needed)
 		);
-		
-		$request_url = add_query_arg($query_params, $url); // Agregar los parámetros de consulta a la URL de la API
-		
+
+		$request_url = add_query_arg($query_params, $url); // Add the query parameters to the API URL
+
 		$response = wp_remote_get($request_url);
 
-		// Obtener el código de respuesta y el cuerpo de la respuesta
+		// Get the response code and response body
 		$response_code = wp_remote_retrieve_response_code($response);
 		$response_body = wp_remote_retrieve_body($response);
 
-		// Verificar si la solicitud fue exitosa (código de respuesta 200)
+		// Check if the request was successful (response code 200)
 		if ($response_code === 200) {
-
-			$this->log->log( 'Request to obtain the ids successful for ' . $request_url);
-			// Decodificar el cuerpo de la respuesta JSON en un array de posts
+			$this->log->log('Request to obtain the IDs successful for ' . $request_url);
+			
+			// Decode the JSON response body into an array of posts
 			$posts = json_decode($response_body, true);
 
-			$this->log->log( 'These are the posts obtained: ');
-			$this->log->log( print_r($posts, true));
+			$this->log->log('These are the posts obtained:');
+			$this->log->log(print_r($posts, true));
 
 			$this->items = $posts;
 		} else {
-			// La solicitud no fue exitosa, manejar el error
-			$this->log->log( 'Error in ids request: ');
-			$this->log->log( print_r($response_code, true) );
+			// The request was not successful, handle the error
+			$this->log->log('Error in IDs request:');
+			$this->log->log(print_r($response_code, true));
 
 			$this->items = array();
 		}
 	}
 
+	/**
+	 * Get the REST URL based on the provided post type.
+	 *
+	 * @param string $type The post type.
+	 * @return string The REST URL.
+	 * @since 1.0.0
+	 */
 	private function get_rest_url($type) {
 		switch ($type) {
-            case "product":
-                $rest_url = rest_url('wp-json/wc/v3/products?_embed');
-                break;
-            case "page":
-                $rest_url = rest_url('wp/v2/pages?_embed');
-                break;
-            default:
+			case "product":
+				$rest_url = rest_url('wp-json/wc/v3/products?_embed');
+				break;
+			case "page":
+				$rest_url = rest_url('wp/v2/pages?_embed');
+				break;
+			default:
 				$rest_url = rest_url('wp/v2/posts?_embed');
-                break;
-        }
+				break;
+		}
 
 		return $rest_url;
 	}
