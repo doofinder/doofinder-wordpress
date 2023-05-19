@@ -59,7 +59,7 @@ class WPML extends Language_Plugin {
 	/**
 	 * @inheritdoc
 	 */
-	public function get_posts_ids( $language_code, $post_type, $ids_greater_than, $number_of_posts ) {
+	public function get_posts_ids( $language_code, $post_type) {
 		global $wpdb;
 
 		$query = "
@@ -67,9 +67,7 @@ class WPML extends Language_Plugin {
 			FROM {$wpdb->prefix}icl_translations
 			WHERE {$wpdb->prefix}icl_translations.language_code = '$language_code'
 			AND {$wpdb->prefix}icl_translations.element_type = 'post_{$post_type}'
-			AND {$wpdb->prefix}icl_translations.element_id > $ids_greater_than 
 			ORDER BY {$wpdb->prefix}icl_translations.element_id
-			LIMIT $number_of_posts
 		";
 
 		$ids = $wpdb->get_results( $query, ARRAY_N );

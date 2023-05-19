@@ -33,13 +33,11 @@ abstract class Language_Plugin {
 	 * Get all posts ids of a given language.
 	 *
 	 * @param string $language_code
-	 * @param int    $ids_greater_than
 	 * @param string $post_type
-	 * @param int    $number_of_posts
 	 *
 	 * @return int[] List of ids.
 	 */
-	abstract public function get_posts_ids( $language_code, $post_type, $ids_greater_than, $number_of_posts);
+	abstract public function get_posts_ids( $language_code, $post_type);
 
 	/**
 	 * Retrieve the name of the wordpress option

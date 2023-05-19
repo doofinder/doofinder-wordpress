@@ -1,0 +1,132 @@
+<?php
+
+namespace Doofinder\WP\Api;
+
+use Doofinder\WP\Settings;
+use Doofinder\WP\Log;
+
+/**
+ * Handles requests to the Management API.
+ */
+class Update_On_Save_Api {
+	/**
+	 * Instance of a class used to log to a file.
+	 *
+	 * @var Log
+	 */
+	private $log;
+
+	/**
+	 * API Host
+	 *
+	 * @var string
+	 */
+	private $api_host;
+
+	/**
+	 * API Key
+	 *
+	 * @var string
+	 */
+	private $api_key;
+
+	/**
+	 * Hash
+	 * The search engine's unique id
+	 *
+	 * @var string
+	 */
+	private $hash;
+
+	/**
+	 * Authorization Header
+	 *
+	 * @var string
+	 */
+	private $authorization_header;
+
+	public function __construct( $language ) {
+		$this->log                  = new Log( 'management-api.txt' );
+		$this->api_key 				= Settings::get_api_key();
+		$this->api_host 			= Settings::get_api_host();
+		$this->hash 				= Settings::get_search_engine_hash( $language);
+		$this->authorization_header = array(
+			'Authorization' => "Token $this->api_key",
+			'content-type'  => 'application/json'
+		);
+
+		$this->log->log( 'Create Management API Client' );
+		$this->log->log( 'API Key: ' . $this->api_key );
+		$this->log->log( 'API Host: ' . $this->api_host );
+		$this->log->log( 'Hash: ' . $this->hash );
+	}
+
+	/**
+	 * Handle sending requests to API
+	 *
+	 * @param $url
+	 * @param $data
+	 *
+	 */
+	private function sendRequest( $url, $data ) {
+		$this->log->log( "Making a request to: $url");
+		$response = wp_remote_request($url, $data);
+		if (is_wp_error($response)) {
+			// Manejar el error de la solicitud
+			$error_message = $response->get_error_message();
+			$this->log->log( "Error en la solicitud: $error_message");
+		} else {
+			// Obtener la respuesta de la API
+			$response_body = wp_remote_retrieve_body($response);
+			$decoded_response = json_decode($response_body, true);
+
+			$this->log->log( "Se ha hecho la petición correctamente: $decoded_response");
+		}
+	}
+
+	public function buildURL($path) {
+		return "{$this->api_host}/{$path}";
+	  }
+
+	/**
+	 * Partially updates item from index by its id. The operation returns the updated item.
+	 *
+	 * @param string Feed type
+     * @param array Data
+	 * 
+	 */
+	public function updateBulk( $post_type, $data ) {
+		$this->log->log( 'Update items' );
+
+		$uri = $this->buildURL("plugins/wordpress/" . $this->hash . "/" . $post_type . "/product_update");
+
+		$options = [
+			'headers' => $this->authorization_header,
+			'method'  => 'POST',
+            'body' => json_encode($data),
+        ];
+
+		return $this->sendRequest( $uri, $options );
+	}
+
+	/**
+	 * Partially updates item from index by its id. The operation returns the updated item.
+	 *
+	 * @param string Feed type
+     * @param array Data
+	 * 
+	 */
+	public function deleteBulk( $post_type, $data ) {
+		$this->log->log( 'Update items' );
+
+		$uri = $this->buildURL("plugins/wordpress/" . $this->hash . "/" . $post_type . "/product_delete");
+
+		$options = [
+			'headers' => $this->authorization_header,
+			'method'  => 'POST',
+            'body' => json_encode($data),
+        ];
+
+		return $this->sendRequest( $uri, $options );
+	}
+}

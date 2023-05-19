@@ -2,8 +2,6 @@
 
 namespace Doofinder\WP;
 
-use Doofinder\WP\Api\Api_Factory;
-
 defined( 'ABSPATH' ) or die();
 
 class Post {
@@ -82,15 +80,13 @@ class Post {
 	 */
 	public static function add_additional_settings() {
 		add_action( 'add_meta_boxes', function () {
-			$post_types = Post_Types::instance();
-
 			add_meta_box(
 				'doofinder-for-wp-visibility-settings',
 				__( 'Doofinder - Indexing', 'doofinder_for_wp' ),
 				function () {
 					self::render_html_indexing_visibility();
 				},
-				$post_types->get_indexable(),
+				get_post_types( array( 'public' => true ) ),
 				'side'
 			);
 		} );
@@ -98,21 +94,6 @@ class Post {
 		add_action( 'save_post', function ( $post_id ) {
 			self::handle_additional_settings_save( $post_id );
 		} );
-	}
-
-	/**
-	 * Register webhooks for saving, and removing the post.
-	 */
-	public static function register_webhooks() {
-		add_action( 'wp_insert_post', function ( $post_id, \WP_Post $post, $updated ) {
-			// Only handle posts from allowed post types.
-			$post_types = Post_Types::instance();
-			if ( ! in_array( $post->post_type, $post_types->get_indexable() ) ) {
-				return;
-			}
-
-			self::webhook_update_post( $post, $updated );
-		}, 99, 3 );
 	}
 
 	/**
@@ -171,39 +152,6 @@ class Post {
 	}
 
 	/**
-	 * Send the post to Doofinder API when saving.
-	 *
-	 * Remove post from index if the post settings suggest
-	 * that the post should not be indexed.
-	 *
-	 * @param \WP_Post $post
-	 * @param bool $updated
-	 */
-	private static function webhook_update_post( $post, $updated ) {
-		$api            = Api_Factory::get();
-		$doofinder_post = new Post( $post );
-
-		// If posts settings suggest that it can be indexed
-		// we update its data in the API.
-		if ( $doofinder_post->is_indexable() ) {
-			$api->update_item(
-				$doofinder_post->post->post_type,
-				$doofinder_post->post->ID,
-				$doofinder_post->format_for_api()
-			);
-
-			return;
-		}
-
-		// Post cannot be indexed (it's not published, moved to trash, etc),
-		// we remove it from the index.
-		$api->remove_item(
-			$doofinder_post->post->post_type,
-			$doofinder_post->post->ID
-		);
-	}
-
-	/**
 	 * Post constructor.
 	 *
 	 * @param \WP_Post|int $post
@@ -233,6 +181,10 @@ class Post {
 	 * @return bool
 	 */
 	public function is_indexable() {
+		if (  $this->post->post_status === 'trash' ) {
+			return false;
+		}
+
 		// Posts visibility settings are stored in meta, so we need to
 		// fetch it from the database if we don't have it yet.
 		if ( ! $this->meta ) {
@@ -319,23 +271,9 @@ class Post {
 			$data = array_merge( $data, $meta );
 		}
 
-		// Add categories.
-		if ( Settings::get_index_categories() ) {		
-			$data['categories'] = $this->get_categories();
-		}
+		$data['categories'] = $this->get_categories();
 
-		// Add tags.
-		if ( Settings::get_index_tags() ) {
-			$data['tags'] = $this->get_tags();
-		}
-
-		// Add additional attributes.
-		if ( Settings::get_additional_attributes() ) {
-			$data = array_merge(
-				$data,
-				$this->get_additional_attributes()
-			);
-		}
+		$data['tags'] = $this->get_tags();
 
 		return $data;
 	}
@@ -560,50 +498,6 @@ class Post {
 		}
 
 		$this->meta = $filtered_meta;
-	}
-
-	/**
-     * Generate array of values generated from additional attributes settings.
-     * These are configured by the user, so won't be exactly the same
-     * in every installation.
-     *
-	 * @return array
-	 */
-	private function get_additional_attributes() {
-		$additional_attributes = Settings::get_additional_attributes();
-		$output                = array();
-
-		foreach ( $additional_attributes as $attribute ) {
-			$value = null;
-
-			switch ( $attribute['attribute'] ) {
-				case 'post_title':
-					$value = $this->post->post_title;
-					break;
-
-				case 'post_content':
-					$value = $this->get_content();
-					break;
-
-				case 'excerpt':
-					$value = $this->get_excerpt();
-					break;
-
-				case 'permalink':
-					$value = get_the_permalink( $this->post );
-					break;
-
-				case 'thumbnail':
-					$value = $this->get_thumbnail();
-					break;
-			}
-
-			if ( $value ) {
-				$output[ $attribute['field'] ] = $value;
-			}
-		}
-
-		return $output;
 	}
 
 	/**

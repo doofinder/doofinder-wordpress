@@ -2,7 +2,6 @@
 
 namespace Doofinder\WP\Settings;
 
-use Doofinder\WP\Indexing_Data;
 use Doofinder\WP\Multilanguage\Language_Plugin;
 use Doofinder\WP\Log;
 
@@ -67,9 +66,6 @@ trait Register_Settings {
 	 * @see Settings::$tabs
 	 */
 	private function add_authentication_settings() {
-		$indexing_data = Indexing_Data::instance();
-		$is_indexing   = $indexing_data->get( 'status' ) === 'processing';
-
 		add_settings_section(
 			'doofinder-for-wp-keys',
 			__( 'Authentication', 'doofinder_for_wp' ),
@@ -87,13 +83,7 @@ trait Register_Settings {
 		add_settings_field(
 			$api_key_option_name,
 			__( 'API Key', 'doofinder_for_wp' ),
-			function () use ( $is_indexing, $api_key_option_name ) {
-				if ( $is_indexing ) {
-					$this->render_html_indexing_in_progress();
-
-					return;
-				}
-
+			function () use ( $api_key_option_name ) {
 				$this->render_html_api_key( $api_key_option_name );
 			},
 			self::$top_level_menu,
@@ -107,13 +97,7 @@ trait Register_Settings {
 		add_settings_field(
 			$api_host_option_name,
 			__( 'API Host', 'doofinder_for_wp' ),
-			function () use ( $is_indexing, $api_host_option_name ) {
-				if ( $is_indexing ) {
-					$this->render_html_indexing_in_progress();
-
-					return;
-				}
-
+			function () use ( $api_host_option_name ) {
 				$this->render_html_api_host( $api_host_option_name );
 			},
 			self::$top_level_menu,
@@ -128,13 +112,7 @@ trait Register_Settings {
 		add_settings_field(
 			$search_engine_hash_option_name,
 			__( 'Search Engine HashID', 'doofinder_for_wp' ),
-			function () use ( $is_indexing, $search_engine_hash_option_name ) {
-				if ( $is_indexing ) {
-					$this->render_html_indexing_in_progress();
-
-					return;
-				}
-
+			function () use ( $search_engine_hash_option_name ) {
 				$this->render_html_search_engine_hash( $search_engine_hash_option_name );
 			},
 			self::$top_level_menu,
@@ -146,151 +124,24 @@ trait Register_Settings {
 			'validate_search_engine_hash',
 		) );
 
-		add_settings_section(
-			'doofinder-for-wp-debug-mode',
-			__( 'Debug mode', 'doofinder_for_wp' ),
-			function () { },
-			self::$top_level_menu
-		);
-
-		// Disable debug mode
-		$disable_debug_mode_option_name =
-			$this->language->get_option_name( 'doofinder_for_wp_disable_debug_mode' );
+		// Update on save
+		$update_on_save_option_name = $this->language->get_option_name( 'doofinder_for_wp_update_on_save' );
 		add_settings_field(
-			$disable_debug_mode_option_name,
-			__( 'Disable debug mode', 'doofinder_for_wp' ),
-			function () use ( $is_indexing, $disable_debug_mode_option_name ) {
-				if ( $is_indexing ) {
-					$this->render_html_indexing_in_progress();
-
-					return;
-				}
-
-				echo $this->render_html_disable_debug_mode( $disable_debug_mode_option_name );
+			$update_on_save_option_name,
+			__( 'Update on save', 'doofinder_for_wp' ),
+			function () use ( $update_on_save_option_name ) {
+				$this->render_html_update_on_save( $update_on_save_option_name );
 			},
 			self::$top_level_menu,
-			'doofinder-for-wp-debug-mode'
+			'doofinder-for-wp-keys'
 		);
 
-		register_setting(
-			self::$top_level_menu,
-			$disable_debug_mode_option_name
-		);
+		register_setting( self::$top_level_menu, $update_on_save_option_name, array( $this, 'validate_update_on_save' ) );
+		
 	}
 
 	/**
 	 * Section 2 / tab 2 fields.
-	 *
-	 * IDE might report this as unused, because it's dynamically called.
-	 *
-	 * @see Settings::$tabs
-	 */
-	private function add_data_settings() {
-		$indexing_data = Indexing_Data::instance();
-		$is_indexing   = $indexing_data->get( 'status' ) === 'processing';
-
-		add_settings_section(
-			'doofinder-for-wp-indexing-settings',
-			__( 'Index Settings', 'doofinder_for_wp' ),
-			function () {
-				?>
-
-                <p class="description"><?php _e( 'Configure the data you want to index in your search engine. You may need to reindex your content after changing some of these settings.',
-						'doofinder_for_wp' ); ?></p>
-
-				<?php
-			},
-			self::$top_level_menu
-		);
-
-		// Post types to index
-		$post_types_to_index_option_name =
-			$this->language->get_option_name( 'doofinder_for_wp_post_types_to_index' );
-		add_settings_field(
-			$post_types_to_index_option_name,
-			__( 'Post Types', 'doofinder_for_wp' ),
-			function () use ( $is_indexing, $post_types_to_index_option_name ) {
-				if ( $is_indexing ) {
-					$this->render_html_indexing_in_progress();
-
-					return;
-				}
-
-				$this->render_html_post_types_to_index( $post_types_to_index_option_name );
-			},
-			self::$top_level_menu,
-			'doofinder-for-wp-indexing-settings'
-		);
-
-		register_setting( self::$top_level_menu, $post_types_to_index_option_name, array(
-			$this,
-			'validate_post_types',
-		) );
-
-		// Index categories
-		$index_categories_option_name =
-			$this->language->get_option_name( 'doofinder_for_wp_index_categories' );
-		add_settings_field(
-			$index_categories_option_name,
-			__( 'Index Categories', 'doofinder_for_wp' ),
-			function () use ( $is_indexing, $index_categories_option_name ) {
-				if ( $is_indexing ) {
-					$this->render_html_indexing_in_progress();
-
-					return;
-				}
-
-				$this->render_html_index_categories( $index_categories_option_name );
-			},
-			self::$top_level_menu,
-			'doofinder-for-wp-indexing-settings'
-		);
-
-		register_setting( self::$top_level_menu, $index_categories_option_name );
-
-		// Index tags
-		$index_tags_option_name =
-			$this->language->get_option_name( 'doofinder_for_wp_index_tags' );
-		add_settings_field(
-			$index_tags_option_name,
-			__( 'Index Tags', 'doofinder_for_wp' ),
-			function () use ( $is_indexing, $index_tags_option_name ) {
-				if ( $is_indexing ) {
-					$this->render_html_indexing_in_progress();
-
-					return;
-				}
-
-				$this->render_html_index_tags( $index_tags_option_name );
-			},
-			self::$top_level_menu,
-			'doofinder-for-wp-indexing-settings'
-		);
-
-		register_setting( self::$top_level_menu, $index_tags_option_name );
-
-		// Additional attributes
-		$additional_attributes_option_name =
-			$this->language->get_option_name( 'doofinder_for_wp_additional_attributes' );
-		add_settings_field(
-			$additional_attributes_option_name,
-			__( 'Additional Attributes', 'doofinder_for_wp' ),
-			function () use ( $additional_attributes_option_name ) {
-				$this->render_html_additional_attributes( $additional_attributes_option_name );
-			},
-			self::$top_level_menu,
-			'doofinder-for-wp-indexing-settings'
-		);
-
-		register_setting(
-			self::$top_level_menu,
-			$additional_attributes_option_name,
-			array( $this, 'sanitize_additional_attributes' )
-		);
-	}
-
-	/**
-	 * Section 3 / tab 3 fields.
 	 *
 	 * IDE might report this as unused, because it's dynamically called.
 	 *
@@ -445,75 +296,18 @@ trait Register_Settings {
 		return $input;
 	}
 
-	/**
-	 * Validate post types.
+	    /**
+	 * Validate api host.
 	 *
-	 * If post types differ then display info for reindex posts.
+	 * @param string
 	 *
-	 * @param array $input
-	 *
-	 * @return array $input
+	 * @return string
 	 */
-	public function validate_post_types( $input ) {
-		$default_post_types = array( 'page', 'post' );
-		$old_post_types     = $this->get_post_types_to_index();
-
-		if ( ! $old_post_types ) {
-			$old_post_types = $default_post_types;
+	function validate_update_on_save( $input ) {
+		if ( null == $input ) {
+			add_settings_error( 'doofinder_for_wp_messages', 'doofinder_for_wp_message_update_on_save',
+				__( 'Update on save is mandatory.', 'doofinder_for_wp' ) );
 		}
-
-		if ( ! $input ) {
-			$post_types = $default_post_types;
-		} else {
-			$post_types = array_keys( $input );
-		}
-
-		sort( $old_post_types );
-		sort( $post_types );
-
-		if ( $post_types != $old_post_types ) {
-			$url = admin_url( 'admin.php?page=index_posts' );
-			add_settings_error( 'doofinder_for_wp_messages', 'doofinder_for_wp_message',
-				sprintf( __( 'Settings Saved: please, <a href="%s">reindex content</a> for changes to take effect.',
-					'doofinder_for_wp' ), $url ), 'updated' );
-		}
-
 		return $input;
-	}
-
-	/**
-	 * Process additional attributes sent from the frontend
-	 * and convert them to the shape we want to store in the DB.
-	 *
-	 * This functional basically converts indexes, so we save a nice
-	 * regular numerically-indexed array, and removes all records
-	 * that are either selected to be deleted, or invalid.
-	 *
-	 * @param array $input
-	 *
-	 * @return array
-	 */
-	public function sanitize_additional_attributes( $input ) {
-		$output = array();
-
-		// We want to save a regular array containing all attributes,
-		// but what we send from the frontend is an associative array
-		// (because it has "new" entry).
-		// Convert data from frontend to nicely-indexed regular array,
-		// removing all the records that we want to delete, and those
-		// with empty "field" value along the way.
-		foreach ( $input as $attribute ) {
-			if ( ! $attribute['field'] ) {
-				continue;
-			}
-
-			if ( isset( $attribute['delete'] ) && $attribute['delete'] ) {
-				continue;
-			}
-
-			$output[] = $attribute;
-		}
-
-		return $output;
 	}
 }

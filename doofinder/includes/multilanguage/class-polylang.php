@@ -62,7 +62,7 @@ class Polylang extends Language_Plugin {
 	 *
 	 * @inheritdoc
 	 */
-	public function get_posts_ids( $language_code, $post_type, $ids_greater_than, $number_of_posts ) {
+	public function get_posts_ids( $language_code, $post_type ) {
 		global $wpdb;
 
 		$query = $wpdb->get_results( "
@@ -75,10 +75,8 @@ class Polylang extends Language_Plugin {
 			WHERE $wpdb->term_taxonomy.taxonomy = 'language'
 			AND $wpdb->terms.slug = '$language_code'
 			AND $wpdb->posts.post_type = '$post_type'
-			AND $wpdb->posts.ID > $ids_greater_than
 			GROUP BY $wpdb->posts.ID
 			ORDER BY $wpdb->posts.ID
-			LIMIT $number_of_posts
 		", ARRAY_N );
 
 		return array_map( function ( $item ) {

@@ -12,8 +12,6 @@
 
 namespace Doofinder\WP;
 
-use Doofinder\WP\Search\Internal_Search;
-
 defined( 'ABSPATH' ) or die;
 
 if ( ! class_exists( '\Doofinder\WP\Doofinder_For_WordPress' ) ):
@@ -83,17 +81,6 @@ if ( ! class_exists( '\Doofinder\WP\Doofinder_For_WordPress' ) ):
 		public function __construct() {
 			$class = __CLASS__;
 
-			// Enable ajax debugging if Whoops is installed.
-			if ( class_exists( 'Whoops\Handler\JsonResponseHandler' ) ) {
-				if ( \Whoops\Util\Misc::isAjaxRequest() ) {
-					$jsonHandler = new \Whoops\Handler\JsonResponseHandler();
-					$jsonHandler->setJsonApi( true );
-
-					$run = new \Whoops\Run();
-					$run->pushHandler( $jsonHandler );
-				}
-			}
-
 			// Load classes on demand
 			self::autoload( self::plugin_path() . 'includes/' );
 			include_once 'lib/autoload.php';
@@ -102,23 +89,19 @@ if ( ! class_exists( '\Doofinder\WP\Doofinder_For_WordPress' ) ):
 			if ( is_admin() ) {
 				Thumbnail::prepare_thumbnail_size();
 				Post::add_additional_settings();
-				Post::register_webhooks();
-
 				Settings::instance();
-				Index_Interface::instance();
+
+				Update_On_Save::register_hooks();
 			}
 
 			// Init frontend functionalities
 			if ( ! is_admin() ) {
 				JS_Layer::instance();
-				Internal_Search::instance();
 			}
 			
 			add_action( 'init', function () use ( $class ) {
 				// Register all custom URLs
 				call_user_func( array( $class, 'register_urls' ) );
-				// Enable excerpt for indexable posts
-				call_user_func( array( $class, 'enable_excerpt' ) );
 			} );
 		}
 
@@ -213,12 +196,10 @@ if ( ! class_exists( '\Doofinder\WP\Doofinder_For_WordPress' ) ):
 			self::register_urls();
 			flush_rewrite_rules();
 
+			Update_On_Save::create_update_on_save_db();
+
 			$log = new Log();
 			$log->log('Plugin enabled');
-
-			if ( Setup_Wizard::should_migrate() ) {
-				Setup_Wizard::migrate();
-			}
 		}
 
 		/**
@@ -229,6 +210,8 @@ if ( ! class_exists( '\Doofinder\WP\Doofinder_For_WordPress' ) ):
 		 */
 		public static function plugin_disabled() {
 			flush_rewrite_rules();
+			// Update_On_Save::clean_update_on_save_db();
+			// Update_On_Save::delete_update_on_save_db();
 		}
 
 		/**
@@ -259,36 +242,7 @@ if ( ! class_exists( '\Doofinder\WP\Doofinder_For_WordPress' ) ):
 					}
 
 					$log->log($plugins);
-
-					// Iterate through the plugins being updated and check if ours is there
-					foreach ($plugins as $plugin) {
-						$log->log($plugin);
-
-						if ($plugin == $our_plugin) {
-
-							if ( Setup_Wizard::should_activate() ) {
-								Setup_Wizard::activate();
-							}
-
-							$log->log('upgrader_process - try to migrate');
-							// Try to migrate settings if possible and necessary
-							if ( Setup_Wizard::should_migrate() ) {
-								Setup_Wizard::migrate();
-							}
-						}
-					}
 				}
-		}
-		/**
-		 * This function enables the excerpt for any indexable post.
-		 */
-		public static function enable_excerpt(){
-			$post_types = Post_Types::instance();
-			foreach ($post_types->get_indexable() as $key => $post_type) {
-                if (!post_type_supports($post_type, 'excerpt')) {
-                    add_post_type_support($post_type, 'excerpt');
-                }
-			}
 		}
 	}
 

@@ -56,13 +56,6 @@ class Settings {
 	private $language;
 
 	/**
-	 * Indicate if post types settings has changed.
-	 *
-	 * @var bool
-	 */
-	public $is_post_types_changed = false;
-
-	/**
 	 * Returns the only instance of Settings
 	 *
 	 * @since 1.0.0
@@ -86,10 +79,6 @@ class Settings {
 			'authentication' => array(
 				'label'     => __( 'Authentication', 'doofinder_for_wp' ),
 				'fields_cb' => 'add_authentication_settings'
-			),
-			'data'           => array(
-				'label'     => __( 'Data Settings', 'doofinder_for_wp' ),
-				'fields_cb' => 'add_data_settings'
 			),
 			'search'         => array(
 				'label'     => __( 'Search Settings', 'doofinder_for_wp' ),
@@ -120,5 +109,20 @@ class Settings {
 				Doofinder_For_WordPress::plugin_url() . '/assets/css/admin.css'
 			);
 		} );
+	}
+	
+
+    /**
+	 * Determine if the update on save is enabled.
+	 *
+	 * Just an alias for "get_option", because ideally we don't
+	 * want to replace the option name in multiple files.
+	 *
+	 * @return bool
+	 */
+	public static function is_update_on_save_enabled()
+	{
+		$option = get_option('doofinder_for_wp_update_on_save', 'every_day');
+		return  $option != 'every_day' ? true : false;
 	}
 }

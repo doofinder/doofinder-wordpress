@@ -4,7 +4,6 @@ namespace Doofinder\WP\Settings;
 
 use Doofinder\WP\Multilanguage\Language_Plugin;
 use Doofinder\WP\Multilanguage\No_Language_Plugin;
-use Doofinder\WP\Post_Types;
 
 defined( 'ABSPATH' ) or die();
 
@@ -193,17 +192,23 @@ trait Renderers {
 	private function render_html_api_host( $option_name ) {
 		$saved_value = get_option( $option_name );
 
+		if ( $saved_value === "https://admin.doofinder.com" ) {
+			$txt = "Europa - ";
+		} else {
+			$txt = "USA - ";
+		}
+
 		?>
 
         <span class="doofinder-tooltip"><span><?php _e( 'The host API must contain point to the server where you have registered.',
 					'doofinder_for_wp' ); ?></span></span>
 
 		<select name="<?php echo $option_name; ?>" class="widefat">
-			<option disabled selected>
-				<?php if ( $saved_value ): echo $saved_value; endif; ?>
+			<option value="<?php echo $saved_value; ?>" selected>
+				<?php if ( $saved_value ): echo $txt . $saved_value; endif; ?>
 			</option>
-			<option value="https://eu1-api.doofinder.com">Europa - https://eu1-api.doofinder.com</option>
-			<option value="https://us1-api.doofinder.com">USA - https://us1-api.doofinder.com</option>
+			<option value="https://admin.doofinder.com">Europa - https://admin.doofinder.com</option>
+			<option value="https://us1-admin.doofinder.com">USA - https://us1-admin.doofinder.com</option>
 		</select>
 		<?php
 	}
@@ -234,228 +239,31 @@ trait Renderers {
 	}
 
 	/**
-	 * Print HTML for the "Disable debug mode" option.
+	 * Print HTML for the "API Host" option.
 	 *
 	 * @param string $option_name
 	 */
-	private function render_html_disable_debug_mode( $option_name ) {
+	private function render_html_update_on_save( $option_name ) {
 		$saved_value = get_option( $option_name );
 
 		?>
 
-		<span class="doofinder-tooltip"><span><?php _e( 'Checking this will make indexing possible on staging (it will disable the debug mode).',
+        <span class="doofinder-tooltip"><span><?php _e( 'You can select the time interval at which the update on save is launched.',
 					'doofinder_for_wp' ); ?></span></span>
 
-		<input
-			type="checkbox"
-			name="<?php echo $option_name ?>"
-			<?php if ( $saved_value ): ?>
-				checked="checked"
-			<?php endif ;?>
-		>
-
-		<?php
-	}
-
-	/**
-	 * Print HTML with checkboxes where user can select
-	 * which post types to index.
-	 *
-	 * @param string $option_name
-	 */
-	private function render_html_post_types_to_index( $option_name ) {
-		// Saved list of post types.
-		$saved_value = get_option( $option_name );
-
-		// We later check in array, if option is empty,
-		// then empty string is returned.
-		if ( ! $saved_value ) {
-			$saved_value = array();
-		}
-
-		?>
-        <span class="doofinder-tooltip"><span><?php _e( 'You must reindex your content after changing this setting.',
-					'doofinder_for_wp' ); ?></span></span>
-		<?php
-
-		// Output checkboxes with post types.
-		$post_types = Post_Types::instance();
-		foreach ( $post_types->get() as $post_type ) {
-			$checked = array_key_exists( $post_type, $saved_value );
-			if ( ! $saved_value && Post_Types::is_default( $post_type ) ) {
-				$checked = true;
-			}
-
-			?>
-
-            <label>
-                <input type="checkbox"
-                       name="<?php echo $option_name; ?>[<?php echo $post_type; ?>]"
-
-					<?php if ( $checked ): ?>
-                        checked
-					<?php endif; ?>
-                >
-
-				<?php
-
-				// Get full name of the post type.
-				$post_type_object = get_post_type_object( $post_type );
-				echo $post_type_object->labels->name;
-
-				?>&nbsp;&nbsp;
-            </label>
-
-			<?php
-		}
-	}
-
-	/**
-	 * Render checkbox to enable/disable indexing categories.
-	 *
-	 * @param string $option_name
-	 */
-	private function render_html_index_categories( $option_name ) {
-		?>
-
-        <label>
-            <input
-                    type="checkbox"
-                    name="<?php echo $option_name; ?>"
-
-				<?php if ( get_option( $option_name ) ): ?>
-                    checked="checked"
-				<?php endif; ?>
-            >
-
-			<?php _e( 'Index Categories', 'doofinder_for_wp' ); ?>
-        </label>
-
-		<?php
-	}
-
-	/**
-	 * Render checkbox to enable/disable indexing tags.
-	 *
-	 * @param string $option_name
-	 */
-	private function render_html_index_tags( $option_name ) {
-		?>
-
-        <label>
-            <input
-                    type="checkbox"
-                    name="<?php echo $option_name; ?>"
-
-				<?php if ( get_option( $option_name ) ): ?>
-                    checked="checked"
-				<?php endif; ?>
-            >
-
-			<?php _e( 'Index Tags', 'doofinder_for_wp' ); ?>
-        </label>
-
-		<?php
-	}
-
-	/**
-	 * Render the inputs for Additional Attributes. This is a table
-	 * of inputs and selects where the user can choose any additional
-	 * fields to add to the exported data.
-	 *
-	 * @param string $option_name
-	 */
-	private function render_html_additional_attributes( $option_name ) {
-		$saved_attributes = get_option( $option_name );
-
-		?>
-
-        <table class="doofinder-for-wp-attributes">
-            <thead>
-            <tr>
-                <th><?php _e( 'Field', 'doofinder_for_wp' ); ?></th>
-                <th><?php _e( 'Attribute', 'doofinder_for_wp' ); ?></th>
-                <th><?php _e( 'Delete', 'doofinder_for_wp' ); ?></th>
-            </tr>
-            </thead>
-
-            <tbody>
-			<?php
-
-            if (! empty($saved_attributes)) {
-                foreach ($saved_attributes as $index => $attribute) {
-                    $this->render_html_single_additional_attribute(
-                        $option_name,
-                        $index,
-                        $attribute
-                    );
-                }
-            }
-
-			$this->render_html_single_additional_attribute(
-				$option_name,
-				'new'
-			);
-
-			?>
-            </tbody>
-        </table>
-
-		<?php
-	}
-
-	/**
-	 * Renders a single row representing additional attribute.
-	 * A helper for "render_html_additional_attributes".
-	 *
-	 * @see Renderers::render_html_additional_attributes
-	 *
-	 * @param string $option_name
-	 * @param string|int $index
-	 * @param ?array $attribute
-	 */
-	private function render_html_single_additional_attribute( $option_name, $index, $attribute = null ) {
-		$attributes = include 'attributes.php';
-
-		?>
-
-        <tr>
-            <td>
-                <input
-                        type="text"
-                        name="<?php echo $option_name; ?>[<?php echo $index; ?>][field]"
-
-					<?php if ( $attribute ): ?>
-                        value="<?php echo $attribute['field']; ?>"
-					<?php endif; ?>
-                />
-            </td>
-
-            <td>
-                <select
-                        name="<?php echo $option_name; ?>[<?php echo $index; ?>][attribute]"
-                >
-					<?php foreach ( $attributes as $id => $attr ): ?>
-                        <option
-                                value="<?php echo $id; ?>"
-
-							<?php if ( $attribute && $attribute['attribute'] === $id ): ?>
-                                selected="selected"
-							<?php endif; ?>
-                        >
-							<?php echo $attr['label']; ?>
-                        </option>
-					<?php endforeach; ?>
-                </select>
-            </td>
-
-            <td>
-                <input
-                        type="checkbox"
-                        name="<?php echo $option_name; ?>[<?php echo $index; ?>][delete]"
-                />
-            </td>
-        </tr>
+		<select name="<?php echo $option_name; ?>" class="widefat">
+			<option value="<?php echo $saved_value; ?>" selected>
+				<?php if ( $saved_value ): echo $saved_value; endif; ?>
+			</option>
+			<option value="each_1_minute">Each 1 minute</option>
+			<option value="each_15_minutes">Each 15 minutes</option>
+			<option value="each_30_minutes">Each 30 minutes</option>
+			<option value="hourly">Hourly</option>
+			<option value="every_3_hours">Every 3 hours</option>
+			<option value="every_6_hours">Every 6 hours</option>
+			<option value="every_12_hours">Every 12 hours</option>
+			<option value="every_day">every day</option>
+		</select>
 
 		<?php
 	}
@@ -526,46 +334,6 @@ trait Renderers {
 			}
 
 			?></textarea>
-
-		<?php
-	}
-
-	/**
-	 * Render checkbox allowing users to enable/disable the Internal Search.
-	 *
-	 * @param string $option_name
-	 */
-	private function render_html_enable_internal_search( $option_name ) {
-		$saved_value = get_option( $option_name );
-
-		?>
-
-        <span class="doofinder-tooltip"><span><?php _e( 'Enabling this setting will make WordPress use Doofinder internally for search.',
-					'doofinder_for_wp' ); ?></span></span>
-        <label>
-            <input type="checkbox" name="<?php echo $option_name; ?>"
-				<?php if ( $saved_value ): ?>
-                    checked
-				<?php endif; ?>
-            >
-
-			<?php _e( 'Enable Internal Search', 'doofinder_for_wp' ); ?>
-        </label>
-
-		<?php
-	}
-
-	/**
-	 * Print the information that indexing is in progress.
-	 *
-	 * We cannot change some options (e.g. which post types to index)
-	 * if we are already indexing.
-	 */
-	private function render_html_indexing_in_progress() {
-		?>
-
-        <i><?php _e( 'Indexing is in progress. Wait until indexing finishes before changing the settings.',
-				'doofinder_for_wp' ); ?></i>
 
 		<?php
 	}
