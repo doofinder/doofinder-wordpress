@@ -55,13 +55,6 @@ class Update_On_Save_Index {
 	private $log;
 
 	/**
-	 * List of posts prepared to be indexed.
-	 *
-	 * @var array[]
-	 */
-	private $items = array();
-
-	/**
 	 * List with default post types.
 	 *
 	 * @var array
@@ -109,25 +102,24 @@ class Update_On_Save_Index {
 			$this->log->log($posts_ids_to_update);
 
 			if (!empty($posts_ids_to_update)) {
-				$url = $this->get_rest_url($post_type);
+				$this->log->log('There are no ids to update');
 
 				// Call the function passing the post type name as a parameter
-				$this->log->log('Load Posts ' . $post_type);
-				$this->load_posts($posts_ids_to_update, $url);
-
-				if (!empty($this->items) && $action === 'update') {
+				if ($action === 'update') {
 					$this->log->log('We send the request to UPDATE items with this data:');
-					$this->api->updateBulk($post_type, $this->items);
+					$this->api->updateBulk($post_type, $posts_ids_to_update);
 					$this->items = array();
-				} elseif (!empty($this->items) && $action === 'delete') {
+					return;
+				} 
+				if (!empty($this->items) && $action === 'delete') {
 					$this->log->log('We send the request to DELETE items with this data:');
-					$this->api->deleteBulk($post_type, $this->items);
+					$this->api->deleteBulk($post_type, $posts_ids_to_update);
 					$this->items = array();
-				} else {
-					$this->log->log('We have not been able to obtain data!');
+					return;
 				}
 			} else {
-				$this->log->log('There are no ids to update');
+				$this->log->log('No objects to index.');
+				return;
 			}
 		}
 	}
@@ -156,71 +148,4 @@ class Update_On_Save_Index {
 			return $item[0];
 		}, $ids );
 	}
-
-	/**
-	 * Load posts from the WordPress API based on the provided IDs.
-	 *
-	 * @param array  $ids_items An array of post IDs.
-	 * @param string $url       The URL of the WordPress API.
-	 * @return void
-	 * @since 1.0.0
-	 */
-	private function load_posts($ids_items, $url) {
-		// Make the HTTP GET request to the WordPress API
-		$query_params = array(
-			'include'   => implode(',', $ids_items), // Convert the IDs list into a comma-separated string
-			'per_page'  => 100, // Maximum number of products to fetch per request (adjust as needed)
-		);
-
-		$request_url = add_query_arg($query_params, $url); // Add the query parameters to the API URL
-
-		$response = wp_remote_get($request_url);
-
-		// Get the response code and response body
-		$response_code = wp_remote_retrieve_response_code($response);
-		$response_body = wp_remote_retrieve_body($response);
-
-		// Check if the request was successful (response code 200)
-		if ($response_code === 200) {
-			$this->log->log('Request to obtain the IDs successful for ' . $request_url);
-			
-			// Decode the JSON response body into an array of posts
-			$posts = json_decode($response_body, true);
-
-			$this->log->log('These are the posts obtained:');
-			$this->log->log(print_r($posts, true));
-
-			$this->items = $posts;
-		} else {
-			// The request was not successful, handle the error
-			$this->log->log('Error in IDs request:');
-			$this->log->log(print_r($response_code, true));
-
-			$this->items = array();
-		}
-	}
-
-	/**
-	 * Get the REST URL based on the provided post type.
-	 *
-	 * @param string $type The post type.
-	 * @return string The REST URL.
-	 * @since 1.0.0
-	 */
-	private function get_rest_url($type) {
-		switch ($type) {
-			case "product":
-				$rest_url = rest_url('wp-json/wc/v3/products?_embed');
-				break;
-			case "page":
-				$rest_url = rest_url('wp/v2/pages?_embed');
-				break;
-			default:
-				$rest_url = rest_url('wp/v2/posts?_embed');
-				break;
-		}
-
-		return $rest_url;
-	}
-
 }

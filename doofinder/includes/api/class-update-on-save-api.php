@@ -95,11 +95,11 @@ class Update_On_Save_Api {
 	 * It sends a POST request to the Doofinder API with the data to be updated.
 	 *
 	 * @param string $post_type The post type for which the items should be updated.
-	 * @param array  $data      The data representing the items to be updated.
+	 * @param array  $ids      The ids representing the items to be updated.
 	 * @return mixed The response from the Doofinder API.
 	 * @since 1.0.0
 	 */
-	public function updateBulk($post_type, $data) {
+	public function updateBulk($post_type, $ids) {
 		$this->log->log('Update items');
 
 		$uri = $this->buildURL("plugins/wordpress/" . $this->hash . "/" . $post_type . "/product_update");
@@ -107,7 +107,7 @@ class Update_On_Save_Api {
 		$options = [
 			'headers' => $this->authorization_header,
 			'method'  => 'POST',
-			'body'    => json_encode($data),
+			'body'    => json_encode($ids),
 		];
 
 		return $this->sendRequest($uri, $options);
@@ -120,11 +120,11 @@ class Update_On_Save_Api {
 	 * It sends a POST request to the Doofinder API with the data to be deleted.
 	 *
 	 * @param string $post_type The post type for which the items should be deleted.
-	 * @param array  $data      The data representing the items to be deleted.
+	 * @param array  $ids      The ids representing the items to be deleted.
 	 * @return mixed The response from the Doofinder API.
 	 * @since 1.0.0
 	 */
-	public function deleteBulk( $post_type, $data ) {
+	public function deleteBulk( $post_type, $ids ) {
 		$this->log->log( 'Update items' );
 
 		$uri = $this->buildURL("plugins/wordpress/" . $this->hash . "/" . $post_type . "/product_delete");
@@ -132,7 +132,7 @@ class Update_On_Save_Api {
 		$options = [
 			'headers' => $this->authorization_header,
 			'method'  => 'POST',
-            'body' => json_encode($data),
+            'body' => json_encode($ids),
         ];
 
 		return $this->sendRequest( $uri, $options );
