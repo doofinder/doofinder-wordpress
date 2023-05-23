@@ -64,8 +64,8 @@ class Update_On_Save {
 
             if(self::allow_process_items()) {
                 $log->log( 'We can send the data. '); 
-                $update_on_save_index->lunch_doofinder_update_on_save();
-                // return self::clean_update_on_save_db();
+                $update_on_save_index->launch_doofinder_update_on_save();
+                return self::clean_update_on_save_db();
             }
         }
 

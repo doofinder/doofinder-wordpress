@@ -108,18 +108,13 @@ class Update_On_Save_Index {
 				if ($action === 'update') {
 					$this->log->log('We send the request to UPDATE items with this data:');
 					$this->api->updateBulk($post_type, $posts_ids_to_update);
-					$this->items = array();
-					return;
 				} 
-				if (!empty($this->items) && $action === 'delete') {
+				if ($action === 'delete') {
 					$this->log->log('We send the request to DELETE items with this data:');
 					$this->api->deleteBulk($post_type, $posts_ids_to_update);
-					$this->items = array();
-					return;
 				}
 			} else {
 				$this->log->log('No objects to index.');
-				return;
 			}
 		}
 	}
