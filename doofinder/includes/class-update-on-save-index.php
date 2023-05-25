@@ -105,13 +105,15 @@ class Update_On_Save_Index {
 				$this->log->log('Ids ready to send ' . print_r($posts_ids_to_update, true) );
 
 				// Call the function passing the post type name as a parameter
-				if ($action === 'update') {
-					$this->log->log('We send the request to UPDATE items with this data:');
-					$this->api->updateBulk($post_type, $posts_ids_to_update);
-				} 
-				if ($action === 'delete') {
-					$this->log->log('We send the request to DELETE items with this data:');
-					$this->api->deleteBulk($post_type, $posts_ids_to_update);
+				switch ($action) {
+					case 'update':
+						$this->log->log('We send the request to UPDATE items with this data:');
+						$this->api->updateBulk($post_type, $posts_ids_to_update);
+						break;
+					case 'delete':
+						$this->log->log('We send the request to DELETE items with this data:');
+						$this->api->deleteBulk($post_type, $posts_ids_to_update);
+						break;
 				}
 			} else {
 				$this->log->log('No objects to index.');

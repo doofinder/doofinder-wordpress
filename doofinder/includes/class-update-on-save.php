@@ -49,7 +49,6 @@ class Update_On_Save {
      *
      * @param int $post_id The ID of the post.
      * @param WP_Post $post The post object.
-     * @param bool $updated Whether the post has been updated.
      */
 	public static function add_item_to_update($post_id, $post, $updated) {
 
@@ -65,11 +64,9 @@ class Update_On_Save {
             if(self::allow_process_items()) {
                 $log->log( 'We can send the data. '); 
                 $update_on_save_index->launch_doofinder_update_on_save();
-                return self::clean_update_on_save_db();
+                self::clean_update_on_save_db();
             }
         }
-
-        return;
 	}
 
     /**
@@ -83,15 +80,17 @@ class Update_On_Save {
     public static function add_item_to_db($doofinder_post, $post_id, $status, $type) {
         $log = new Log( 'update_on_save.txt' );
         if ( $status === 'auto-draft' || $type === "revision") {
+            # If it is draft or revision we don't need to do anything with it because we don't have to index it.
             $log->log( 'It is not necessary to save it as it is a draft. '); 
         } elseif ( $doofinder_post->is_indexable()) {
+            # If the status of the post is still indexable after the changes we do an update.
             $log->log( 'The item will be saved with the update action. '); 
             self::add_to_update_on_save_db($post_id, $type, "update");
         } else {
+            # If the status of the post is no longer indexable we have to delete it.
             $log->log( 'The item will be saved with the delete action. '); 
             self::add_to_update_on_save_db($post_id, $type, "delete");
         }
-        return;
     }
 
     /**
@@ -108,7 +107,7 @@ class Update_On_Save {
 
         $resultado = $wpdb->get_var("SELECT * FROM $table_name WHERE post_id = $post_id" );
 
-        if ($resultado != NULL) {       
+        if ($resultado != null) {       
             $wpdb->update( $table_name,
                 array(
                     'post_id' => $post_id,
@@ -117,7 +116,6 @@ class Update_On_Save {
                 ),
                 array( 'id' => $resultado )
             );
-            return;
         } else {
             $wpdb->insert( $table_name,
                 array(
@@ -127,8 +125,6 @@ class Update_On_Save {
                 )
             );
         }
-
-        return;
 	}
 
     /**
@@ -167,22 +163,20 @@ class Update_On_Save {
                 $delay = 720;
                 break;
             default:
-                $delay = 1;
+                $delay = 15;
                 break;
         }
 
         $log->log( 'The established delay is:  ' . $last_exec ); 
 
-        if (is_int($delay)) {
-            $last_exec_ts = strtotime($last_exec);
+        $last_exec_ts = strtotime($last_exec);
 
-            $diff_min = (time() - $last_exec_ts) / 60;
+        $diff_min = (time() - $last_exec_ts) / 60;
 
-            $log->log( 'The difference is:  ' . $diff_min ); 
+        $log->log( 'The difference is:  ' . $diff_min ); 
 
-            if ($diff_min > $delay) {
-                return true;
-            }
+        if ($diff_min >= $delay) {
+            return true;
         }
 
         return false;
@@ -201,8 +195,6 @@ class Update_On_Save {
 
         $log = new Log( 'update_on_save.txt' );
         $log->log( 'Cleaned database' ); 
-
-        return true;
 	}
 
     /**
@@ -218,7 +210,5 @@ class Update_On_Save {
 
         $log = new Log( 'update_on_save.txt' );
         $log->log( 'Deleted database' ); 
-
-        return true;
 	}
 }

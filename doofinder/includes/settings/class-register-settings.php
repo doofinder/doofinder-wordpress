@@ -3,7 +3,6 @@
 namespace Doofinder\WP\Settings;
 
 use Doofinder\WP\Multilanguage\Language_Plugin;
-use Doofinder\WP\Log;
 
 defined( 'ABSPATH' ) or die();
 
@@ -231,7 +230,7 @@ trait Register_Settings {
 	 *
 	 * @param string
 	 *
-	 * @return string
+	 * @return string|null
 	 */
 	function validate_api_key( $input ) {
 		if ( null == $input ) {
@@ -285,7 +284,7 @@ trait Register_Settings {
 	 *
 	 * @param string $input
 	 *
-	 * @return string $input
+	 * @return string|null $input
 	 */
 	public function validate_search_engine_hash( $input ) {
 		if ( null == $input ) {
@@ -296,12 +295,12 @@ trait Register_Settings {
 		return $input;
 	}
 
-	    /**
+	/**
 	 * Validate api host.
 	 *
 	 * @param string
 	 *
-	 * @return string
+	 * @return string|null
 	 */
 	function validate_update_on_save( $input ) {
 		if ( null == $input ) {
