@@ -68,19 +68,22 @@ class Update_On_Save_Api {
 	 * @param $data
 	 *
 	 */
-	private function sendRequest( $url, $data ) {
+	private function sendRequest( $url, $ids ) {
 		$this->log->log( "Making a request to: $url");
+		$data = [
+			'headers' => $this->authorization_header,
+			'method'  => 'POST',
+            'body' => json_encode($ids),
+        ];
+
 		$response = wp_remote_request($url, $data);
-		if (is_wp_error($response)) {
-			// Manejar el error de la solicitud
-			$error_message = $response->get_error_message();
-			$this->log->log( "Error en la solicitud: $error_message");
-		} else {
-			// Obtener la respuesta de la API
+		if (!is_wp_error($response)) {
 			$response_body = wp_remote_retrieve_body($response);
 			$decoded_response = json_decode($response_body, true);
-
-			$this->log->log( "Se ha hecho la petición correctamente: $decoded_response");
+			$this->log->log( "The request has been made correctly: $decoded_response");
+		} else {
+			$error_message = $response->get_error_message();
+			$this->log->log( "Error in the request: $error_message");
 		}
 	}
 
@@ -104,13 +107,7 @@ class Update_On_Save_Api {
 
 		$uri = $this->buildURL("plugins/wordpress/" . $this->hash . "/" . $post_type . "/product_update");
 
-		$options = [
-			'headers' => $this->authorization_header,
-			'method'  => 'POST',
-			'body'    => json_encode($ids),
-		];
-
-		return $this->sendRequest($uri, $options);
+		return $this->sendRequest($uri, $ids);
 	}
 
 	/**
@@ -125,16 +122,10 @@ class Update_On_Save_Api {
 	 * @since 1.0.0
 	 */
 	public function deleteBulk( $post_type, $ids ) {
-		$this->log->log( 'Update items' );
+		$this->log->log( 'Delete items' );
 
 		$uri = $this->buildURL("plugins/wordpress/" . $this->hash . "/" . $post_type . "/product_delete");
 
-		$options = [
-			'headers' => $this->authorization_header,
-			'method'  => 'POST',
-            'body' => json_encode($ids),
-        ];
-
-		return $this->sendRequest( $uri, $options );
+		return $this->sendRequest( $uri, $ids );
 	}
 }

@@ -192,7 +192,7 @@ trait Renderers {
 	private function render_html_api_host( $option_name ) {
 		$saved_value = get_option( $option_name );
 
-		if ( $saved_value === "https://admin.doofinder.com" ) {
+		if ( $saved_value === "https://eu1-admin.doofinder.com" ) {
 			$txt = "Europa - ";
 		} else {
 			$txt = "USA - ";
@@ -207,7 +207,7 @@ trait Renderers {
 			<option value="<?php echo $saved_value; ?>" selected>
 				<?php if ( $saved_value ): echo $txt . $saved_value; endif; ?>
 			</option>
-			<option value="https://admin.doofinder.com">Europa - https://admin.doofinder.com</option>
+			<option value="https://eu1-admin.doofinder.com">Europa - https://eu1-admin.doofinder.com</option>
 			<option value="https://us1-admin.doofinder.com">USA - https://us1-admin.doofinder.com</option>
 		</select>
 		<?php

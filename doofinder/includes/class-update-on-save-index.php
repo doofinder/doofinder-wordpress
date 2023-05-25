@@ -102,7 +102,7 @@ class Update_On_Save_Index {
 			$this->log->log($posts_ids_to_update);
 
 			if (!empty($posts_ids_to_update)) {
-				$this->log->log('There are no ids to update');
+				$this->log->log('Ids ready to send ' . print_r($posts_ids_to_update, true) );
 
 				// Call the function passing the post type name as a parameter
 				if ($action === 'update') {
