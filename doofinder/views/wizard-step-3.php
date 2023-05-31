@@ -1,70 +1,18 @@
 <?php
 
+/**
+ * Final step of the wizard
+ */
+
 namespace Doofinder\WP;
 
-/** @var Setup_Wizard $this */
+use Doofinder\WP\Setup_Wizard;
 
 ?>
-
-<form method="post" action="<?php echo admin_url(); ?>">
-	<?php
-
-    // If there's no plugin active we still need to process 1 language.
-	$languages = $this->language->get_languages();
-	if ( ! $languages ) {
-		$languages[''] = '';
-	}
-
-	foreach ( $languages as $language_code => $language_name ):
-
-		?>
-		<?php
-
-		// Header for all languages except the default one.
-		if ( $language_code !== $this->language->get_base_language() ):
-			?>
-
-            <h2><?php echo "$language_name:" ?></h2>
-
-		<?php endif; ?>
-
-		<?php
-
-		// Language code (suffix) for options.
-		// Default language has no suffix, all other languages do.
-		$options_suffix = '';
-		$name_suffix    = '';
-		if ( $language_code !== $this->language->get_base_language() ) {
-			$options_suffix = $language_code;
-			$name_suffix    = "-$language_code";
-		}
-
-		?>
-        <div class="form-row">
-            <label class="has-checkbox">
-				<?php _e( 'Do you want to enable JS Layer?', 'doofinder_for_wp' ); ?>
-
-                <input type="checkbox" name="enable-js-layer<?php echo $name_suffix; ?>"
-					<?php if ( Settings::is_js_layer_enabled( $options_suffix ) ): ?>
-                        checked
-					<?php endif; ?>
-                >
-            </label>
-        </div>
-
-        <div class="form-row">
-            <label for="js-layer-code"><?php _e( 'JS Layer code:', 'doofinder_for_wp' ); ?></label>
-            <textarea name="js-layer-code<?php echo $name_suffix; ?>" id="js-layer-code" rows="16"><?php
-
-				if ( Settings::get_js_layer( $options_suffix ) ) {
-					echo Settings::get_js_layer( $options_suffix );
-				}
-
-				?></textarea>
-        </div>
-	<?php endforeach; ?>
-
-    <div>
-        <button type="submit"><?php _e( 'Next', 'woocommerce_for_wp' ); ?></button>
-    </div>
-</form>
+<div class="df-setup-finished <?php echo $step_state >= $no_steps ? 'active' : ''; ?>">
+    <figure class="df-setup-finished__icon">🏆</figure>
+    <h2 class="df-setup-finished__title"><?php _e('Congrats!', 'wordpress-doofinder'); ?></h2>
+    <h4 class="df-setup-finished__desc"><?php _e('Your store has been optimized with the best search experience', 'wordpress-doofinder'); ?></h4>
+    <input type="hidden" name="process-step" value="3" />
+    <a class="button button-primary" href="/wp-admin/admin.php?page=doofinder_for_wp"><?php _e('Close', 'wordpress-doofinder'); ?></a>
+</div>

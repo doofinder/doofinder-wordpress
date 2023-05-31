@@ -2,77 +2,48 @@
 
 namespace Doofinder\WP;
 
+$error = $error ?? false;
+
+use Doofinder\WP\Settings;
+use Doofinder\WP\Setup_Wizard;
+
 /** @var Setup_Wizard $this */
 
+
+$sectors = [
+    "Pharma & Cosmetics" => "parapharmacy",
+    "Tech Products & Electronics" => "technology",
+    "Apparel & Accessories" => "fashion",
+    "Sport & Fitness" => "sport",
+    "Childcare" => "childcare",
+    "Pets" => "pets",
+    "Home & Garden" => "home",
+    "Food & Beverages" => "food",
+    "Toys & Hobbies" => "toys",
+    "Auto Parts & Accessories" => "autos",
+    "Leisure & Culture" => "leisure",
+    "Others" => "others"
+];
+
+$selected_sector = Settings::get_sector('')
+
 ?>
-
-<form method="post" action="<?php echo admin_url(); ?>">
-
-    <!-- API Key -->
-    <div class="form-row <?php if ( $this->get_error( 'api-key' ) ): ?>has-error<?php endif; ?>">
-        <label for="api-key"><?php _e( 'Api Key:', 'doofinder_for_wp' ); ?></label>
-
-        <input required type="text" name="api-key" id="api-key"
-			<?php if ( Settings::get_api_key() ): ?>
-                value="<?php echo Settings::get_api_key(); ?>"
-			<?php endif; ?>
-        >
-
-		<?php if ( $this->get_error( 'api-key' ) ): ?>
-            <div class="error"><?php echo $this->get_error( 'api-key' ); ?></div>
-		<?php endif; ?>
+<form action="<?php echo Setup_Wizard::get_url(['step' => '1']); ?>" method="post">
+    <div class="df-setup-step__actions">
+        <select id="sector-select" name="sector" required>
+            <option value="" selected disabled hidden> - <?php _e('Choose a sector', 'wordpress-doofinder'); ?> - </option>
+            <?php
+            foreach ($sectors as $sector => $key) {
+                $selected = "";
+                if ($selected_sector === $key) {
+                    $selected = ' selected="selected"';
+                }
+                echo '<option value="' . $key . '"' . $selected . '>' . __($sector, 'wordpress-doofinder') . '</option>';
+            }
+            ?>
+        </select>
+        <button type="submit"><?php _e('Next', 'wordpress-doofinder'); ?></button>
+        <input type="hidden" id="process-step-input" name="process-step" value="1" />
+        <input type="hidden" id="next-step-input" name="next-step" value="2" />
     </div>
-
-    <!-- Hash -->
-    <div class="form-row <?php if ( $this->get_error( 'search-engine-hash' ) ): ?>has-error<?php endif; ?>">
-        <label for="search-engine-hash"><?php _e( 'Search Engine Hash:', 'doofinder_for_wp' ); ?></label>
-
-        <input required type="text" name="search-engine-hash" id="search-engine-hash"
-			<?php if ( Settings::get_search_engine_hash() ): ?>
-                value="<?php echo Settings::get_search_engine_hash(); ?>"
-			<?php endif; ?>
-        >
-
-		<?php if ( $this->get_error( 'search-engine-hash' ) ): ?>
-            <div class="error"><?php echo $this->get_error( 'search-engine-hash' ); ?></div>
-		<?php endif; ?>
-    </div>
-
-    <!-- Hashes for all remaining languages -->
-	<?php
-
-	if ( $this->language->get_languages() ):
-		foreach ( $this->language->get_languages() as $language_code => $language_name ):
-			// Don't display another input for the base language.
-			// The input above handles it.
-			if ( $language_code === $this->language->get_base_language() ) {
-				continue;
-			}
-
-			?>
-
-            <div class="form-row">
-                <label for="search-engine-hash-<?php echo $language_code; ?>">
-					<?php printf( __( 'Search Engine Hash - %s:', 'doofinder_for_wp' ), $language_name ); ?>
-                </label>
-
-                <input
-                        type="text"
-                        name="search-engine-hash-<?php echo $language_code; ?>"
-                        id="search-engine-hash-<?php echo $language_code; ?>"
-
-					<?php if ( Settings::get_search_engine_hash( $language_code ) ): ?>
-                        value="<?php echo Settings::get_search_engine_hash( $language_code ); ?>"
-					<?php endif; ?>
-                >
-            </div>
-
-		<?php
-
-		endforeach;
-	endif;
-
-	?>
-
-    <button type="submit"><?php _e( 'Next', 'doofinder_for_wp' ); ?></button>
 </form>
