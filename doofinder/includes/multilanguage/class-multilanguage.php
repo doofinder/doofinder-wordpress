@@ -13,6 +13,11 @@ class Multilanguage {
 	private static $instance;
 
 	/**
+	 * Flag if site is multilang or not
+	 */
+	public static $is_multilang = false;
+
+	/**
 	 * Create (or retrieve, if already exists) the singleton
 	 * instance of class that implements Language_Plugin
 	 * interface.
@@ -23,6 +28,7 @@ class Multilanguage {
 		if ( ! self::$instance ) {
 			if ( class_exists( 'SitePress' ) ) {
 				self::$instance = new WPML();
+				self::$is_multilang = true;
 
 				return self::$instance;
 			}
@@ -37,6 +43,7 @@ class Multilanguage {
 		// Still no instance?
 		// That means we have no Multilanguage plugins installed.
 		if ( ! self::$instance ) {
+			self::$is_multilang = false;
 			self::$instance = new No_Language_Plugin();
 		}
 

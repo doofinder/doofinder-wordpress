@@ -12,6 +12,13 @@ abstract class Language_Plugin {
 	abstract public function get_languages();
 
 	/**
+	 * @inheritdoc
+	 */
+	public function get_formatted_languages() {
+		return null;
+	}
+
+	/**
 	 * Get active language code.
 	 *
 	 * @return string Lang code of current selected language.

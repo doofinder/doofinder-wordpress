@@ -33,6 +33,34 @@ class WPML extends Language_Plugin {
 	/**
 	 * @inheritdoc
 	 */
+	public function get_formatted_languages()
+	{
+		if (!function_exists('icl_get_languages')) {
+			return array();
+		}
+
+		// "wpml_active_languages" filters the list of the
+		// languages enabled (active) for a site.
+		$languages = apply_filters('wpml_active_languages', null, 'orderby=code&order=desc');
+
+		if (empty($languages)) {
+			return array();
+		}
+
+		// Create associative array with lang code / lang name pairs.
+		// For example 'en' => 'English'.
+		$formatted_languages = array();
+		foreach ($languages as $key => $value) {
+			$language_code = $value['default_locale'];
+			$formatted_languages[$language_code] = $value['translated_name'];
+		}
+
+		return $formatted_languages;
+	}
+
+	/**
+	 * @inheritdoc
+	 */
 	public function get_active_language() {
 		if ( defined( 'ICL_LANGUAGE_CODE' ) ) {
 			// WPML allows us to select "All languages"./

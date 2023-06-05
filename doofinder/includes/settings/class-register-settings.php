@@ -3,6 +3,8 @@
 namespace Doofinder\WP\Settings;
 
 use Doofinder\WP\Multilanguage\Language_Plugin;
+use Doofinder\WP\Setup_Wizard;
+use Doofinder\WP\Log;
 
 defined( 'ABSPATH' ) or die();
 
@@ -135,8 +137,13 @@ trait Register_Settings {
 			'doofinder-for-wp-keys'
 		);
 
-		register_setting( self::$top_level_menu, $update_on_save_option_name, array( $this, 'validate_update_on_save' ) );
-		
+		register_setting(
+			self::$top_level_menu,
+			$disable_debug_mode_option_name
+		);
+
+		echo Setup_Wizard::get_configure_via_setup_wizard_button_html();
+		echo '</div><!-- /.doofinder-search-settings-wrap -->';
 	}
 
 	/**

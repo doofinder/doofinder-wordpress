@@ -246,4 +246,82 @@ trait Accessors {
 
 		return $option_name;
 	}
+
+	/**
+	 * Retrieve last modified date for index (in Doofinder)
+	 *
+	 * Just an alias for "get_option", because ideally we don't
+	 * want to replace the option name in multiple files.
+	 *
+	 * @param string $language Language code.
+	 */
+	public static function get_last_modified_index( $language = '' ) {
+		return get_option( self::option_name_for_language(
+			'woocommerce_doofinder_last_modified_index',
+			$language
+		) );
+	}
+
+	/**
+	 * Set last modified date for index (in Doofinder)
+	 *
+	 * Just an alias for "update_option", because ideally we don't
+	 * want to replace the option name in multiple files.
+	 *
+	 * @param string $language Language code.
+	 * @param int $update_time Timestamp of the update time
+	 */
+	public static function set_last_modified_index( $language = '', $update_time = null ) {
+		$update_time = $update_time ?: time();
+
+		update_option( self::option_name_for_language(
+			'woocommerce_doofinder_last_modified_index',
+			$language
+		), $update_time);
+	}
+
+		/**
+	 * Retrieve the Business Sector
+	 *
+	 * Just an alias for "get_option", because ideally we don't
+	 * want to replace the option name in multiple files.
+	 *
+	 * @param string $language Language code.
+	 *
+	 * @return bool
+	 */
+	public static function get_sector($language = '')
+	{
+		return get_option(self::option_name_for_language(
+			'doofinder_for_wc_sector',
+			$language
+		));
+	}
+
+
+	/**
+	 * Update the value of the Business Sector
+	 *
+	 * Just an alias for "update_option", because ideally we don't
+	 * want to replace the option name in multiple files.
+	 *
+	 * @param string $value
+	 * @param string $language Language code.
+	 */
+	public static function set_sector($value, $language = '')
+	{
+		update_option(self::option_name_for_language('doofinder_sector', $language), $value);
+	}
+
+	/**
+	 * Determine if the configuration of data is completed.
+	 *
+	 * Complete configuration means that API Key  and API Host and Admin Endpoint fields are filled.
+	 *
+	 * @return bool
+	 */
+	public static function is_api_configuration_complete()
+	{
+		return (bool) (self::get_api_key() && self::get_api_host());
+	}
 }
