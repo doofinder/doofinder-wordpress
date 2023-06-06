@@ -18,7 +18,7 @@ $wp_styles = wp_styles();
 <head>
     <meta name="viewport" content="width=device-width" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title><?php printf(__('%s - Doofinder Setup Wizard', 'woocommerce-doofinder'), get_bloginfo('name')); ?></title>
+    <title><?php printf(__('%s - Doofinder Setup Wizard', 'wordpress-doofinder'), get_bloginfo('name')); ?></title>
     <link rel="stylesheet" href="<?php echo $wp_styles->base_url . $wp_styles->registered['common']->src; ?>">
     <link rel="stylesheet" href="<?php echo Doofinder_For_WordPress::plugin_url(); ?>assets/css/admin.css">
     <link rel="stylesheet" href="<?php echo Doofinder_For_WordPress::plugin_url(); ?>assets/css/wizard.css">

@@ -177,9 +177,6 @@ trait Register_Settings {
 			self::$top_level_menu,
 			$disable_debug_mode_option_name
 		);
-
-		echo Setup_Wizard::get_configure_via_setup_wizard_button_html();
-		echo '</div><!-- /.doofinder-search-settings-wrap -->';
 	}
 
 	/**

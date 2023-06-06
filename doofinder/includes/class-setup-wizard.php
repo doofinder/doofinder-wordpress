@@ -547,22 +547,25 @@ class Setup_Wizard
 		}
 
 		ob_start();
-?>
-		<div id="message" class="wordpress-message doofinder-notice-setup-wizard">
-			<figure class="logo" style="width:5rem;height:auto;float:left;margin:.5em 0;margin-right:0.75rem;">
-				<img src="<?php echo Doofinder_For_WordPress::plugin_url() . '/assets/svg/imagotipo1.svg'; ?>" />
-			</figure>
-			<p class="submit">
-				<a href="<?php echo self::get_url(); ?>" class="button-primary button-setup-wizard"><?php _e('Setup Wizard', 'wordpress-doofinder'); ?></a>
-				<?php if ($settings) : ?>
-					&nbsp;<a class="button-secondary button-settings" href="<?php echo Settings::get_url(); ?>"><?php _e('Settings', 'wordpress-doofinder'); ?></a>
-				<?php endif; ?>
-			</p>
+		?>
+		<div class="notice notice-success is-dismissible">
+			<div id="message" class="wordpress-message doofinder-notice-setup-wizard">
+				<figure class="logo" style="width:5rem;height:auto;float:left;margin:.5em 0;margin-right:0.75rem;">
+					<img src="<?php echo Doofinder_For_WordPress::plugin_url() . 'assets/svg/imagotipo1.svg'; ?>" />
+				</figure>
+				<h3><?php echo $message_intro;?></h3>
+				<p><?php echo $message;?></p>
+				<p class="submit">
+					<a href="<?php echo self::get_url(); ?>" class="button-primary button-setup-wizard"><?php _e('Setup Wizard', 'wordpress-doofinder'); ?></a>
+					<?php if ($settings) : ?>
+						&nbsp;<a class="button-secondary button-settings" href="<?php echo Settings::get_url(); ?>"><?php _e('Settings', 'wordpress-doofinder'); ?></a>
+					<?php endif; ?>
+				</p>
+			</div>
 		</div>
-	<?php
+		<?php
 		$html = ob_get_clean();
 		return $html;
-	}
 
 	/**
 	 * Not dissmisable Configure via Wizard setup notice html
