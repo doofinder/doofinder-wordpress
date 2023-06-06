@@ -566,6 +566,7 @@ class Setup_Wizard
 		<?php
 		$html = ob_get_clean();
 		return $html;
+	}
 
 	/**
 	 * Not dissmisable Configure via Wizard setup notice html
