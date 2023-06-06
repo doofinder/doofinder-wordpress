@@ -73,22 +73,24 @@ class Store_Api
 
             $domain = str_ireplace('www.', '', parse_url(get_bloginfo('url'), PHP_URL_HOST));
 
+            if ( is_plugin_active( 'woocommerce/woocommerce.php' ) ) {
+                $product_datatype = $this->get_product_datatype();
+                $currency = get_woocommerce_currency();
+                $platform = "woocommerce";
+            } else {
+                $product_datatype = [];
+                $currency = "EUR";
+                $platform = "wordpress";
+            }
+
             $store_data = [
                 "name" =>  get_bloginfo('name'),
-                "platform" => "wordpress",
+                "platform" => $platform,
                 "primary_language" => $primary_language,
                 // "skip_indexation" => true,
                 "search_engines" => [],
                 "sector" => Settings::get_sector()
             ];
-
-            if ( is_plugin_active( 'woocommerce/woocommerce.php' ) ) {
-                $product_datatype = $this->get_product_datatype();
-                $currency = get_woocommerce_currency();
-            } else {
-                $product_datatype = [];
-                $currency = "EUR";
-            }
 
             foreach ($api_keys as $item) {
                 if ($item['hash'] === 'no-hash') {
