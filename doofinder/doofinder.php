@@ -105,6 +105,11 @@ if ( ! class_exists( '\Doofinder\WP\Doofinder_For_WordPress' ) ):
 				Post::register_webhooks();
 
 				Settings::instance();
+				Setup_Wizard::instance();
+				add_action('admin_notices', function () {
+					echo Setup_Wizard::get_setup_wizard_notice_html();
+				});
+
 				Index_Interface::instance();
 			}
 
