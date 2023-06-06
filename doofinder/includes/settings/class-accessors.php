@@ -293,7 +293,7 @@ trait Accessors {
 	public static function get_sector($language = '')
 	{
 		return get_option(self::option_name_for_language(
-			'doofinder_for_wc_sector',
+			'doofinder_sector',
 			$language
 		));
 	}

@@ -107,11 +107,13 @@ class Store_Api
                             [
                                 "name" => "post",
                                 "preset" => "post",
-                                "datasource" => [
-                                    "type" => "wordpress",
-                                    "options" => [
-                                        "feed_type" => "product",
-                                        "url" =>  get_bloginfo('url')
+                                "datasources" => [
+                                    [
+                                        "type" => "wordpress",
+                                        "options" => [
+                                            "feed_type" => "post",
+                                            "url" =>  get_bloginfo('url')
+                                        ]
                                     ]
                                 ]
                             ],
@@ -161,11 +163,13 @@ class Store_Api
         return [
             "name" => "product",
             "preset" => "product",
-            "datasource" => [
-                "type" => "wordpress",
-                "options" => [
-                    "feed_type" => "product",
-                    "url" =>  get_bloginfo('url')
+            "datasources" => [
+                [
+                    "type" => "wordpress",
+                    "options" => [
+                        "feed_type" => "product",
+                        "url" =>  get_bloginfo('url')
+                    ]
                 ]
             ]
         ];
