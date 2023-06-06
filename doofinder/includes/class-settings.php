@@ -123,6 +123,6 @@ class Settings {
 	public static function is_update_on_save_enabled()
 	{
 		$option = get_option('doofinder_for_wp_update_on_save', 'every_day');
-		return  $option != 'every_day'
+		return  $option != 'every_day';
 	}
 }
