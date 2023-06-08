@@ -137,10 +137,7 @@ trait Register_Settings {
 			'doofinder-for-wp-keys'
 		);
 
-		register_setting(
-			self::$top_level_menu,
-			$disable_debug_mode_option_name
-		);
+		register_setting( self::$top_level_menu, $update_on_save_option_name, array( $this, 'validate_update_on_save' ) );
 	}
 
 	/**
