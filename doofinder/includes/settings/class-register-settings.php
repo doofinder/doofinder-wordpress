@@ -83,7 +83,7 @@ trait Register_Settings {
 		$api_key_option_name = 'doofinder_for_wp_api_key';
 		add_settings_field(
 			$api_key_option_name,
-			__( 'API Key', 'doofinder_for_wp' ),
+			__( 'User Key', 'doofinder_for_wp' ),
 			function () use ( $api_key_option_name ) {
 				$this->render_html_api_key( $api_key_option_name );
 			},
@@ -97,7 +97,7 @@ trait Register_Settings {
 		$api_host_option_name = 'doofinder_for_wp_api_host';
 		add_settings_field(
 			$api_host_option_name,
-			__( 'API Host', 'doofinder_for_wp' ),
+			__( 'Server', 'doofinder_for_wp' ),
 			function () use ( $api_host_option_name ) {
 				$this->render_html_api_host( $api_host_option_name );
 			},
@@ -137,10 +137,7 @@ trait Register_Settings {
 			'doofinder-for-wp-keys'
 		);
 
-		register_setting(
-			self::$top_level_menu,
-			$disable_debug_mode_option_name
-		);
+		register_setting( self::$top_level_menu, $update_on_save_option_name, array( $this, 'validate_update_on_save' ) );
 	}
 
 	/**

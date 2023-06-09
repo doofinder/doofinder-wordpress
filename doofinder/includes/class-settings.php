@@ -10,13 +10,14 @@ use Doofinder\WP\Settings\Register_Settings;
 use Doofinder\WP\Settings\Renderers;
 use Doofinder\WP\Settings\Helpers;
 
-defined( 'ABSPATH' ) or die;
+defined('ABSPATH') or die;
 
-class Settings {
-    use Accessors;
-    use Register_Settings;
-    use Renderers;
-    use Helpers;
+class Settings
+{
+	use Accessors;
+	use Register_Settings;
+	use Renderers;
+	use Helpers;
 
 	/**
 	 * Slug of the top-level menu page.
@@ -61,8 +62,9 @@ class Settings {
 	 * @since 1.0.0
 	 * @return Settings
 	 */
-	public static function instance() {
-		if ( is_null( self::$_instance ) ) {
+	public static function instance()
+	{
+		if (is_null(self::$_instance)) {
 			self::$_instance = new self();
 		}
 
@@ -72,20 +74,22 @@ class Settings {
 	/**
 	 * Settings constructor.
 	 */
-	private function __construct() {
+	private function __construct()
+	{
 		$this->language = Multilanguage::instance();
 
 		self::$tabs = array(
 			'authentication' => array(
-				'label'     => __( 'Authentication', 'doofinder_for_wp' ),
+				'label'     => __('Authentication', 'doofinder_for_wp'),
 				'fields_cb' => 'add_authentication_settings'
 			),
 			'search'         => array(
-				'label'     => __( 'Search Settings', 'doofinder_for_wp' ),
+				'label'     => __('Search Settings', 'doofinder_for_wp'),
 				'fields_cb' => 'add_search_settings'
 			)
 		);
 
+		$this->add_update_on_save_intervals();
 		$this->add_plugin_settings();
 		$this->add_settings_page();
 		$this->add_admin_scripts();
@@ -94,12 +98,13 @@ class Settings {
 	/**
 	 * Register styles used by the Doofinder top level page.
 	 */
-	private function add_admin_scripts() {
-		add_action( 'admin_enqueue_scripts', function () {
+	private function add_admin_scripts()
+	{
+		add_action('admin_enqueue_scripts', function () {
 			// Don't add these scripts on pages other than the Doofinder top level page.
 			// Other pages don't use them.
 			$screen = get_current_screen();
-			if ( $screen->id !== 'toplevel_page_doofinder_for_wp' ) {
+			if ($screen->id !== 'toplevel_page_doofinder_for_wp') {
 				return;
 			}
 
@@ -108,11 +113,55 @@ class Settings {
 				'doofinder-for-wp-styles',
 				Doofinder_For_WordPress::plugin_url() . '/assets/css/admin.css'
 			);
-		} );
+		});
 	}
-	
 
-    /**
+	/**
+	 * Register the Update On Save Schedule Intervals
+	 */
+	public static function add_update_on_save_intervals()
+	{
+		add_filter('cron_schedules', function () {
+			return [
+				'wp_doofinder_each_minute' => [
+					'display' => __('Each minute', 'doofinder_for_wp'),
+					'interval' => 60
+				],
+				'wp_doofinder_each_15_minutes' => [
+					'display' => sprintf(__('Each %s minutes', 'doofinder_for_wp'), 15),
+					'interval' => 60 * 15
+				],
+				'wp_doofinder_each_30_minutes' => [
+					'display' => sprintf(__('Each %s minutes', 'doofinder_for_wp'), 30),
+					'interval' => 60 * 30
+				],
+				'wp_doofinder_each_60_minutes' => [
+					'display' => __('Each hour', 'doofinder_for_wp'),
+					'interval' => HOUR_IN_SECONDS
+				],
+				'wp_doofinder_each_2_hours' => [
+					'display' => sprintf(__('Each %s hours', 'doofinder_for_wp'), 2),
+					'interval' => HOUR_IN_SECONDS * 2
+				],
+				'wp_doofinder_each_6_hours' => [
+					'display' => sprintf(__('Each %s hours', 'doofinder_for_wp'), 6),
+					'interval' => HOUR_IN_SECONDS * 6
+				],
+				'wp_doofinder_each_12_hours' => [
+					'display' => sprintf(__('Each %s hours', 'doofinder_for_wp'), 12),
+					'interval' => HOUR_IN_SECONDS * 12
+				],
+				'wp_doofinder_each_day' => [
+					'display' => __('Each day', 'doofinder_for_wp'),
+					'interval' => DAY_IN_SECONDS
+				]
+			];
+		});
+	}
+
+
+
+	/**
 	 * Determine if the update on save is enabled.
 	 *
 	 * Just an alias for "get_option", because ideally we don't
