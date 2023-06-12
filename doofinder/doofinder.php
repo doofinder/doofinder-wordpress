@@ -13,266 +13,324 @@
 
 namespace Doofinder\WP;
 
+use WP_REST_Response;
+
 defined('ABSPATH') or die;
 
 if (!class_exists('\Doofinder\WP\Doofinder_For_WordPress')) :
 
-	/**
-	 * Main Plugin Class
-	 *
-	 * @class Doofinder_For_WordPress
-	 */
-	class Doofinder_For_WordPress
-	{
+    /**
+     * Main Plugin Class
+     *
+     * @class Doofinder_For_WordPress
+     */
+    class Doofinder_For_WordPress
+    {
 
-		/**
-		 * Plugin version.
-		 *
-		 * @var string
-		 */
-		public static $version = '0.5.4';
+        /**
+         * Plugin version.
+         *
+         * @var string
+         */
+        public static $version = '0.5.4';
 
-		/**
-		 * The only instance of Doofinder_For_WordPress
-		 *
-		 * @var Doofinder_For_WordPress
-		 */
-		protected static $_instance = null;
+        /**
+         * The only instance of Doofinder_For_WordPress
+         *
+         * @var Doofinder_For_WordPress
+         */
+        protected static $_instance = null;
 
-		/**
-		 * Returns the only instance of Doofinder_For_WordPress
-		 *
-		 * @since 1.0.0
-		 * @return Doofinder_For_WordPress
-		 */
-		public static function instance()
-		{
-			if (is_null(self::$_instance)) {
-				self::$_instance = new self();
-			}
+        /**
+         * Returns the only instance of Doofinder_For_WordPress
+         *
+         * @since 1.0.0
+         * @return Doofinder_For_WordPress
+         */
+        public static function instance()
+        {
+            if (is_null(self::$_instance)) {
+                self::$_instance = new self();
+            }
 
-			return self::$_instance;
-		}
+            return self::$_instance;
+        }
 
-		/* Hacking is forbidden *******************************************************/
+        /* Hacking is forbidden *******************************************************/
 
-		/**
-		 * Cloning is forbidden.
-		 *
-		 * @since 1.0.0
-		 */
-		public function __clone()
-		{
-			_doing_it_wrong(__FUNCTION__, __('Cheatin&#8217; huh?', 'wordpress-doofinder'), '0.1');
-		}
+        /**
+         * Cloning is forbidden.
+         *
+         * @since 1.0.0
+         */
+        public function __clone()
+        {
+            _doing_it_wrong(__FUNCTION__, __('Cheatin&#8217; huh?', 'wordpress-doofinder'), '0.1');
+        }
 
-		/**
-		 * Unserializing instances of this class is forbidden.
-		 *
-		 * @since 1.0.0
-		 */
-		public function __wakeup()
-		{
-			_doing_it_wrong(__FUNCTION__, __('Cheatin&#8217; huh?', 'wordpress-doofinder'), '0.1');
-		}
+        /**
+         * Unserializing instances of this class is forbidden.
+         *
+         * @since 1.0.0
+         */
+        public function __wakeup()
+        {
+            _doing_it_wrong(__FUNCTION__, __('Cheatin&#8217; huh?', 'wordpress-doofinder'), '0.1');
+        }
 
-		/* Initialization *************************************************************/
+        /* Initialization *************************************************************/
 
-		/**
-		 * Doofinder_For_WordPress constructor.
-		 *
-		 * @since 1.0.0
-		 */
-		public function __construct()
-		{
-			$class = __CLASS__;
+        /**
+         * Doofinder_For_WordPress constructor.
+         *
+         * @since 1.0.0
+         */
+        public function __construct()
+        {
+            $class = __CLASS__;
 
-			// Load classes on demand
-			self::autoload(self::plugin_path() . 'includes/');
-			include_once 'lib/autoload.php';
+            // Load classes on demand
+            self::autoload(self::plugin_path() . 'includes/');
+            include_once 'lib/autoload.php';
 
-			// Init admin functionalities
-			if (is_admin()) {
-				Thumbnail::prepare_thumbnail_size();
-				Post::add_additional_settings();
-				Settings::instance();
-				if (Setup_Wizard::should_activate()) {
-					Setup_Wizard::activate();
-				}
+            // Init admin functionalities
+            if (is_admin()) {
+                Thumbnail::prepare_thumbnail_size();
+                Post::add_additional_settings();
+                Settings::instance();
+                if (Setup_Wizard::should_activate()) {
+                    Setup_Wizard::activate();
+                }
 
-				Setup_Wizard::instance();
+                Setup_Wizard::instance();
 
-				if (Setup_Wizard::should_show_notice()) {
-					add_action('admin_notices', function () {
-						echo Setup_Wizard::get_setup_wizard_notice_html();
-					});
-				}
+                if (Setup_Wizard::should_show_notice()) {
+                    add_action('admin_notices', function () {
+                        echo Setup_Wizard::get_setup_wizard_notice_html();
+                    });
+                }
 
-				Update_On_Save::register_hooks();
-			}
+                if (Setup_Wizard::should_show_indexing_notice()) {
+                    add_action('admin_notices', function () {
+                        echo Setup_Wizard::get_indexing_status_notice_html();
+                    });
+                }
 
-			// Init frontend functionalities
-			if (!is_admin()) {
-				JS_Layer::instance();
-			}
+                Update_On_Save::register_hooks();
 
-			add_action('init', function () use ($class) {
-				// Register all custom URLs
-				call_user_func(array($class, 'register_urls'));
-			});
-		}
+                self::register_ajax_action();
+            }
 
-		/**
-		 * Autoload custom classes. Folders represent namespaces (after the predefined plugin prefix),
-		 * and files containing classes begin with "class-" prefix, so for example following file:
-		 * example-folder/class-example.php
-		 * Contains following class:
-		 * Doofinder\WP\Example_Folder\Example
-		 *
-		 * @since 1.0.0
-		 *
-		 * @param string $dir Root directory of libraries (where to begin lookup).
-		 */
-		public static function autoload($dir)
-		{
-			$self = __CLASS__;
-			spl_autoload_register(function ($class) use ($self, $dir) {
-				$prefix = 'Doofinder\\WP\\';
+            // Init frontend functionalities
+            if (!is_admin()) {
+                JS_Layer::instance();
+            }
 
-				/*
+            add_action('init', function () use ($class) {
+                // Register all custom URLs
+                call_user_func(array($class, 'register_urls'));
+            });
+
+            self::initialize_rest_endpoints();
+        }
+
+        /**
+         * Autoload custom classes. Folders represent namespaces (after the predefined plugin prefix),
+         * and files containing classes begin with "class-" prefix, so for example following file:
+         * example-folder/class-example.php
+         * Contains following class:
+         * Doofinder\WP\Example_Folder\Example
+         *
+         * @since 1.0.0
+         *
+         * @param string $dir Root directory of libraries (where to begin lookup).
+         */
+        public static function autoload($dir)
+        {
+            $self = __CLASS__;
+            spl_autoload_register(function ($class) use ($self, $dir) {
+                $prefix = 'Doofinder\\WP\\';
+
+                /*
 				 * Check if the class uses the plugins namespace.
 				 */
-				$len = strlen($prefix);
-				if (strncmp($prefix, $class, $len) !== 0) {
-					return;
-				}
+                $len = strlen($prefix);
+                if (strncmp($prefix, $class, $len) !== 0) {
+                    return;
+                }
 
-				/*
+                /*
 				 * Class name after and path after the plugins prefix.
 				 */
-				$relative_class = substr($class, $len);
+                $relative_class = substr($class, $len);
 
-				/*
+                /*
 				 * Class names and folders are lowercase and hyphen delimited.
 				 */
-				$relative_class = strtolower(str_replace('_', '-', $relative_class));
+                $relative_class = strtolower(str_replace('_', '-', $relative_class));
 
-				/*
+                /*
 				 * WordPress coding standards state that files containing classes should begin
 				 * with 'class-' prefix. Also, we are looking specifically for .php files.
 				 */
-				$classes                          = explode('\\', $relative_class);
-				$last_element                     = end($classes);
-				$classes[count($classes) - 1] = "class-$last_element.php";
-				$filename                         = $dir . implode('/', $classes);
+                $classes                          = explode('\\', $relative_class);
+                $last_element                     = end($classes);
+                $classes[count($classes) - 1] = "class-$last_element.php";
+                $filename                         = $dir . implode('/', $classes);
 
-				if (file_exists($filename)) {
-					require_once $filename;
-				}
-			});
-		}
+                if (file_exists($filename)) {
+                    require_once $filename;
+                }
+            });
+        }
 
-		/**
-		 * Get the plugin path.
-		 *
-		 * @since 1.0.0
-		 * @return string
-		 */
-		public static function plugin_path()
-		{
-			return plugin_dir_path(__FILE__);
-		}
+        /**
+         * Get the plugin path.
+         *
+         * @since 1.0.0
+         * @return string
+         */
+        public static function plugin_path()
+        {
+            return plugin_dir_path(__FILE__);
+        }
 
-		/**
-		 * Get the plugin URL.
-		 *
-		 * @since 1.0.0
-		 * @return string
-		 */
-		public static function plugin_url()
-		{
-			return plugin_dir_url(__FILE__);
-		}
+        /**
+         * Get the plugin URL.
+         *
+         * @since 1.0.0
+         * @return string
+         */
+        public static function plugin_url()
+        {
+            return plugin_dir_url(__FILE__);
+        }
 
-		/**
-		 * Initialize all functionalities that register custom URLs.
-		 *
-		 * @since 1.0.0
-		 */
-		public static function register_urls()
-		{
-			Platform_Confirmation::register();
-		}
+        /**
+         * Initialize all functionalities that register custom URLs.
+         *
+         * @since 1.0.0
+         */
+        public static function register_urls()
+        {
+            Platform_Confirmation::register();
+        }
 
-		/* Plugin activation and deactivation *****************************************/
+        /* Plugin activation and deactivation *****************************************/
 
-		/**
-		 * Activation Hook to configure routes and so on
-		 *
-		 * @since 1.0.0
-		 * @return void
-		 */
-		public static function plugin_enabled()
-		{
-			self::autoload(self::plugin_path() . 'includes/');
-			self::register_urls();
-			flush_rewrite_rules();
+        /**
+         * Activation Hook to configure routes and so on
+         *
+         * @since 1.0.0
+         * @return void
+         */
+        public static function plugin_enabled()
+        {
+            self::autoload(self::plugin_path() . 'includes/');
+            self::register_urls();
+            flush_rewrite_rules();
 
-			Update_On_Save::create_update_on_save_db();
+            Update_On_Save::create_update_on_save_db();
 
-			$log = new Log();
-			$log->log('Plugin enabled');
+            $log = new Log();
+            $log->log('Plugin enabled');
 
-			if (Setup_Wizard::should_activate()) {
-				Setup_Wizard::activate(true);
-			}
-		}
+            if (Setup_Wizard::should_activate()) {
+                Setup_Wizard::activate(true);
+            }
+        }
 
-		/**
-		 * Deactivation Hook to flush routes
-		 *
-		 * @since 1.0.0
-		 * @return void
-		 */
-		public static function plugin_disabled()
-		{
-			flush_rewrite_rules();
-			Update_On_Save::clean_update_on_save_db();
-			Update_On_Save::delete_update_on_save_db();
-		}
+        /**
+         * Deactivation Hook to flush routes
+         *
+         * @since 1.0.0
+         * @return void
+         */
+        public static function plugin_disabled()
+        {
+            flush_rewrite_rules();
+            Update_On_Save::clean_update_on_save_db();
+            Update_On_Save::delete_update_on_save_db();
+        }
 
-		/**
-		 * This function runs when WordPress completes its upgrade process
-		 * It iterates through each plugin updated to see if ours is included
-		 *
-		 * @param array $upgrader_object
-		 * @param array $options
-		 */
-		public static function upgrader_process_complete($upgrader_object, $options)
-		{
-			$log = new Log();
-			$log->log('upgrader_process - start');
-			// The path to our plugin's main file
-			$our_plugin = plugin_basename(__FILE__);
+        /**
+         * This function runs when WordPress completes its upgrade process
+         * It iterates through each plugin updated to see if ours is included
+         *
+         * @param array $upgrader_object
+         * @param array $options
+         */
+        public static function upgrader_process_complete($upgrader_object, $options)
+        {
+            $log = new Log();
+            $log->log('upgrader_process - start');
+            // The path to our plugin's main file
+            $our_plugin = plugin_basename(__FILE__);
 
-			$log->log($our_plugin);
-			$log->log($options);
+            $log->log($our_plugin);
+            $log->log($options);
 
-			// If an update has taken place and the updated type is plugins and the plugins element exists
-			if ($options['action'] == 'update' && $options['type'] == 'plugin') {
+            // If an update has taken place and the updated type is plugins and the plugins element exists
+            if ($options['action'] == 'update' && $options['type'] == 'plugin') {
 
-				$log->log('upgrader_process - updating plugin');
+                $log->log('upgrader_process - updating plugin');
 
-				if (isset($options['plugins'])) {
-					$plugins = $options['plugins'];
-				} elseif (isset($options['plugin'])) {
-					$plugins = [$options['plugin']];
-				}
+                if (isset($options['plugins'])) {
+                    $plugins = $options['plugins'];
+                } elseif (isset($options['plugin'])) {
+                    $plugins = [$options['plugin']];
+                }
 
-				$log->log($plugins);
-			}
-		}
-	}
+                $log->log($plugins);
+            }
+        }
+
+        public static function initialize_rest_endpoints()
+        {
+            add_action('rest_api_init', function () {
+                register_rest_route('doofinder/v1', '/indexation-status', array(
+                    'methods' => 'GET',
+                    'callback' => function () {
+                        //check origin and ignore if the domain is not *.doofinder.com
+
+                        //TODO: Remove this when going into production
+                        if (Settings::get_indexing_status() === "processed") {
+                            Settings::set_indexing_status('');
+                        } else {
+                            Settings::set_indexing_status('processed');
+                        }
+
+
+                        //Settings::set_indexing_status('processed');
+
+                        return new WP_REST_Response(
+                            [
+                                'status' => 200,
+                                'indexing_status' => Settings::get_indexing_status(),
+                                'response' => "Indexing status updated"
+                            ]
+                        );
+                    },
+                ));
+            });
+        }
+
+        /**
+         * Register an ajax action that processes wizard step 2 and creates search engines.
+         *
+         *
+         * @since 1.0.0
+         */
+        private static function register_ajax_action()
+        {
+            add_action('wp_ajax_doofinder_check_indexing_status', function () {
+                wp_send_json([
+                    'status' => Settings::get_indexing_status()
+                ]);
+                exit;
+            });
+        }
+    }
 
 endif;
 
