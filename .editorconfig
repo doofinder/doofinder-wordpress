@@ -1,0 +1,18 @@
+# top-most EditorConfig file
+root = true
+
+# Indentation style
+[*]
+indent_style = space
+indent_size = 4
+
+# Set maximum line length to 80 characters
+[*.php]
+max_line_length = 80
+
+# Ensure files use Unix-style line endings
+[*]
+end_of_line = lf
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
