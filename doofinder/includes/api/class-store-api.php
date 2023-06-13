@@ -13,32 +13,32 @@ class Store_Api
 {
 
     /**
-	 * Instance of a class used to log to a file.
-	 *
-	 * @var Log
-	 */
-	private $log;
+     * Instance of a class used to log to a file.
+     *
+     * @var Log
+     */
+    private $log;
 
     /**
-	 * Instance of a class used to log to a file.
-	 *
-	 * @var Multilanguage
-	 */
-	private $language;
-
-	/**
-	 * API Host
-	 *
-	 * @var string
-	 */
-	private $api_host;
+     * Instance of a class used to log to a file.
+     *
+     * @var Multilanguage
+     */
+    private $language;
 
     /**
-	 * API Key
-	 *
-	 * @var string
-	 */
-	private $api_key;
+     * API Host
+     *
+     * @var string
+     */
+    private $api_host;
+
+    /**
+     * API Key
+     *
+     * @var string
+     */
+    private $api_key;
 
 
     public function __construct()
@@ -79,10 +79,13 @@ class Store_Api
                 "primary_language" => $primary_language,
                 // "skip_indexation" => true,
                 "search_engines" => [],
-                "sector" => Settings::get_sector()
+                "sector" => Settings::get_sector(),
+                "callback_urls" => [
+                    get_bloginfo('url') . '/wp-json/doofinder/v1/indexation-status/?token=' . $this->api_key
+                ]
             ];
 
-            if ( is_plugin_active( 'woocommerce/woocommerce.php' ) ) {
+            if (is_plugin_active('woocommerce/woocommerce.php')) {
                 $product_datatype = $this->get_product_datatype();
                 $currency = get_woocommerce_currency();
             } else {
@@ -118,7 +121,6 @@ class Store_Api
                                 ]
                             ],
                             $product_datatype
-                            
                         ]
                     ];
                 }
@@ -131,35 +133,42 @@ class Store_Api
         }
     }
 
-    private function sendRequest( $endpoint, $body ) {
-		$data = [
-			'headers' => [
-                'Authorization' => "Token {$this->api_key}"
+    private function sendRequest($endpoint, $body)
+    {
+        $data = [
+            'headers' => [
+                'Authorization' => "Token {$this->api_key}",
+                'Content-Type' => 'application/json; charset=utf-8'
             ],
-			'method'  => 'POST',
             'body' => json_encode($body),
+            'method'      => 'POST',
+            'data_format' => 'body',
         ];
-        $url = "{$this->api_host}/{$endpoint}";
-        $this->log->log( "Making a request to: $url");
-		$response = wp_remote_request($url, $data);
 
-		if (!is_wp_error($response)) {
-			$response_body = wp_remote_retrieve_body($response);
-			$decoded_response = json_decode($response_body, true);
-			return $decoded_response;
-		} else {
-			$error_message = $response->get_error_message();
-			throw new Exception("Error #{$error_message} creating store structure.", $response->get_error_code());
-		}
-	}
+        $this->api_host = str_replace("https", "http", $this->api_host);
+
+        $url = "{$this->api_host}/{$endpoint}";
+        $this->log->log("Making a request to: $url");
+        $response = wp_remote_post($url, $data);
+
+        if (!is_wp_error($response)) {
+            $response_body = wp_remote_retrieve_body($response);
+            $decoded_response = json_decode($response_body, true);
+            return $decoded_response;
+        } else {
+            $error_message = $response->get_error_message();
+            throw new Exception("Error #{$error_message} creating store structure.", $response->get_error_code());
+        }
+    }
 
 
     public function format_language_code($code)
-	{
-		return str_replace('_', '-', $code);
-	}
+    {
+        return str_replace('_', '-', $code);
+    }
 
-    public function get_product_datatype() {
+    public function get_product_datatype()
+    {
         return [
             "name" => "product",
             "preset" => "product",

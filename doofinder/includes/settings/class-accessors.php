@@ -257,7 +257,7 @@ trait Accessors {
 	 */
 	public static function get_last_modified_index( $language = '' ) {
 		return get_option( self::option_name_for_language(
-			'woocommerce_doofinder_last_modified_index',
+			'doofinder_for_wp_last_modified_index',
 			$language
 		) );
 	}
@@ -275,12 +275,12 @@ trait Accessors {
 		$update_time = $update_time ?: time();
 
 		update_option( self::option_name_for_language(
-			'woocommerce_doofinder_last_modified_index',
+			'doofinder_for_wp_last_modified_index',
 			$language
 		), $update_time);
 	}
 
-		/**
+	/**
 	 * Retrieve the Business Sector
 	 *
 	 * Just an alias for "get_option", because ideally we don't
@@ -323,5 +323,34 @@ trait Accessors {
 	public static function is_api_configuration_complete()
 	{
 		return (bool) (self::get_api_key() && self::get_api_host());
+	}
+
+
+	/**
+	 * Retrieve the Indexing status
+	 *
+	 * @param string $language Language code.
+	 *
+	 * @return bool
+	 */
+	public static function get_indexing_status($language = '')
+	{
+		return get_option(self::option_name_for_language(
+			'doofinder_for_wp_indexing_status',
+			$language
+		), 'processing');
+	}
+
+
+	/**
+	 * Update the value of the Indexing status
+	 *
+	 *
+	 * @param string $value
+	 * @param string $language Language code.
+	 */
+	public static function set_indexing_status($value, $language = '')
+	{
+		update_option(self::option_name_for_language('doofinder_for_wp_indexing_status', $language), $value);
 	}
 }
