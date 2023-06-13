@@ -298,7 +298,7 @@ if (!class_exists('\Doofinder\WP\Doofinder_For_WordPress')) :
 
                         //Hide the indexing notice
                         Setup_Wizard::dismiss_indexing_notice();
-                        //Settings::set_indexing_status('processed');
+                        Settings::set_indexing_status('processed');
 
                         return new WP_REST_Response(
                             [
