@@ -159,8 +159,7 @@ class Setup_Wizard
 	 *
 	 * @var string
 	 */
-    //const ADMIN_PATH = 'https://admin.doofinder.com';
-    const ADMIN_PATH = 'https://pedro-admin.ngrok.doofinder.com';
+    const ADMIN_PATH = 'https://admin.doofinder.com';
 
 
     public function __construct()
