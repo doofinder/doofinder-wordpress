@@ -154,12 +154,13 @@ class Setup_Wizard
      */
     private $log;
 
-    /**
-     * Admin path used to get the connection details
-     *
-     * @var string
-     */
-    const ADMIN_PATH = 'https://admin.doofinder.com';
+	/**
+	 * Admin path used to get the connection details
+	 *
+	 * @var string
+	 */
+    //const ADMIN_PATH = 'https://admin.doofinder.com';
+    const ADMIN_PATH = 'https://pedro-admin.ngrok.doofinder.com';
 
 
     public function __construct()
