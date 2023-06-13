@@ -308,6 +308,7 @@ if (!class_exists('\Doofinder\WP\Doofinder_For_WordPress')) :
                             ]
                         );
                     },
+                    'permission_callback' => '__return_true'
                 ));
             });
         }
