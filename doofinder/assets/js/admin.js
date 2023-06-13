@@ -1,7 +1,6 @@
 jQuery(function () {
     let $ = jQuery.noConflict();
     let ajaxIndexingStatus = function () {
-        console.log("Checking indexing status");
         $.ajax({
             type: "post",
             dataType: "json",
