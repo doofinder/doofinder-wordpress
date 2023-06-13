@@ -81,7 +81,7 @@ class Store_Api
                 "search_engines" => [],
                 "sector" => Settings::get_sector(),
                 "callback_urls" => [
-                    get_bloginfo('url') . '/wp-json/doofinder/v1/indexation-status'
+                    get_bloginfo('url') . '/wp-json/doofinder/v1/indexation-status/?token=' . $this->api_key
                 ]
             ];
 
