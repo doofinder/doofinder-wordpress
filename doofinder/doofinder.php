@@ -103,22 +103,10 @@ if (!class_exists('\Doofinder\WP\Doofinder_For_WordPress')) :
                 }
 
                 Setup_Wizard::instance();
-
-                if (Setup_Wizard::should_show_notice()) {
-                    add_action('admin_notices', function () {
-                        echo Setup_Wizard::get_setup_wizard_notice_html();
-                    });
-                }
-
-                if (Setup_Wizard::should_show_indexing_notice()) {
-                    add_action('admin_notices', function () {
-                        echo Setup_Wizard::get_indexing_status_notice_html();
-                    });
-                }
-
                 Update_On_Save::register_hooks();
 
                 self::register_ajax_action();
+                self::register_admin_scripts_and_styles();
             }
 
             // Init frontend functionalities
@@ -285,22 +273,31 @@ if (!class_exists('\Doofinder\WP\Doofinder_For_WordPress')) :
             }
         }
 
+        public static function register_admin_scripts_and_styles()
+        {
+            add_action('admin_enqueue_scripts', function () {
+                wp_enqueue_script('doofinder-admin-js', plugins_url('assets/js/admin.js', __FILE__));
+            });
+        }
+
         public static function initialize_rest_endpoints()
         {
             add_action('rest_api_init', function () {
                 register_rest_route('doofinder/v1', '/indexation-status', array(
                     'methods' => 'GET',
-                    'callback' => function () {
-                        //check origin and ignore if the domain is not *.doofinder.com
-
-                        //TODO: Remove this when going into production
-                        if (Settings::get_indexing_status() === "processed") {
-                            Settings::set_indexing_status('');
-                        } else {
-                            Settings::set_indexing_status('processed');
+                    'callback' => function (\WP_REST_Request $request) {
+                        if ($request->get_param('token') != Settings::get_api_key()) {
+                            return new WP_REST_Response(
+                                [
+                                    'status' => 401,
+                                    'response' => "Invalid token"
+                                ],
+                                401
+                            );
                         }
 
-
+                        //Hide the indexing notice
+                        Setup_Wizard::dismiss_indexing_notice();
                         //Settings::set_indexing_status('processed');
 
                         return new WP_REST_Response(

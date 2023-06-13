@@ -194,6 +194,8 @@ class Setup_Wizard
 
             $this->register_ajax_action();
         }
+
+        self::add_notices();
     }
 
     /**
@@ -297,9 +299,10 @@ class Setup_Wizard
      */
     public static function should_show_indexing_notice()
     {
-        $show_notice = get_option(self::$wizard_show_indexing_notice_option, '1');
-
-        return ((bool) $show_notice);
+        $show_notice = (bool) get_option(self::$wizard_show_indexing_notice_option, 0);
+        //TODO: Add language variable
+        $indexing_status = Settings::get_indexing_status();
+        return $show_notice && $indexing_status === "processing";
     }
 
     /**
@@ -327,6 +330,7 @@ class Setup_Wizard
         update_option(self::$wizard_active_option, false);
         update_option(self::$wizard_done_option, true);
         update_option(self::$wizard_show_notice_option, false);
+        update_option(self::$wizard_show_indexing_notice_option, false);
     }
 
     /**
@@ -432,9 +436,16 @@ class Setup_Wizard
         // If on last step deactivate wizard and redirect to settings page
 
         if ($current_step > self::$no_steps) {
+            self::remove_notice();
 
             // Reset wizard to step 1
             update_option(self::$wizard_step_option, 1);
+
+            //Show the indexing notice
+            update_option(self::$wizard_show_indexing_notice_option, 1);
+
+            //Set the indexing status to processing
+            Settings::set_indexing_status('processing');
 
             // Update wizard status to finished if configuration is complete
             if (Settings::is_configuration_complete()) {
@@ -737,30 +748,41 @@ class Setup_Wizard
         return $html;
     }
 
-    // /**
-    //  * Add/show custom Wordpress notice in admin panel
-    //  *
-    //  * @return void
-    //  */
-    // public static function add_notice()
-    // {
-    // 	if (class_exists('WC_Admin_Notices')) {
-    // 		\WC_Admin_Notices::add_custom_notice(self::$wizard_notice_name, Setup_Wizard::get_setup_wizard_notice_html());
-    // 	}
-    // }
 
-    // /**
-    //  * Remove custom Wordpress notice in admin panel
-    //  *
-    //  * @return void
-    //  */
-    // public static function remove_notice()
-    // {
-    // 	if (class_exists('WC_Admin_Notices')) {
-    // 		\WC_Admin_Notices::remove_notice(self::$wizard_notice_name);
-    // 	}
-    // 	self::dissmiss_notice();
-    // }
+    public static function add_notices()
+    {
+        if (Setup_Wizard::should_show_indexing_notice()) {
+            add_action('admin_notices', function () {
+                echo Setup_Wizard::get_indexing_status_notice_html();
+            });
+        }
+
+        if (Setup_Wizard::should_show_notice()) {
+            add_action('admin_notices', function () {
+                echo Setup_Wizard::get_setup_wizard_notice_html();
+            });
+        }
+    }
+
+    /**
+     * Remove custom Wordpress notice in admin panel
+     *
+     * @return void
+     */
+    public static function remove_notice()
+    {
+        self::dismiss_notice();
+    }
+
+    public static function dismiss_notice()
+    {
+        update_option(self::$wizard_show_notice_option, false);
+    }
+
+    public static function dismiss_indexing_notice()
+    {
+        update_option(Setup_Wizard::$wizard_show_indexing_notice_option, 0);
+    }
 
     /**
      * Display the setup wizard view.
