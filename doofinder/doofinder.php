@@ -99,7 +99,7 @@ if (!class_exists('\Doofinder\WP\Doofinder_For_WordPress')) :
                 Post::add_additional_settings();
                 Settings::instance();
                 if (Setup_Wizard::should_activate()) {
-                    Setup_Wizard::activate();
+                    Setup_Wizard::activate(true);
                 }
 
                 Setup_Wizard::instance();
@@ -107,6 +107,11 @@ if (!class_exists('\Doofinder\WP\Doofinder_For_WordPress')) :
 
                 self::register_ajax_action();
                 self::register_admin_scripts_and_styles();
+
+                // Try to migrate settings if possible and necessary
+                if (Setup_Wizard::should_migrate()) {
+                    Migration::migrate();
+                }
             }
 
             // Init frontend functionalities
@@ -277,6 +282,9 @@ if (!class_exists('\Doofinder\WP\Doofinder_For_WordPress')) :
         {
             add_action('admin_enqueue_scripts', function () {
                 wp_enqueue_script('doofinder-admin-js', plugins_url('assets/js/admin.js', __FILE__));
+                wp_localize_script('doofinder-admin-js', 'Doofinder', [
+                    'show_indexing_notice' => Setup_Wizard::should_show_indexing_notice() ? 'true' : 'false'
+                ]);
             });
         }
 

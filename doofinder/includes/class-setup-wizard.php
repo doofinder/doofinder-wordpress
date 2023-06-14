@@ -67,11 +67,25 @@ class Setup_Wizard
     private static $wizard_request_token = 'doofinder_setup_wizard_token';
 
     /**
-     * Name of the wordpress notice shown after plugin activation
+     * Name of the migration notice
      *
      * @var string
      */
-    private static $wizard_notice_name = 'doofinder_show_wizard_notice';
+    public static $wizard_migration_notice_name = 'doofinder_show_the_migration_complete_notice';
+
+    /**
+     * Name of the option storing settgins migration info
+     *
+     * @var string
+     */
+    public static $wizard_migration_option = 'doofinder_v2_migration_status';
+
+    /**
+     * Name of the transient controling wheter to show migration notice
+     *
+     * @var string
+     */
+    public static $wizard_migration_notice_transient = 'doofinder_migration_complete';
 
     /**
      * Name of the option storing the current status of using wizard.
@@ -154,11 +168,11 @@ class Setup_Wizard
      */
     private $log;
 
-	/**
-	 * Admin path used to get the connection details
-	 *
-	 * @var string
-	 */
+    /**
+     * Admin path used to get the connection details
+     *
+     * @var string
+     */
     const ADMIN_PATH = 'https://admin.doofinder.com';
 
 
@@ -288,7 +302,8 @@ class Setup_Wizard
     {
         $show_notice = get_option(self::$wizard_show_notice_option);
 
-        return ((bool) $show_notice) && !Settings::is_configuration_complete();
+        $config_complete = !Settings::is_configuration_complete();
+        return ((bool) $show_notice) && !$config_complete;
     }
 
     /**
@@ -302,7 +317,8 @@ class Setup_Wizard
         $show_notice = (bool) get_option(self::$wizard_show_indexing_notice_option, 0);
         //TODO: Add language variable
         $indexing_status = Settings::get_indexing_status();
-        return $show_notice && $indexing_status === "processing";
+        $res = $show_notice && $indexing_status === "processing";
+        return $res;
     }
 
     /**
@@ -679,10 +695,45 @@ class Setup_Wizard
                 </div>
             </div>
         </div>
+    <?php
+        $html = ob_get_clean();
+        return $html;
+    }
+
+
+    /**
+     * Wizard setup notice html
+     *
+     * @param bool $settings
+     *
+     * @return string
+     */
+    public static function get_setup_wizard_migration_notice_html()
+    {
+        ob_start();
+    ?>
+        <div class="notice notice-success is-dismissible">
+            <div id="message" class="wordpress-message doofinder-notice-migrastion-complete">
+                <div style="display: flex;">
+                    <div style="width: 100px;">
+                        <figure class="logo" style="width:5rem;height:auto;float:left;margin:.5em 0;margin-right:0.75rem;">
+                            <img src="<?php echo Doofinder_For_WordPress::plugin_url() . 'assets/svg/imagotipo1.svg'; ?>" />
+                        </figure>
+                    </div>
+                    <div style="flex-grow: 1;">
+                        <h3>Migration status</h3>
+                        <p>
+                            <?php _e('Doofinder settings have been migrated successfully.', 'wordpress-doofinder') ?>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
         <?php
         $html = ob_get_clean();
         return $html;
     }
+
 
     /**
      * Not dissmisable Configure via Wizard setup notice html
@@ -751,17 +802,15 @@ class Setup_Wizard
 
     public static function add_notices()
     {
-        if (Setup_Wizard::should_show_indexing_notice()) {
-            add_action('admin_notices', function () {
+        add_action('admin_notices', function () {
+            if (Setup_Wizard::should_show_indexing_notice()) {
                 echo Setup_Wizard::get_indexing_status_notice_html();
-            });
-        }
+            }
 
-        if (Setup_Wizard::should_show_notice()) {
-            add_action('admin_notices', function () {
+            if (Setup_Wizard::should_show_notice()) {
                 echo Setup_Wizard::get_setup_wizard_notice_html();
-            });
-        }
+            }
+        });
     }
 
     /**
@@ -1304,5 +1353,40 @@ class Setup_Wizard
                 return false;
             }
         }
+    }
+
+
+    /**
+     * Check if we should migrate settings
+     *
+     * @return bool
+     */
+    public static function should_migrate()
+    {
+
+        $log = new Log();
+        $migration_option = get_option(self::$wizard_migration_option);
+
+        // Migration was already done, we should abort
+        if ($migration_option === 'completed' || $migration_option === 'failed') {
+            $log->log('Should migrate - Migration already done or not possible');
+            return false;
+        }
+
+        if (!Settings::get_api_key()) {
+            $log->log('Should migrate - Migration possible - Api Key');
+            return true;
+        }
+
+        if (!Settings::get_api_host()) {
+            $log->log('Should migrate - Migration possible - Api Host');
+            return true;
+        }
+
+        // Migration not necessary
+        $log->log('Should migrate - Migration not necessary');
+        update_option('woocommerce_doofinder_migration_status', 'completed');
+
+        return false;
     }
 }
