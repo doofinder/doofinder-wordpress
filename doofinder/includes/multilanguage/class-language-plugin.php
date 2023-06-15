@@ -12,11 +12,11 @@ abstract class Language_Plugin {
 	abstract public function get_languages();
 
 	/**
-	 * @inheritdoc
+	 * Get all formatted languages.
+	 *
+	 * @return array[string]string List of all languages.
 	 */
-	public function get_formatted_languages() {
-		return null;
-	}
+	abstract public function get_formatted_languages();
 
 	/**
 	 * Get active language code.
@@ -24,6 +24,24 @@ abstract class Language_Plugin {
 	 * @return string Lang code of current selected language.
 	 */
 	abstract public function get_active_language();
+
+	/**
+	 * Get active language code.
+	 *
+	 * @return string Lang code of current selected language.
+	 */
+	abstract public function get_current_language();
+
+	/**
+	 * Retrieve the base language of the site.
+	 *
+	 * This is important because the behavior of the site (e.g. language-specific
+	 * option names) should be the same as if there was no multilanguage plugin
+	 * installed.
+	 *
+	 * @return string Lang code of the base (primary) language of the site.
+	 */
+	abstract public function get_default_language();
 
 	/**
 	 * Retrieve the base language of the site.
@@ -37,14 +55,29 @@ abstract class Language_Plugin {
 	abstract public function get_base_language();
 
 	/**
-	 * Get all posts ids of a given language.
+	 * Retrieve the name of the wordpress option
+	 * for the current languages.
 	 *
-	 * @param string $language_code
-	 * @param string $post_type
+	 * Some fields in Doofinder settings will have different values,
+	 * depending on language.
 	 *
-	 * @return int[] List of ids.
+	 * @param string $base
+	 *
+	 * @return string
 	 */
-	abstract public function get_posts_ids( $language_code, $post_type);
+	// public function get_option_name( $base ) {
+	// 	$language_code = $this->get_active_language();
+	// 	if ( ! $language_code ) {
+	// 		return $base;
+	// 	}
+
+	// 	$base_language = $this->get_base_language();
+	// 	if ( $language_code === $base_language ) {
+	// 		return $base;
+	// 	}
+
+	// 	return "{$base}_{$language_code}";
+	// }
 
 	/**
 	 * Retrieve the name of the wordpress option
@@ -57,17 +90,5 @@ abstract class Language_Plugin {
 	 *
 	 * @return string
 	 */
-	public function get_option_name( $base ) {
-		$language_code = $this->get_active_language();
-		if ( ! $language_code ) {
-			return $base;
-		}
-
-		$base_language = $this->get_base_language();
-		if ( $language_code === $base_language ) {
-			return $base;
-		}
-
-		return "{$base}_{$language_code}";
-	}
+	//abstract public function get_option_name( $base );
 }
