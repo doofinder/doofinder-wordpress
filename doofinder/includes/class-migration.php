@@ -2,11 +2,9 @@
 
 namespace Doofinder\WP;
 
-use Doofinder\WP\Multilanguage\Language_Plugin;
-use Doofinder\WP\Multilanguage\Multilanguage;
+use Doofinder\WP\Api\Store_Api;
 use Doofinder\WP\Settings;
 use Doofinder\WP\Log;
-use WPML_Wizard;
 
 class Migration
 {
@@ -24,10 +22,17 @@ class Migration
 
     public static function migrate()
     {
-        self::$log = new Log('migration-txt');
+        self::$log = new Log('migration.log');
         self::$log->log('Migrate - Start');
 
         self::initialize_migration();
+
+
+        //check if app credentials are set
+        if(!Store_Api::has_application_credentials()){
+            $store_api = new Store_Api();
+            $store_api->normalize_store_and_indices();
+        }
 
         if (self::do_woocommerce_migration()) {
             self::finish_migration();
@@ -40,6 +45,22 @@ class Migration
         }
     }
 
+    /**
+     * Initialize the migration
+     *
+     * @return void
+     */
+    private static function initialize_migration()
+    {
+        delete_option(Setup_Wizard::$wizard_migration_notice_name);
+        delete_option(Setup_Wizard::$wizard_migration_option);
+    }
+
+    /**
+     * Adds the migration notice
+     *
+     * @return void
+     */
     public static function add_notices()
     {
         add_action('admin_notices', function () {
@@ -53,13 +74,12 @@ class Migration
         });
     }
 
-
-    private static function initialize_migration()
-    {
-        delete_option(Setup_Wizard::$wizard_migration_notice_name);
-        delete_option(Setup_Wizard::$wizard_migration_option);
-    }
-
+    /**
+     * This function migrates the options from the former woocommerce plugin to
+     * the current plugin options.
+     *
+     * @return void
+     */
     private static function do_woocommerce_migration()
     {
         if (get_option('woocommerce_doofinder_internal_search_api_key', FALSE)) {
@@ -97,6 +117,11 @@ class Migration
         return false;
     }
 
+    /**
+     * Default migration
+     *
+     * @return void
+     */
     private static function do_default_migration()
     {
         $api_key = Settings::get_api_key();
@@ -164,6 +189,18 @@ class Migration
         return true;
     }
 
+    /**
+     * This function migrates the value of the first option into the second
+     * if it is empty.
+     *
+     * @param string $wc_option_name The woocommerce option that we are going to
+     * migrate.
+     *
+     * @param string $wp_option_name The Wordpress option that we should create
+     * if it is empty.
+     *
+     * @return void
+     */
     private static function migrate_option($wc_option_name, $wp_option_name)
     {
         $current_option_value = get_option($wp_option_name);
@@ -176,6 +213,12 @@ class Migration
         }
     }
 
+    /**
+     * This function executes any needed processes after finalizing migrations.
+     * For example: update options and show migration notice.
+     *
+     * @return void
+     */
     private static function finish_migration()
     {
         // Add notice about successfull migration
