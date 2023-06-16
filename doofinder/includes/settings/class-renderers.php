@@ -4,6 +4,7 @@ namespace Doofinder\WP\Settings;
 
 use Doofinder\WP\Multilanguage\Language_Plugin;
 use Doofinder\WP\Multilanguage\No_Language_Plugin;
+use Doofinder\WP\Setup_Wizard;
 
 defined('ABSPATH') or die();
 
@@ -119,6 +120,7 @@ trait Renderers
 
                 ?>
             </form>
+            <?php echo Setup_Wizard::get_configure_via_setup_wizard_button_html(); ?>
         </div>
 
     <?php
