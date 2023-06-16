@@ -109,7 +109,7 @@ class Store_Api
                         'datatypes' => [
                             [
                                 "name" => "post",
-                                "preset" => "post",
+                                "preset" => "generic",
                                 "datasources" => [
                                     [
                                         "type" => "wordpress",
