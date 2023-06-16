@@ -180,11 +180,13 @@ class Store_Api
 
         $primary_language = Helpers::format_locale_to_hyphen($primary_language);
         $domain = str_ireplace('www.', '', parse_url(get_bloginfo('url'), PHP_URL_HOST));
-        $store_options =  self::get_store_options();
 
+        $store_options =  self::get_store_options();
         if (is_null($store_options)) {
             throw new Exception("Invalid store options");
         }
+
+        $callback_urls = self::get_callback_urls($api_keys);
 
         $store_payload = [
             "name" =>  get_bloginfo('name'),
@@ -193,9 +195,7 @@ class Store_Api
             // "skip_indexation" => true,
             "search_engines" => [],
             "sector" => Settings::get_sector(),
-            "callback_urls" => [
-                get_bloginfo('url') . '/wp-json/doofinder/v1/indexation-status/?token=' . $this->api_key
-            ],
+            "callback_urls" => $callback_urls,
             "options" => $store_options
         ];
 
@@ -230,7 +230,7 @@ class Store_Api
                 'datatypes' => [
                     [
                         "name" => "post",
-                        "preset" => "post",
+                        "preset" => "generic",
                         "datasources" => [
                             [
                                 "type" => "wordpress",
@@ -268,6 +268,18 @@ class Store_Api
                 ]
             ]
         ];
+    }
+
+    private function get_callback_urls($api_keys)
+    {
+        $callback_urls = [];
+        $currency = 'EUR';
+        foreach ($api_keys as $item) {
+            $code = $item['lang']['locale'] ?? $item['lang']['code'] ?? $primary_language;
+            $code = Helpers::format_locale_to_hyphen($code);
+            $callback_urls[$code][$currency] = get_bloginfo('url') . '/wp-json/doofinder/v1/indexation-status/?token=' . $this->api_key;
+        }
+        return $callback_urls;
     }
 
     /**
@@ -311,7 +323,7 @@ class Store_Api
     {
         $user_id = get_current_user_id();
         $user = get_user_by('id',  $user_id);
-        $credentials = get_option(self::$credentials_option_name);
+        $credentials = get_site_option(self::$credentials_option_name);
         $password_data = NULL;
 
         if (is_array($credentials) && array_key_exists('user_id', $credentials) &&  array_key_exists('uuid', $credentials)) {
@@ -324,8 +336,7 @@ class Store_Api
                 'user_id' => $user_id,
                 'uuid' => $app_pass[1]['uuid']
             ];
-
-            update_option(self::$credentials_option_name, $credentials);
+            update_site_option(self::$credentials_option_name, $credentials);
 
             $password_data = [
                 'api_user' => $user->data->user_login,
