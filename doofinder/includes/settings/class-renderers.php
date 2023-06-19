@@ -209,9 +209,9 @@ trait Renderers
 		<select name="<?php echo $option_name; ?>" class="widefat">
 			<?php 
 				$selected_eu = $saved_value === $key_eu ? " selected " : "";
-				echo '<option value="https://eu1-admin.doofinder.com"' . $selected_eu . '> Europa - https://eu1-admin.doofinder.com </option>';
+				echo '<option value=" ' . $key_eu . ' "' . $selected_eu . '> Europa -  ' . $key_eu . '  </option>';
 				$selected_us = $saved_value === $key_us ? " selected " : "";
-				echo '<option value=" ' . $key_us . ' "' . $selected_us . '> Europa - https://eu1-admin.doofinder.com </option>';
+				echo '<option value=" ' . $key_us . ' "' . $selected_us . '> USA -  ' . $key_us . '  </option>';
 			?>
 		</select>
 	<?php
