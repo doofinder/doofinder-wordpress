@@ -358,12 +358,9 @@ trait Accessors
      *
      * @return bool
      */
-    public static function get_indexing_status($language = '')
+    public static function get_indexing_status()
     {
-        return get_option(self::option_name_for_language(
-            'doofinder_for_wp_indexing_status',
-            $language
-        ), 'processing');
+        return get_option('doofinder_for_wp_indexing_status', 'processing');
     }
 
 
@@ -372,10 +369,9 @@ trait Accessors
      *
      *
      * @param string $value
-     * @param string $language Language code.
      */
-    public static function set_indexing_status($value, $language = '')
+    public static function set_indexing_status($value)
     {
-        update_option(self::option_name_for_language('doofinder_for_wp_indexing_status', $language), $value);
+        update_option('doofinder_for_wp_indexing_status', $value);
     }
 }
