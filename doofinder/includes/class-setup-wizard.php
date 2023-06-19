@@ -721,7 +721,7 @@ class Setup_Wizard
                         </figure>
                     </div>
                     <div style="flex-grow: 1;">
-                        <h3>Migration status</h3>
+                        <h3><?php _e('Migration status', 'wordpress-doofinder') ?></h3>
                         <p>
                             <?php _e('Doofinder settings have been migrated successfully.', 'wordpress-doofinder') ?>
                         </p>
