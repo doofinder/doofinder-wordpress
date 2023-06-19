@@ -1032,8 +1032,8 @@ class Setup_Wizard
                     $this->log->log('Store create result:');
                     $this->log->log(print_r($store_data, true));
 
-                    $this->set_search_engines($store_data->search_engines);
-                    $this->enable_layer($store_data->script);
+                    $this->set_search_engines($store_data['search_engines']);
+                    $this->enable_layer($store_data['script']);
                     //Set the indexing status to processing
                     Settings::set_indexing_status('processing');
                 } catch (Exception $exception) {
@@ -1239,12 +1239,12 @@ class Setup_Wizard
             $language = Helpers::format_locale_to_underscore($language);
             $language_key = Helpers::get_language_from_locale($language);
             $is_primary_language = strtolower($this->language->get_base_language()) === strtolower($language);
-            if (!property_exists($search_engine, $currency)) {
+            if (!array_key_exists($currency_key, $search_engine)) {
                 $currency_key = strtolower($currency);
             }
 
-            if (property_exists($search_engine, $currency_key)) {
-                $search_engine_hash = $search_engine->$currency;
+            if (array_key_exists($currency_key, $search_engine)) {
+                $search_engine_hash = $search_engine[$currency_key];
                 if (!$this->process_all_languages || $is_primary_language) {
                     $language_key = '';
                 }
