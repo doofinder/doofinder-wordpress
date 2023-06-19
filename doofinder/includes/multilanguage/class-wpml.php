@@ -134,7 +134,7 @@ class WPML implements I18n_Handler
 				return '';
 			}
 
-			return $this->languages[$lang];
+			return $lang;
 		}
 
 		return false;
