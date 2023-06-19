@@ -285,6 +285,9 @@ if (!class_exists('\Doofinder\WP\Doofinder_For_WordPress')) :
                 wp_localize_script('doofinder-admin-js', 'Doofinder', [
                     'show_indexing_notice' => Setup_Wizard::should_show_indexing_notice() ? 'true' : 'false'
                 ]);
+
+                // CSS
+                wp_enqueue_style('doofinder-admin-css', Doofinder_For_WordPress::plugin_url() . '/assets/css/admin.css');
             });
         }
 
