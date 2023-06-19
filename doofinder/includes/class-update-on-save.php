@@ -64,6 +64,7 @@ class Update_On_Save {
             if(self::allow_process_items()) {
                 $log->log( 'We can send the data. '); 
                 $update_on_save_index->launch_doofinder_update_on_save();
+                update_option( 'doofinder_update_on_save_last_exec', date('Y-m-d H:i:s') );
                 self::clean_update_on_save_db();
             }
         }
@@ -138,40 +139,28 @@ class Update_On_Save {
         $language = Multilanguage::instance();
         $current_language = $language->get_active_language();
         $update_on_save_option = Accessors::get_update_on_save($current_language);
+
+        // Get the cron job schedule
+        $task_schedule = wp_get_schedule($update_on_save_option);
+
+        // Get all available scheduled intervals
+        $schedules = wp_get_schedules();
+
+        // Check if the cron job is scheduled
+        if (isset($schedules[$task_schedule])) {
+            $delay = $schedules[$task_schedule]['interval'];
+        } else {
+            $delay = 900;
+        }
         
         $last_exec = get_option('doofinder_update_on_save_last_exec');
 
         $log->log( 'The last execution was: ' . $last_exec ); 
-
-        switch ($update_on_save_option) {
-            case "each_15_minutes":
-                $delay = 15;
-                break;
-            case "each_30_minutes":
-                $delay = 30;
-                break;
-            case "hourly":
-                $delay = 60;
-                break;
-            case "every_3_hours":
-                $delay = 180;
-                break;
-            case "every_6_hours":
-                $delay = 360;
-                break;
-            case "every_12_hours":
-                $delay = 720;
-                break;
-            default:
-                $delay = 15;
-                break;
-        }
-
-        $log->log( 'The established delay is:  ' . $last_exec ); 
+        $log->log( 'The established delay is:  ' . $delay ); 
 
         $last_exec_ts = strtotime($last_exec);
 
-        $diff_min = (time() - $last_exec_ts) / 60;
+        $diff_min = (time() - $last_exec_ts);
 
         $log->log( 'The difference is:  ' . $diff_min ); 
 

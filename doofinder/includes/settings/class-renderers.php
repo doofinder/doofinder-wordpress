@@ -197,13 +197,8 @@ trait Renderers
 	private function render_html_api_host($option_name)
 	{
 		$saved_value = get_option($option_name);
-
-		if ($saved_value === "https://eu1-admin.doofinder.com") {
-			$txt = "Europa - ";
-		} else {
-			$txt = "USA - ";
-		}
-
+		$key_eu = "https://eu1-admin.doofinder.com";
+		$key_us = "https://us1-admin.doofinder.com";
 	?>
 
 		<span class="doofinder-tooltip"><span><?php _e(
@@ -212,12 +207,12 @@ trait Renderers
 												); ?></span></span>
 
 		<select name="<?php echo $option_name; ?>" class="widefat">
-			<option value="<?php echo $saved_value; ?>" selected>
-				<?php if ($saved_value) : echo $txt . $saved_value;
-				endif; ?>
-			</option>
-			<option value="https://eu1-admin.doofinder.com">Europa - https://eu1-admin.doofinder.com</option>
-			<option value="https://us1-admin.doofinder.com">USA - https://us1-admin.doofinder.com</option>
+			<?php 
+				$selected_eu = $saved_value === $key_eu ? " selected " : "";
+				echo '<option value="https://eu1-admin.doofinder.com"' . $selected_eu . '> Europa - https://eu1-admin.doofinder.com </option>';
+				$selected_us = $saved_value === $key_us ? " selected " : "";
+				echo '<option value=" ' . $key_us . ' "' . $selected_us . '> Europa - https://eu1-admin.doofinder.com </option>';
+			?>
 		</select>
 	<?php
 	}
