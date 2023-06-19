@@ -27,9 +27,8 @@ class Migration
 
         self::initialize_migration();
 
-
         //check if app credentials are set
-        if(!Store_Api::has_application_credentials()){
+        if (!Store_Api::has_application_credentials() && Settings::is_configuration_complete()) {
             $store_api = new Store_Api();
             $store_api->normalize_store_and_indices();
         }
