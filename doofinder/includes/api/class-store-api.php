@@ -181,8 +181,7 @@ class Store_Api
         }
 
         $callback_urls = self::get_callback_urls($api_keys, $primary_language);
-
-        $datatypes = [];
+        $currency = is_plugin_active('woocommerce/woocommerce.php') ? get_woocommerce_currency() : "EUR";
 
         $store_payload = [
             "name" =>  get_bloginfo('name'),
@@ -194,27 +193,6 @@ class Store_Api
             "callback_urls" => $callback_urls,
             "options" => $store_options
         ];
-
-        if (is_plugin_active('woocommerce/woocommerce.php')) {
-            $datatypes[] = $this->get_product_datatype();
-            $currency = get_woocommerce_currency();
-        } else {
-            $datatypes[] = [
-                "name" => "post",
-                "preset" => "generic",
-                "datasources" => [
-                    [
-                        "type" => "wordpress",
-                        "options" => [
-                            "feed_type" => "post",
-                            "url" =>  get_bloginfo('url')
-                        ]
-                    ]
-                ]
-            ];
-            //Default to EUR but as we don't have products it really doesn't mind
-            $currency = "EUR";
-        }
 
         if (!Multilanguage::$is_multilang) {
             $api_keys = [
@@ -228,6 +206,7 @@ class Store_Api
             //Prioritize the locale code
             $code = $item['lang']['locale'] ?? $item['lang']['code'] ?? $primary_language;
             $code = Helpers::format_locale_to_hyphen($code);
+            $lang = Helpers::get_language_from_locale($code);
 
             // Prepare search engine body
             $this->log->log('Wizard Step 2 - Prepare Search Enginge body : ');
@@ -235,8 +214,10 @@ class Store_Api
                 'name' => $domain . ($code ? ' (' . strtoupper($code) . ')' : ''),
                 'language' => $code,
                 'currency' => $currency,
-                'site_url' => get_bloginfo('url'),
-                'datatypes' => $datatypes
+                'site_url' => $this->language->get_home_url($lang),
+                'datatypes' => [
+                    $this->get_datatype($lang)
+                ]
             ];
 
             $store_payload["search_engines"][] = $search_engine;
@@ -244,12 +225,21 @@ class Store_Api
         return $store_payload;
     }
 
+    public function get_datatype($language)
+    {
+        if (is_plugin_active('woocommerce/woocommerce.php')) {
+            return $this->get_product_datatype($language);
+        } else {
+            return $this->get_post_datatype($language);
+        }
+    }
+
     /**
      * Generates the product datatype structure.
      *
      * @return array The product datatype structure.
      */
-    public function get_product_datatype()
+    public function get_product_datatype($language)
     {
         return [
             "name" => "product",
@@ -259,7 +249,29 @@ class Store_Api
                     "type" => "wordpress",
                     "options" => [
                         "feed_type" => "product",
-                        "url" =>  get_bloginfo('url')
+                        "url" => $this->language->get_home_url($language)
+                    ]
+                ]
+            ]
+        ];
+    }
+
+    /**
+     * Generates the post datatype structure.
+     *
+     * @return array The post datatype structure.
+     */
+    public function get_post_datatype($language)
+    {
+        return [
+            "name" => "post",
+            "preset" => "generic",
+            "datasources" => [
+                [
+                    "type" => "wordpress",
+                    "options" => [
+                        "feed_type" => "post",
+                        "url" =>  $this->language->get_home_url($language)
                     ]
                 ]
             ]
