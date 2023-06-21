@@ -94,17 +94,11 @@ class Store_Api
      *    ),
      *    'search_engines' => array(
      *        'fde92a8f364b8d769262974e95d82dba' => array(
-     *            'datatypes' => array(
-     *                array(
-     *                    'name' => 'post',
-     *                    'preset' => 'post',
-     *                    'datasources' => array(
-     *                        array(
-     *                            'type' => 'wordpress',
-     *                            'options' => array(
-     *                                'feed_type' => 'post',
-     *                                'url' => 'http://pedro-wordpress.ngrok.doofinder.com'
-     *    [...]
+     *          'feed_type' => 'post',
+     *          'url' => 'http://pedro-wordpress.ngrok.doofinder.com'
+     *        )
+     *    )
+     * )
      * @return void
      */
     public function normalize_store_and_indices()
@@ -126,7 +120,7 @@ class Store_Api
             }
 
             $se_hashid = Settings::get_search_engine_hash($lang);
-            $payload['search_engines'][$se_hashid]['datatypes'] = $search_engine['datatypes'];
+            $payload['search_engines'][$se_hashid] = $search_engine['datatypes'][0]['datasources'][0]['options'];
         }
 
         $this->sendRequest("plugins/wordpress/normalize-indices/", $payload);
@@ -186,7 +180,9 @@ class Store_Api
             throw new Exception("Invalid store options");
         }
 
-        $callback_urls = self::get_callback_urls($api_keys);
+        $callback_urls = self::get_callback_urls($api_keys, $primary_language);
+
+        $datatypes = [];
 
         $store_payload = [
             "name" =>  get_bloginfo('name'),
@@ -200,10 +196,23 @@ class Store_Api
         ];
 
         if (is_plugin_active('woocommerce/woocommerce.php')) {
-            $product_datatype = $this->get_product_datatype();
+            $datatypes[] = $this->get_product_datatype();
             $currency = get_woocommerce_currency();
         } else {
-            $product_datatype = [];
+            $datatypes[] = [
+                "name" => "post",
+                "preset" => "generic",
+                "datasources" => [
+                    [
+                        "type" => "wordpress",
+                        "options" => [
+                            "feed_type" => "post",
+                            "url" =>  get_bloginfo('url')
+                        ]
+                    ]
+                ]
+            ];
+            //Default to EUR but as we don't have products it really doesn't mind
             $currency = "EUR";
         }
 
@@ -222,28 +231,15 @@ class Store_Api
 
             // Prepare search engine body
             $this->log->log('Wizard Step 2 - Prepare Search Enginge body : ');
-            $store_payload["search_engines"][] = [
+            $search_engine = [
                 'name' => $domain . ($code ? ' (' . strtoupper($code) . ')' : ''),
                 'language' => $code,
                 'currency' => $currency,
                 'site_url' => get_bloginfo('url'),
-                'datatypes' => [
-                    [
-                        "name" => "post",
-                        "preset" => "generic",
-                        "datasources" => [
-                            [
-                                "type" => "wordpress",
-                                "options" => [
-                                    "feed_type" => "post",
-                                    "url" =>  get_bloginfo('url')
-                                ]
-                            ]
-                        ]
-                    ],
-                    $product_datatype
-                ]
+                'datatypes' => $datatypes
             ];
+
+            $store_payload["search_engines"][] = $search_engine;
         }
         return $store_payload;
     }
@@ -270,7 +266,7 @@ class Store_Api
         ];
     }
 
-    private function get_callback_urls($api_keys)
+    private function get_callback_urls($api_keys, $primary_language)
     {
         $callback_urls = [];
         $currency = 'EUR';
