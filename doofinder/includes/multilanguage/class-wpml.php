@@ -75,7 +75,7 @@ class WPML implements I18n_Handler
 		global $sitepress;
 
 		$lang_code = $sitepress->get_default_language();
-		return $this->languages[$lang_code]['locale'];
+		return $this->languages[$lang_code]['code'];
 	}
 
 
@@ -106,10 +106,6 @@ class WPML implements I18n_Handler
 			if ($lang === 'all') {
 				return '';
 			}
-
-			//get locale code
-			$lang = $this->get_locale_by_lang_code($lang);
-
 			return $lang;
 		}
 
