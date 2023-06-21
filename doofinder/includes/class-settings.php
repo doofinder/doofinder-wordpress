@@ -80,12 +80,8 @@ class Settings
 
 		self::$tabs = array(
 			'authentication' => array(
-				'label'     => __('Authentication', 'doofinder_for_wp'),
-				'fields_cb' => 'add_authentication_settings'
-			),
-			'search'         => array(
-				'label'     => __('Search Settings', 'doofinder_for_wp'),
-				'fields_cb' => 'add_search_settings'
+				'label'     => __('General Settings', 'doofinder_for_wp'),
+				'fields_cb' => 'add_general_settings'
 			)
 		);
 
