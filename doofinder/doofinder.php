@@ -125,6 +125,8 @@ if (!class_exists('\Doofinder\WP\Doofinder_For_WordPress')) :
             });
 
             self::initialize_rest_endpoints();
+            if (is_plugin_active('woocommerce/woocommerce.php'))
+                Add_To_Cart::instance();
         }
 
         /**

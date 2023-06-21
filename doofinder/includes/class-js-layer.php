@@ -2,93 +2,79 @@
 
 namespace Doofinder\WP;
 
-class JS_Layer {
+class JS_Layer
+{
 
-	/**
-	 * Singleton instance of this class.
-	 *
-	 * @var self
-	 */
-	private static $instance;
+    /**
+     * Singleton instance of this class.
+     *
+     * @var self
+     */
+    private static $instance;
 
-	/**
-	 * @var Log
-	 */
-	private $log;
+    /**
+     * @var Log
+     */
+    private $log;
 
-	/**
-	 * Retrieve (or create, if one does not exist) a singleton
-	 * instance of this class.
-	 *
-	 * @return self
-	 */
-	public static function instance() {
-		if ( ! self::$instance ) {
-			self::$instance = new self();
-		}
+    /**
+     * Retrieve (or create, if one does not exist) a singleton
+     * instance of this class.
+     *
+     * @return self
+     */
+    public static function instance()
+    {
+        if (!self::$instance) {
+            self::$instance = new self();
+        }
 
-		return self::$instance;
-	}
+        return self::$instance;
+    }
 
-	private function __construct() {
-		if (
-			! Settings::is_js_layer_enabled() ||
-			(
-				! Settings::get_js_layer() &&
-				! Settings::is_js_layer_from_doofinder_enabled()
-			)
-		) {
-			return;
-		}
+    private function __construct()
+    {
+        if (
+            !Settings::is_js_layer_enabled() || Settings::get_js_layer() === ""
+        ) {
+            return;
+        }
 
-		$this->log = new Log();
+        $this->log = new Log();
 
-		$this->insert_js_layer();
-	}
+        $this->insert_js_layer();
+    }
 
-	/**
-	 * Insert the code of the JS Layer to HTML.
-	 */
-	private function insert_js_layer() {
-		add_action( 'wp_footer', function () {
-			if ( Settings::is_js_layer_from_doofinder_enabled() ) {
-				$this->insert_js_layer_from_doofinder();
+    /**
+     * Insert the code of the JS Layer to HTML.
+     */
+    private function insert_js_layer()
+    {
+        add_action('wp_footer', function () {
+            $this->insert_js_layer_from_options();
+        });
+    }
 
-				return;
-			}
+    /**
+     * Output JS Layer script pasted by the user in the options.
+     */
+    private function insert_js_layer_from_options()
+    {
 
-			$this->insert_js_layer_from_options();
-		} );
-	}
+        $layer = Settings::get_js_layer();
 
-	/**
-	 * Output JS Layer script pasted by the user in the options.
-	 */
-	private function insert_js_layer_from_options() {
-		echo Settings::get_js_layer();
-	}
+        if (defined('WP_ENVIRONMENT_TYPE') && WP_ENVIRONMENT_TYPE === 'local') {
+            $local_constants = "<script>
+    // FOR DEVELOPMENT PURPOSES ONLY!!!
+    var __DF_DEBUG_MODE__ = true;
+    var __DF_SEARCH_SERVER__ = '" . DF_SEARCH_HOST . "';
+    var __DF_LAYER_SERVER__ = '" . DF_LAYER_HOST . "';
+    var __DF_CDN_PREFIX__ =  '" . DF_LAYER_HOST . "/assets';";
+            $layer = str_replace('<script>', $local_constants, $layer);
+            $layer = str_replace('https://cdn.doofinder.com/livelayer/1/js/loader.min.js', DF_LAYER_HOST . "/assets/js/loader.js", $layer);
+        }
 
-	/**
-	 * Output a script tag fetching JS Layer script directly
-	 * from Doofinder server. This is based on the API Key
-	 * and hash.
-	 */
-	private function insert_js_layer_from_doofinder() {
-		$api_key = Settings::get_api_key();
-		$hash    = Settings::get_search_engine_hash();
 
-		if ( ! $api_key || ! $hash ) {
-			return;
-		}
-
-		if ( ! preg_match( '/(.+?)-/', $api_key, $matches ) ) {
-			$this->log->log( 'Could not extract zone from API Key.' );
-
-			return;
-		}
-
-		echo <<<HTML
-<script type="text/javascript" src="//{$matches[1]}-search.doofinder.com/5/script/{$hash}.js"></script>
-HTML;
-	}
+        echo $layer;
+    }
 }
