@@ -295,7 +295,7 @@ if (!class_exists('\Doofinder\WP\Doofinder_For_WordPress')) :
         {
             add_action('rest_api_init', function () {
                 register_rest_route('doofinder/v1', '/indexation-status', array(
-                    'methods' => 'GET',
+                    'methods' => 'POST',
                     'callback' => function (\WP_REST_Request $request) {
                         if ($request->get_param('token') != Settings::get_api_key()) {
                             return new WP_REST_Response(
