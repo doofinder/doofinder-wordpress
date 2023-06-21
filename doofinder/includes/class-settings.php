@@ -119,10 +119,6 @@ class Settings
 	{
 		add_filter('cron_schedules', function () {
 			return [
-				'wp_doofinder_each_minute' => [
-					'display' => __('Each minute', 'doofinder_for_wp'),
-					'interval' => 60
-				],
 				'wp_doofinder_each_15_minutes' => [
 					'display' => sprintf(__('Each %s minutes', 'doofinder_for_wp'), 15),
 					'interval' => 60 * 15
@@ -167,7 +163,7 @@ class Settings
 	 */
 	public static function is_update_on_save_enabled()
 	{
-		$option = get_option('doofinder_for_wp_update_on_save', 'every_day');
-		return  $option != 'every_day';
+		$option = get_option('doofinder_for_wp_update_on_save', 'wp_doofinder_each_day');
+		return  $option != 'wp_doofinder_each_day';
 	}
 }
