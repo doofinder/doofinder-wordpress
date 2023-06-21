@@ -302,7 +302,7 @@ class Setup_Wizard
     {
         $show_notice = get_option(self::$wizard_show_notice_option);
 
-        $config_complete = !Settings::is_configuration_complete();
+        $config_complete = Settings::is_configuration_complete();
         return ((bool) $show_notice) && !$config_complete;
     }
 
