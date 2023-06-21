@@ -164,33 +164,37 @@ class WPML implements I18n_Handler
 		return $this->languages;
 	}
 
-	/**
-	 * @inheritdoc
-	 */
-	public function get_formatted_languages()
-	{
-		if (!function_exists('icl_get_languages')) {
-			return array();
-		}
+    /**
+     * @inheritdoc
+     */
+    public function get_formatted_languages()
+    {
+        if (!function_exists('icl_get_languages')) {
+            return array();
+        }
 
-		// "wpml_active_languages" filters the list of the
-		// languages enabled (active) for a site.
-		$languages = apply_filters('wpml_active_languages', null, 'orderby=code&order=desc');
+        // "wpml_active_languages" filters the list of the
+        // languages enabled (active) for a site.
+        $languages = apply_filters('wpml_active_languages', null, 'orderby=code&order=desc');
 
-		if (empty($languages)) {
-			return array();
-		}
+        if (empty($languages)) {
+            return array();
+        }
 
-		// Create associative array with lang code / lang name pairs.
-		// For example 'en' => 'English'.
-		$formatted_languages = array();
-		foreach ($languages as $key => $value) {
-			$language_code = $value['default_locale'];
-			$formatted_languages[$language_code] = $value['translated_name'];
-		}
+        // Create associative array with lang code / lang name pairs.
+        // For example 'en' => 'English'.
+        $formatted_languages = array();
+        foreach ($languages as $key => $value) {
+            $language_code = $value['default_locale'];
+            $translated_name = isset($value['translated_name']) ? $value['translated_name'] : '';
+            if(empty($translated_name)){
+                $translated_name = isset($value['display_name']) ? $value['display_name'] : '';
+            }
+            $formatted_languages[$language_code] = $translated_name;
+        }
 
-		return $formatted_languages;
-	}
+        return $formatted_languages;
+    }
 
 	/**
 	 * @inheritdoc

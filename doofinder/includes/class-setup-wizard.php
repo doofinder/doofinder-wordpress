@@ -68,9 +68,25 @@ class Setup_Wizard
 
     /**
      * Name of the migration notice
+     * Name of the migration notice
      *
      * @var string
      */
+    public static $wizard_migration_notice_name = 'doofinder_show_the_migration_complete_notice';
+
+    /**
+     * Name of the option storing settgins migration info
+     *
+     * @var string
+     */
+    public static $wizard_migration_option = 'doofinder_v2_migration_status';
+
+    /**
+     * Name of the transient controling wheter to show migration notice
+     *
+     * @var string
+     */
+    public static $wizard_migration_notice_transient = 'doofinder_migration_complete';
     public static $wizard_migration_notice_name = 'doofinder_show_the_migration_complete_notice';
 
     /**
@@ -302,6 +318,8 @@ class Setup_Wizard
     {
         $show_notice = get_option(self::$wizard_show_notice_option);
 
+        $config_complete = !Settings::is_configuration_complete();
+        return ((bool) $show_notice) && !$config_complete;
         $config_complete = !Settings::is_configuration_complete();
         return ((bool) $show_notice) && !$config_complete;
     }
@@ -696,6 +714,7 @@ class Setup_Wizard
             </div>
         </div>
     <?php
+    <?php
         $html = ob_get_clean();
         return $html;
     }
@@ -804,11 +823,18 @@ class Setup_Wizard
     {
         add_action('admin_notices', function () {
             if (Setup_Wizard::should_show_indexing_notice()) {
+        add_action('admin_notices', function () {
+            if (Setup_Wizard::should_show_indexing_notice()) {
                 echo Setup_Wizard::get_indexing_status_notice_html();
+            }
             }
 
             if (Setup_Wizard::should_show_notice()) {
+            if (Setup_Wizard::should_show_notice()) {
                 echo Setup_Wizard::get_setup_wizard_notice_html();
+            }
+        });
+    }
             }
         });
     }
@@ -1353,6 +1379,41 @@ class Setup_Wizard
                 return false;
             }
         }
+    }
+
+
+    /**
+     * Check if we should migrate settings
+     *
+     * @return bool
+     */
+    public static function should_migrate()
+    {
+
+        $log = new Log();
+        $migration_option = get_option(self::$wizard_migration_option);
+
+        // Migration was already done, we should abort
+        if ($migration_option === 'completed' || $migration_option === 'failed') {
+            $log->log('Should migrate - Migration already done or not possible');
+            return false;
+        }
+
+        if (!Settings::get_api_key()) {
+            $log->log('Should migrate - Migration possible - Api Key');
+            return true;
+        }
+
+        if (!Settings::get_api_host()) {
+            $log->log('Should migrate - Migration possible - Api Host');
+            return true;
+        }
+
+        // Migration not necessary
+        $log->log('Should migrate - Migration not necessary');
+        update_option('woocommerce_doofinder_migration_status', 'completed');
+
+        return false;
     }
 
 
