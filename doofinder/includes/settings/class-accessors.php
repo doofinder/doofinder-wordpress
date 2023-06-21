@@ -164,24 +164,6 @@ trait Accessors
     }
 
     /**
-     * Determine if we should grab JS layer directly from Doofinder.
-     *
-     * Just an alias for "get_option", because ideally we don't
-     * want to replace the option name in multiple files.
-     *
-     * @param string $language Language code.
-     *
-     * @return bool
-     */
-    public static function is_js_layer_from_doofinder_enabled($language = '')
-    {
-        return (bool) get_option(self::option_name_for_language(
-            'doofinder_for_wp_load_js_layer_from_doofinder',
-            $language
-        ));
-    }
-
-    /**
      * Enable JS Layer.
      *
      * Just an alias for "update_option", because ideally we don't
