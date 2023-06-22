@@ -4,7 +4,7 @@
  * Plugin Name: Doofinder
  * License: GPLv2 or later
  * License URI: http://www.gnu.org/licenses/gpl-2.0.html
- * Version: 0.5.4
+ * Version: 1.0
  * Author: Doofinder
  * Description: Integrate Doofinder Search in your WordPress website.
  *
@@ -32,7 +32,7 @@ if (!class_exists('\Doofinder\WP\Doofinder_For_WordPress')) :
          *
          * @var string
          */
-        public static $version = '0.5.4';
+        public static $version = '1.0';
 
         /**
          * The only instance of Doofinder_For_WordPress
@@ -296,6 +296,7 @@ if (!class_exists('\Doofinder\WP\Doofinder_For_WordPress')) :
         public static function initialize_rest_endpoints()
         {
             add_action('rest_api_init', function () {
+                Config::register();
                 register_rest_route('doofinder/v1', '/indexation-status', array(
                     'methods' => 'POST',
                     'callback' => function (\WP_REST_Request $request) {
