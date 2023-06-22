@@ -293,16 +293,11 @@ trait Accessors
      * Just an alias for "get_option", because ideally we don't
      * want to replace the option name in multiple files.
      *
-     * @param string $language Language code.
-     *
-     * @return bool
+     * @return string
      */
-    public static function get_sector($language = '')
+    public static function get_sector()
     {
-        return get_option(self::option_name_for_language(
-            'doofinder_sector',
-            $language
-        ));
+        return get_option('doofinder_sector');
     }
 
 
@@ -313,11 +308,10 @@ trait Accessors
      * want to replace the option name in multiple files.
      *
      * @param string $value
-     * @param string $language Language code.
      */
-    public static function set_sector($value, $language = '')
+    public static function set_sector($value)
     {
-        update_option(self::option_name_for_language('doofinder_sector', $language), $value);
+        update_option('doofinder_sector', $value);
     }
 
     /**
