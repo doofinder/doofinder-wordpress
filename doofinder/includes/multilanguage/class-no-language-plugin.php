@@ -53,6 +53,10 @@ class No_Language_Plugin extends Language_Plugin
         return '';
     }
 
+    public function get_base_locale(){
+        return get_locale();
+    }
+
     /**
      * @inheritdoc
      */

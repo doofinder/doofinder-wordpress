@@ -169,7 +169,7 @@ class Store_Api
     {
         $primary_language = get_locale();
         if ($this->language->get_languages() != null) {
-            $primary_language = $this->language->get_base_language();
+            $primary_language = $this->language->get_base_locale();
         }
 
         $primary_language = Helpers::format_locale_to_hyphen($primary_language);
@@ -331,20 +331,22 @@ class Store_Api
     {
         $user_id = get_current_user_id();
         $user = get_user_by('id',  $user_id);
-        $credentials = get_site_option(self::$credentials_option_name);
+        $credentials_option_name = self::$credentials_option_name . "_" . get_current_blog_id();
+        $credentials = get_option($credentials_option_name);
         $password_data = NULL;
+        $app_name = 'doofinder_' . get_current_blog_id();
 
         if (is_array($credentials) && array_key_exists('user_id', $credentials) &&  array_key_exists('uuid', $credentials)) {
             WP_Application_Passwords::delete_application_password($credentials['user_id'], $credentials['uuid']);
         }
 
-        if (!WP_Application_Passwords::application_name_exists_for_user($user_id, 'doofinder')) {
-            $app_pass = WP_Application_Passwords::create_new_application_password($user_id, array('name' => 'doofinder'));
+        if (!WP_Application_Passwords::application_name_exists_for_user($user_id, $app_name)) {
+            $app_pass = WP_Application_Passwords::create_new_application_password($user_id, array('name' => $app_name));
             $credentials = [
                 'user_id' => $user_id,
                 'uuid' => $app_pass[1]['uuid']
             ];
-            update_site_option(self::$credentials_option_name, $credentials);
+            update_option($credentials_option_name, $credentials);
 
             $password_data = [
                 'api_user' => $user->data->user_login,
