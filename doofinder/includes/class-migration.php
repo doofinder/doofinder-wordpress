@@ -103,6 +103,9 @@ class Migration
             $wizard = Setup_Wizard::instance();
             $base_language = $wizard->language->get_base_language();
             $langs = $wizard->language->get_languages();
+            //define empty language for main language options
+            $langs[''] = '';
+
             foreach ($langs as $lang_key => $value) {
                 $lang = ($lang_key === $base_language) ? '' : $lang_key;
                 foreach ($multilang_options as $wc_key => $wp_key) {
