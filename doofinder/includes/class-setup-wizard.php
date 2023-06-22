@@ -1028,6 +1028,14 @@ class Setup_Wizard
                     $store_api = new Store_Api();
                     $store_data = $store_api->create_store($has_api_keys);
 
+                    if (array_key_exists('errors', $store_data)) {
+                        $message = "";
+                        foreach ($store_data['errors'] as $error) {
+                            $message .= $error .". ";
+                        }
+                        throw new Exception($message);
+                    }
+
                     $this->log->log('Store create result:');
                     $this->log->log(print_r($store_data, true));
 
@@ -1047,8 +1055,9 @@ class Setup_Wizard
                     // Send failed ajax response
                     wp_send_json_error(array(
                         'status'  => false,
-                        'error' => true,
-                        'message' => $this->errors['wizard-step-2'],
+                        'errors' => [
+                            $this->errors['wizard-step-2']
+                        ],
                     ));
 
                     return;
@@ -1106,13 +1115,7 @@ class Setup_Wizard
             // Suffix for options.
             // This should be empty for default language, and language code
             // for any other.
-            $options_suffix = '';
-            $name_suffix    = '';
-
-            if ($language_code !== $this->language->get_base_language()) {
-                $options_suffix = Helpers::get_language_from_locale($language_code);
-                $name_suffix    = "-$language_code";
-            }
+            $options_suffix = ($language_code === $this->language->get_base_locale()) ? '' : Helpers::get_language_from_locale($language_code);
 
             // Search engine data
             Settings::set_search_engine_hash('', $options_suffix);
@@ -1237,7 +1240,7 @@ class Setup_Wizard
             //format language to en_US instead of en-US format
             $language = Helpers::format_locale_to_underscore($language);
             $language_key = Helpers::get_language_from_locale($language);
-            $is_primary_language = strtolower($this->language->get_base_language()) === strtolower($language);
+            $is_primary_language = strtolower($this->language->get_base_locale()) === strtolower($language);
             if (!array_key_exists($currency_key, $search_engine)) {
                 $currency_key = strtolower($currency);
             }
@@ -1271,7 +1274,7 @@ class Setup_Wizard
             // for any other.
             $options_suffix = '';
 
-            if ($language_code !== $this->language->get_base_language()) {
+            if ($language_code !== $this->language->get_base_locale()) {
                 $options_suffix = Helpers::get_language_from_locale($language_code);
             }
 
@@ -1332,7 +1335,7 @@ class Setup_Wizard
 
             foreach ($language->get_languages() as $lang) {
                 $code = $lang['locale'];
-                $code = $code === $language->get_base_language() ? '' : Helpers::get_language_from_locale($code);
+                $code = $code === $language->get_base_locale() ? '' : Helpers::get_language_from_locale($code);
                 $hash = Settings::get_search_engine_hash($code);
                 $hash = !$hash ? 'no-hash' : $hash;
 
