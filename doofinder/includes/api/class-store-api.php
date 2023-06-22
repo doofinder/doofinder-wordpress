@@ -185,7 +185,7 @@ class Store_Api
 
         $store_payload = [
             "name" =>  get_bloginfo('name'),
-            "platform" => "wordpress",
+            "platform" =>  is_plugin_active('woocommerce/woocommerce.php') ? "woocommerce" : "wordpress",
             "primary_language" => $primary_language,
             // "skip_indexation" => true,
             "search_engines" => [],
