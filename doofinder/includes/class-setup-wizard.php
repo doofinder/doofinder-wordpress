@@ -173,8 +173,7 @@ class Setup_Wizard
      *
      * @var string
      */
-    //const ADMIN_PATH = "http://admin.doofinder.com";
-    const ADMIN_PATH = "http://pedro-admin.ngrok.doofinder.com";
+    const ADMIN_PATH = "http://admin.doofinder.com";
 
     public function __construct()
     {
@@ -500,15 +499,16 @@ class Setup_Wizard
      * @param string $status
      * @return void
      */
-    private static function set_indexing_status($status){
+    private static function set_indexing_status($status)
+    {
         $multilanguage = Multilanguage::instance();
         $languages = $multilanguage->get_languages();
 
-        if(is_null($languages)){
+        if (is_null($languages)) {
             Settings::set_indexing_status($status);
-        }else{
-            foreach ( $languages as $lang => $value) {
-                if($lang === $multilanguage->get_base_language()){
+        } else {
+            foreach ($languages as $lang => $value) {
+                if ($lang === $multilanguage->get_base_language()) {
                     $lang = '';
                 }
                 Settings::set_indexing_status($status, $lang);
@@ -618,29 +618,41 @@ class Setup_Wizard
     public static function get_setup_wizard_notice_html($settings = true)
     {
 
-        $message_intro = __('<strong>Welcome to Doofinder</strong>', 'wordpress-doofinder');
-
-        $message = __(' &#8211; Run setup wizard to finish installation.', 'wordpress-doofinder');
-
+        $message = __('Please, run setup wizard to finish installation.', 'wordpress-doofinder');
         if (Settings::is_configuration_complete()) {
-            $message = __(' &#8211; Looks like Doofinder is already set up. You can review the configuration in the settings or run the setup wizard.', 'wordpress-doofinder');
+            $message = __('Looks like Doofinder is already set up. You can review the configuration in the settings or run the setup wizard.', 'wordpress-doofinder');
+        }
+
+        //Hide the settings button in settings page
+        if (@$_GET['page'] === "doofinder_for_wp") {
+            $settings = false;
         }
 
         ob_start();
         ?>
         <div class="notice notice-success is-dismissible">
-            <div id="message" class="wordpress-message doofinder-notice-setup-wizard">
-                <figure class="logo" style="width:5rem;height:auto;float:left;margin:.5em 0;margin-right:0.75rem;">
-                    <img src="<?php echo Doofinder_For_WordPress::plugin_url() . 'assets/svg/imagotipo1.svg'; ?>" />
-                </figure>
-                <h3><?php echo $message_intro; ?></h3>
-                <p><?php echo $message; ?></p>
-                <p class="submit">
-                    <a href="<?php echo self::get_url(); ?>" class="button-primary button-setup-wizard"><?php _e('Setup Wizard', 'wordpress-doofinder'); ?></a>
-                    <?php if ($settings) : ?>
-                        &nbsp;<a class="button-secondary button-settings" href="<?php echo Settings::get_url(); ?>"><?php _e('Settings', 'wordpress-doofinder'); ?></a>
-                    <?php endif; ?>
-                </p>
+            <div id="message" class="wordpress-message df-notice df-notice-setup-wizard">
+                <div class="df-notice-row">
+                    <div class="df-notice-col logo">
+                        <figure class="logo" style="width:5rem;height:auto;float:left;margin:.5em 0;margin-right:0.75rem;">
+                            <img src="<?php echo Doofinder_For_WordPress::plugin_url() . 'assets/svg/imagotipo1.svg'; ?>" />
+                        </figure>
+                    </div>
+                    <div class="df-notice-col content">
+                        <h3><?php _e('Welcome to Doofinder', 'wordpress-doofinder') ?></h3>
+                        <p>
+                            <?php echo $message ?>
+                        </p>
+                    </div>
+                    <div class="df-notice-col extra">
+                        <div class="submit">
+                            <a href="<?php echo self::get_url(); ?>" class="button-primary button-setup-wizard"><?php _e('Run Setup Wizard', 'wordpress-doofinder'); ?></a>
+                            <?php if ($settings) : ?>
+                                &nbsp;<a class="button-secondary button-settings" href="<?php echo Settings::get_url(); ?>"><?php _e('Go to Settings', 'wordpress-doofinder'); ?></a>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     <?php
@@ -660,21 +672,21 @@ class Setup_Wizard
         ob_start();
     ?>
         <div class="notice notice-success is-dismissible">
-            <div id="message" class="wordpress-message doofinder-notice-indexation-status indexation-status processing">
+            <div id="message" class="wordpress-message df-notice indexation-status processing">
                 <div class="status-processing">
-                    <div style="display: flex;  justify-content: flex-end">
-                        <div style="width: 100px;">
+                    <div class="df-notice-row flex-end">
+                        <div class="df-notice-col logo">
                             <figure class="logo" style="width:5rem;height:auto;float:left;margin:.5em 0;margin-right:0.75rem;">
                                 <img src="<?php echo Doofinder_For_WordPress::plugin_url() . 'assets/svg/imagotipo1.svg'; ?>" />
                             </figure>
                         </div>
-                        <div style="flex-grow: 1;">
+                        <div class="df-notice-col content">
                             <h3><?php _e("Doofinder Indexing Status", 'wordpress-doofinder'); ?></h3>
                             <p><?php _e("The product feed is being processed. Depending on the size of the store's product catalogue, this process may take a few minutes.", 'wordpress-doofinder'); ?></p>
                             <p><strong><?php _e("Your products may not appear correctly updated in search results until the process is complete.", 'wordpress-doofinder'); ?></strong></p>
 
                         </div>
-                        <div style="align-self: center;">
+                        <div class="df-notice-col extra align-center">
                             <figure class="logo" style="width:5rem;height:auto;float:left;margin:.5em 0;margin-right:0.75rem;">
                                 <div class="spinner-wrapper">
                                     <div class="lds-spinner">
@@ -697,17 +709,17 @@ class Setup_Wizard
                     </div>
                 </div>
                 <div class="status-processed">
-                    <div style="display: flex;justify-content: flex-end;">
-                        <div style="width: 100px;">
+                    <div class="df-notice-row flex-end">
+                        <div class="df-notice-col logo">
                             <figure class="logo" style="width:5rem;height:auto;float:left;margin:.5em 0;margin-right:0.75rem;">
                                 <img src="<?php echo Doofinder_For_WordPress::plugin_url() . 'assets/svg/imagotipo1.svg'; ?>" />
                             </figure>
                         </div>
-                        <div style="flex-grow: 1;">
+                        <div class="df-notice-col content">
                             <h3><?php _e("Doofinder Indexing Status", 'wordpress-doofinder'); ?></h3>
                             <p><?php _e("The product feed has been processed.", "doofinder_for_wp"); ?></p>
                         </div>
-                        <div style="align-self: center;">
+                        <div class="df-notice-col extra align-center">
                             <figure class="logo" style="width:5rem;height:auto;float:left;margin:.5em 0;margin-right:0.75rem;">
                                 <div class="success-icon-wrapper">
                                     <img src="wp-content/plugins/doofinder/assets/img/green_checkmark.png">
@@ -736,14 +748,14 @@ class Setup_Wizard
         ob_start();
     ?>
         <div class="notice notice-success is-dismissible">
-            <div id="message" class="wordpress-message doofinder-notice-migrastion-complete">
-                <div style="display: flex;">
-                    <div style="width: 100px;">
+            <div id="message" class="wordpress-message df-notice migration-complete">
+                <div class="df-notice-row">
+                    <div class="df-notice-col logo">
                         <figure class="logo" style="width:5rem;height:auto;float:left;margin:.5em 0;margin-right:0.75rem;">
                             <img src="<?php echo Doofinder_For_WordPress::plugin_url() . 'assets/svg/imagotipo1.svg'; ?>" />
                         </figure>
                     </div>
-                    <div style="flex-grow: 1;">
+                    <div class="df-notice-col content">
                         <h3><?php _e('Migration status', 'wordpress-doofinder') ?></h3>
                         <p>
                             <?php _e('Doofinder settings have been migrated successfully.', 'wordpress-doofinder') ?>
@@ -752,44 +764,8 @@ class Setup_Wizard
                 </div>
             </div>
         </div>
-        <?php
+    <?php
         $html = ob_get_clean();
-        return $html;
-    }
-
-
-    /**
-     * Not dissmisable Configure via Wizard setup notice html
-     *
-     * @param bool $settings
-     *
-     * @return string
-     */
-    public static function get_configure_via_setup_wizard_notice_html()
-    {
-
-        $html = '';
-
-        if (!Settings::is_configuration_complete()) :
-
-            $message = __(' Configure Doofinder in minutes with Doofinder Setup Wizard', 'wordpress-doofinder');
-
-            ob_start();
-
-        ?>
-            <div class="notice doofinder-notice-setup-wizard">
-                <p class="main" style="margin-top:1em;">
-                    <?php echo $message; ?>
-                </p>
-                <p>
-                    <a href="<?php echo self::get_url(); ?>" class="button-primary"><?php _e('Configure', 'wordpress-doofinder'); ?></a>
-                </p>
-            </div>
-        <?php
-            $html = ob_get_clean();
-
-        endif;
-
         return $html;
     }
 
@@ -809,7 +785,7 @@ class Setup_Wizard
 
         ob_start();
 
-        ?>
+    ?>
         <p class="doofinder-button-setup-wizard" style="width:100px;float:right;position:relative;top:-68px;">
             <a href="<?php echo self::get_url(); ?>" class="button-secondary"><?php _e('Setup Wizard', 'wordpress-doofinder'); ?></a>
         </p>
@@ -1149,7 +1125,6 @@ class Setup_Wizard
 
             //Set the indexing status to processing
             Settings::set_indexing_status('processing', $options_suffix);
-
         }
     }
 

@@ -88,28 +88,6 @@ class Settings
 		$this->add_update_on_save_intervals();
 		$this->add_plugin_settings();
 		$this->add_settings_page();
-		$this->add_admin_scripts();
-	}
-
-	/**
-	 * Register styles used by the Doofinder top level page.
-	 */
-	private function add_admin_scripts()
-	{
-		add_action('admin_enqueue_scripts', function () {
-			// Don't add these scripts on pages other than the Doofinder top level page.
-			// Other pages don't use them.
-			$screen = get_current_screen();
-			if ($screen->id !== 'toplevel_page_doofinder_for_wp') {
-				return;
-			}
-
-			// CSS
-			wp_enqueue_style(
-				'doofinder-for-wp-styles',
-				Doofinder_For_WordPress::plugin_url() . '/assets/css/admin.css'
-			);
-		});
 	}
 
 	/**
