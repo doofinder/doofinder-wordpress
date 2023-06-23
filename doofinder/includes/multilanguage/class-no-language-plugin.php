@@ -34,7 +34,7 @@ class No_Language_Plugin extends Language_Plugin
      */
     public function get_current_language()
     {
-        return null;
+        return '';
     }
 
     /**
@@ -42,7 +42,7 @@ class No_Language_Plugin extends Language_Plugin
      */
     public function get_default_language()
     {
-        return null;
+        return '';
     }
 
     /**

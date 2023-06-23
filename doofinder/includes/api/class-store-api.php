@@ -284,10 +284,38 @@ class Store_Api
         $currency = 'EUR';
         foreach ($api_keys as $item) {
             $code = $item['lang']['locale'] ?? $item['lang']['code'] ?? $primary_language;
+            $lang = Helpers::get_language_from_locale($code);
             $code = Helpers::format_locale_to_hyphen($code);
-            $callback_urls[$code][$currency] = get_bloginfo('url') . '/wp-json/doofinder/v1/indexation-status/?token=' . $this->api_key;
+            $callback_urls[$code][$currency] = self::build_callback_url(
+                $this->language->get_home_url($lang),
+                '/wp-json/doofinder/v1/index-status/?token=' . $this->api_key
+            );
         }
         return $callback_urls;
+    }
+
+    /**
+     * This method takes the base url and adds
+     *
+     * @param [type] $base_url
+     * @param [type] $endpoint_path
+     * @return void
+     */
+    private static function build_callback_url($base_url, $endpoint_path)
+    {
+        $parsed_url = parse_url($base_url);
+        parse_str($parsed_url['query'], $parameters);
+        $callback_url = $parsed_url['scheme'] . '://' . $parsed_url['host'] . rtrim($parsed_url['path'], '/') . '/' . ltrim($endpoint_path, '/');
+
+        // Combine any existing parameters with any possible endopoint path parameters
+        if (!empty($parameters)) {
+            parse_str(parse_url($callback_url, PHP_URL_QUERY), $endpoint_parameters);
+            $combined_parameters = array_merge($parameters, $endpoint_parameters);
+            $callback_url = strtok($callback_url, '?');
+            $callback_url .= '?' . http_build_query($combined_parameters);
+        }
+
+        return $callback_url;
     }
 
     /**

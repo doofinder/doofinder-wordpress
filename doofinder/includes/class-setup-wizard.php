@@ -173,7 +173,8 @@ class Setup_Wizard
      *
      * @var string
      */
-    const ADMIN_PATH = "http://admin.doofinder.com";
+    //const ADMIN_PATH = "http://admin.doofinder.com";
+    const ADMIN_PATH = "http://pedro-admin.ngrok.doofinder.com";
 
     public function __construct()
     {
@@ -313,9 +314,10 @@ class Setup_Wizard
      */
     public static function should_show_indexing_notice()
     {
+        $multilanguage = Multilanguage::instance();
         $show_notice = (bool) get_option(self::$wizard_show_indexing_notice_option, 0);
-        //TODO: Add language variable
-        $indexing_status = Settings::get_indexing_status();
+        $lang = $multilanguage->get_current_language();
+        $indexing_status = Settings::get_indexing_status($lang);
         $res = $show_notice && $indexing_status === "processing";
         return $res;
     }
@@ -460,7 +462,7 @@ class Setup_Wizard
             update_option(self::$wizard_show_indexing_notice_option, 1);
 
             //Set the indexing status to processing
-            Settings::set_indexing_status('processing');
+            self::set_indexing_status('processing');
 
             // Update wizard status to finished if configuration is complete
             if (Settings::is_configuration_complete()) {
@@ -489,6 +491,28 @@ class Setup_Wizard
         if ($redirect) {
             wp_safe_redirect($redirect_url);
             die();
+        }
+    }
+
+    /**
+     * Sets the indexing status to the given value for all languages.
+     *
+     * @param string $status
+     * @return void
+     */
+    private static function set_indexing_status($status){
+        $multilanguage = Multilanguage::instance();
+        $languages = $multilanguage->get_languages();
+
+        if(is_null($languages)){
+            Settings::set_indexing_status($status);
+        }else{
+            foreach ( $languages as $lang => $value) {
+                if($lang === $multilanguage->get_base_language()){
+                    $lang = '';
+                }
+                Settings::set_indexing_status($status, $lang);
+            }
         }
     }
 
@@ -1031,7 +1055,7 @@ class Setup_Wizard
                     if (array_key_exists('errors', $store_data)) {
                         $message = "";
                         foreach ($store_data['errors'] as $error) {
-                            $message .= $error .". ";
+                            $message .= $error . ". ";
                         }
                         throw new Exception($message);
                     }
@@ -1041,8 +1065,6 @@ class Setup_Wizard
 
                     $this->set_search_engines($store_data['search_engines']);
                     $this->enable_layer($store_data['script']);
-                    //Set the indexing status to processing
-                    Settings::set_indexing_status('processing');
                 } catch (Exception $exception) {
                     $this->log->log('Wizard Step 2 - Exception');
                     $this->log->log($exception->getMessage());
@@ -1125,7 +1147,9 @@ class Setup_Wizard
             // JS Layer Code
             Settings::set_js_layer('', $options_suffix);
 
-            Settings::set_indexing_status('', $options_suffix);
+            //Set the indexing status to processing
+            Settings::set_indexing_status('processing', $options_suffix);
+
         }
     }
 

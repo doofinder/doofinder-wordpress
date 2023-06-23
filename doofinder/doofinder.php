@@ -14,6 +14,7 @@
 namespace Doofinder\WP;
 
 use WP_REST_Response;
+use Doofinder\WP\Multilanguage\Multilanguage;
 
 defined('ABSPATH') or die;
 
@@ -297,7 +298,7 @@ if (!class_exists('\Doofinder\WP\Doofinder_For_WordPress')) :
         {
             add_action('rest_api_init', function () {
                 Config::register();
-                register_rest_route('doofinder/v1', '/indexation-status', array(
+                register_rest_route('doofinder/v1', '/index-status', array(
                     'methods' => 'POST',
                     'callback' => function (\WP_REST_Request $request) {
                         if ($request->get_param('token') != Settings::get_api_key()) {
@@ -309,15 +310,16 @@ if (!class_exists('\Doofinder\WP\Doofinder_For_WordPress')) :
                                 401
                             );
                         }
-
+                        $multilanguage = Multilanguage::instance();
+                        $lang = ($multilanguage->get_current_language() === $multilanguage->get_base_language()) ? "" : $multilanguage->get_current_language();
                         //Hide the indexing notice
                         Setup_Wizard::dismiss_indexing_notice();
-                        Settings::set_indexing_status('processed');
+                        Settings::set_indexing_status('processed', $lang);
 
                         return new WP_REST_Response(
                             [
                                 'status' => 200,
-                                'indexing_status' => Settings::get_indexing_status(),
+                                'indexing_status' => Settings::get_indexing_status($lang),
                                 'response' => "Indexing status updated"
                             ]
                         );
@@ -336,8 +338,10 @@ if (!class_exists('\Doofinder\WP\Doofinder_For_WordPress')) :
         private static function register_ajax_action()
         {
             add_action('wp_ajax_doofinder_check_indexing_status', function () {
+                $multilanguage = Multilanguage::instance();
+                $lang = ($multilanguage->get_current_language() === $multilanguage->get_base_language()) ? "" : $multilanguage->get_current_language();
                 wp_send_json([
-                    'status' => Settings::get_indexing_status()
+                    'status' => Settings::get_indexing_status($lang)
                 ]);
                 exit;
             });
