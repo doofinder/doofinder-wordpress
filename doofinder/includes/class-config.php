@@ -44,6 +44,7 @@ class Config
      */
     public function __construct()
     {
+        global $wp_version;
         $multilanguage = Multilanguage::instance();
 
         if ($multilanguage->is_active()) {
@@ -55,7 +56,7 @@ class Config
         $config = array(
             'platform' => array(
                 'name'    => 'WordPress',
-                'version' => '\WP()->version,'
+                'version' => $wp_version
             ),
             'module' => array(
                 'configuration' => $configuration,
@@ -71,6 +72,7 @@ class Config
             $config['platform'] = array(
                 'name' => 'WooCommerce',
                 'version' => \WC()->version,
+                'wordpress_version' => $wp_version
             );
         }
 
@@ -114,9 +116,10 @@ class Config
     {
         $language_code = $this->get_locale_language_code();
 
+        $currency = is_plugin_active('woocommerce/woocommerce.php') ? get_woocommerce_currency() : "EUR";
         $configuration = array();
         $configuration[$language_code] = array(
-            'currency' => get_woocommerce_currency(),
+            'currency' => $currency,
             'language' => $language_code
         );
 
