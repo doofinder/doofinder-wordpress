@@ -61,7 +61,7 @@ trait Accessors
     public static function get_api_host()
     {
         //If we are in local environment, return the DF_API_HOST set in wp-config
-        if (wp_get_environment_type() === 'local' && defined(DF_API_HOST)) {
+        if (wp_get_environment_type() === 'local' && defined('DF_API_HOST')) {
             return DF_API_HOST;
         }
         return get_option('doofinder_for_wp_api_host', 'https://admin.doofinder.com');
