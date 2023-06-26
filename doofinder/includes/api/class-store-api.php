@@ -68,7 +68,7 @@ class Store_Api
     public function create_store($api_keys)
     {
         if (is_array($api_keys)) {
-            $store_payload = self::build_store_payload($api_keys);
+            $store_payload = $this->build_store_payload($api_keys);
             $this->log->log("store_data: ");
             $this->log->log($store_payload);
             return $this->sendRequest("plugins/create-store", $store_payload);
@@ -119,6 +119,16 @@ class Store_Api
     }
 
     /**
+     * This method checks if there is an application password set.
+     *
+     * @return boolean
+     */
+    public static function has_application_credentials()
+    {
+        return WP_Application_Passwords::application_name_exists_for_user(get_current_user_id(), 'doofinder');
+    }
+
+    /**
      * Send a POST request with the given $body to the given $endpoint.
      *
      * @param string $endpoint The endpoint url.
@@ -157,7 +167,7 @@ class Store_Api
      * @param array $api_keys The list of search engine ids
      * @return void
      */
-    public function build_store_payload($api_keys)
+    private function build_store_payload($api_keys)
     {
         $primary_language = get_locale();
         if ($this->language->get_languages() != null) {
@@ -167,12 +177,12 @@ class Store_Api
         $primary_language = Helpers::format_locale_to_hyphen($primary_language);
         $domain = str_ireplace('www.', '', parse_url(get_bloginfo('url'), PHP_URL_HOST));
 
-        $store_options =  self::get_store_options();
+        $store_options =  $this->get_store_options();
         if (is_null($store_options)) {
             throw new Exception("Invalid store options");
         }
 
-        $callback_urls = self::get_callback_urls($api_keys, $primary_language);
+        $callback_urls = $this->get_callback_urls($api_keys, $primary_language);
         $currency = is_plugin_active('woocommerce/woocommerce.php') ? get_woocommerce_currency() : "EUR";
 
         $store_payload = [
@@ -217,7 +227,7 @@ class Store_Api
         return $store_payload;
     }
 
-    public function get_datatype($language)
+    private function get_datatype($language)
     {
         return is_plugin_active('woocommerce/woocommerce.php') ?
             $this->get_product_datatype($language) :
@@ -229,7 +239,7 @@ class Store_Api
      *
      * @return array The product datatype structure.
      */
-    public function get_product_datatype($language)
+    private function get_product_datatype($language)
     {
         return [
             "name" => "product",
@@ -251,7 +261,7 @@ class Store_Api
      *
      * @return array The post datatype structure.
      */
-    public function get_post_datatype($language)
+    private function get_post_datatype($language)
     {
         return [
             "name" => "post",
@@ -276,7 +286,7 @@ class Store_Api
             $code = $item['lang']['locale'] ?? $item['lang']['code'] ?? $primary_language;
             $lang = Helpers::get_language_from_locale($code);
             $code = Helpers::format_locale_to_hyphen($code);
-            $callback_urls[$code][$currency] = self::build_callback_url(
+            $callback_urls[$code][$currency] = $this->build_callback_url(
                 $this->language->get_home_url($lang),
                 '/wp-json/doofinder/v1/index-status/?token=' . $this->api_key
             );
@@ -291,7 +301,7 @@ class Store_Api
      * @param [type] $endpoint_path
      * @return void
      */
-    private static function build_callback_url($base_url, $endpoint_path)
+    private function build_callback_url($base_url, $endpoint_path)
     {
         $parsed_url = parse_url($base_url);
         parse_str($parsed_url['query'], $parameters);
@@ -313,9 +323,9 @@ class Store_Api
      *
      * @return void
      */
-    private static function get_store_options()
+    private function get_store_options()
     {
-        $password_data = self::create_application_credentials();
+        $password_data = $this->create_application_credentials();
         if (!is_null($password_data)) {
             return [
                 "url" => get_bloginfo('url'),
@@ -327,16 +337,6 @@ class Store_Api
     }
 
     /**
-     * This method checks if there is an application password set.
-     *
-     * @return boolean
-     */
-    public static function has_application_credentials()
-    {
-        return WP_Application_Passwords::application_name_exists_for_user(get_current_user_id(), 'doofinder');
-    }
-
-    /**
      * Creates a new application password.
      * If a password exists, it deletes it and creates a new password.
      *
@@ -345,7 +345,7 @@ class Store_Api
      *
      * @return array Array containing api_user and api_pass
      */
-    public static function create_application_credentials()
+    private function create_application_credentials()
     {
         $user_id = get_current_user_id();
         $user = get_user_by('id',  $user_id);
