@@ -219,11 +219,9 @@ class Store_Api
 
     public function get_datatype($language)
     {
-        if (is_plugin_active('woocommerce/woocommerce.php')) {
-            return $this->get_product_datatype($language);
-        } else {
-            return $this->get_post_datatype($language);
-        }
+        return is_plugin_active('woocommerce/woocommerce.php') ?
+            $this->get_product_datatype($language) :
+            $this->get_post_datatype($language);
     }
 
     /**
