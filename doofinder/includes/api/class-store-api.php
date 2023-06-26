@@ -44,14 +44,6 @@ class Store_Api
      */
     private $api_key;
 
-    /**
-     * APP Credentials option name
-     *
-     * @var string
-     */
-    public static $credentials_option_name = 'doofinder_for_wp_app_credentials';
-
-
     public function __construct()
     {
         // Get global disable_api_calls flag
@@ -359,7 +351,7 @@ class Store_Api
     {
         $user_id = get_current_user_id();
         $user = get_user_by('id',  $user_id);
-        $credentials_option_name = self::$credentials_option_name . "_" . get_current_blog_id();
+        $credentials_option_name = "doofinder_for_wp_app_credentials_" . get_current_blog_id();
         $credentials = get_option($credentials_option_name);
         $password_data = NULL;
         $app_name = 'doofinder_' . get_current_blog_id();
