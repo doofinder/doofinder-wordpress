@@ -63,7 +63,7 @@ class JS_Layer
 
         $layer = Settings::get_js_layer();
 
-        if (defined('WP_ENVIRONMENT_TYPE') && WP_ENVIRONMENT_TYPE === 'local') {
+        if (defined('WP_ENVIRONMENT_TYPE') && WP_ENVIRONMENT_TYPE === 'local' && defined('DF_SEARCH_HOST') && defined('DF_LAYER_HOST')) {
             $local_constants = "<script>
     // FOR DEVELOPMENT PURPOSES ONLY!!!
     var __DF_DEBUG_MODE__ = true;
