@@ -64,7 +64,7 @@ trait Accessors
         if (wp_get_environment_type() === 'local' && defined(DF_API_HOST)) {
             return DF_API_HOST;
         }
-        return get_option('doofinder_for_wp_api_host');
+        return get_option('doofinder_for_wp_api_host', 'https://admin.doofinder.com');
     }
 
     /**

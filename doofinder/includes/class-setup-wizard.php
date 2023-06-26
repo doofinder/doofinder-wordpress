@@ -412,11 +412,6 @@ class Setup_Wizard
         return $setup_wizard_url;
     }
 
-    public function getAdminPath()
-    {
-        return self::ADMIN_PATH;
-    }
-
     /**
      * What the current step of the wizard is? This is the last step
      * that the user have seen and not submitted yet.
