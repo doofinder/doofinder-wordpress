@@ -97,6 +97,15 @@ class Store_Api
     {
         $wizard = Setup_Wizard::instance();
         $api_keys = Setup_Wizard::are_api_keys_present($wizard->process_all_languages, $wizard->language);
+
+        if (!Multilanguage::$is_multilang) {
+            $api_keys = [
+                '' => [
+                    'hash' => Settings::get_search_engine_hash()
+                ]
+            ];
+        }
+
         $store_payload = $this->build_store_payload($api_keys);
 
         $payload = [
@@ -115,7 +124,12 @@ class Store_Api
             $payload['search_engines'][$se_hashid] = $search_engine['datatypes'][0]['datasources'][0]['options'];
         }
 
-        $this->sendRequest("plugins/wordpress/normalize-indices/", $payload);
+        $this->log->log("Sending request to normalize indices.");
+        $response = $this->sendRequest("plugins/wordpress/normalize-indices/", $payload);
+        if (array_key_exists('errors', $response)) {
+            $this->log->log("The store and indices normalization has failed!");
+            $this->log->log(print_r($response['errors'], true));
+        }
     }
 
     /**
@@ -133,7 +147,7 @@ class Store_Api
      *
      * @param string $endpoint The endpoint url.
      * @param array $body The array containing the payload to be sent.
-     * @return void
+     * @return array The request decoded response
      */
     private function sendRequest($endpoint, $body)
     {
@@ -195,14 +209,6 @@ class Store_Api
             "callback_urls" => $callback_urls,
             "options" => $store_options
         ];
-
-        if (!Multilanguage::$is_multilang) {
-            $api_keys = [
-                '' => [
-                    'hash' => 'no-hash'
-                ]
-            ];
-        }
 
         foreach ($api_keys as $item) {
             //Prioritize the locale code
