@@ -26,21 +26,14 @@ class Migration
         self::$log->log('Migrate - Start');
 
         self::initialize_migration();
+        if (self::do_woocommerce_migration()) {
+            self::finish_migration();
+        }
 
         //check if app credentials are set
         if (!Store_Api::has_application_credentials() && Settings::is_configuration_complete()) {
             $store_api = new Store_Api();
             $store_api->normalize_store_and_indices();
-        }
-
-        if (self::do_woocommerce_migration()) {
-            self::finish_migration();
-            return;
-        }
-
-        if (self::do_default_migration()) {
-            self::finish_migration();
-            return;
         }
     }
 
@@ -114,56 +107,18 @@ class Migration
                     self::migrate_option($wc_option_name, $wp_option_name);
                 }
             }
+
+            self::maybe_fix_api_host();
+
             return true;
         }
         return false;
     }
 
-    /**
-     * Default migration
-     *
-     * @return void
-     */
-    private static function do_default_migration()
+    private static function maybe_fix_api_host()
     {
-        $api_key = Settings::get_api_key();
-
-        if (preg_match('@-@', $api_key)) {
-            $arr = explode('-', $api_key);
-        }
-
-        $api_key_prefix = $arr[0] ?? null;
-        $api_key_value = $arr[1] ?? null;
-
-        if (!$api_key) {
-
-            // Migration not possible
-            self::$log->log('Migrate - Migration Not Possible');
-            update_option(Setup_Wizard::$wizard_migration_option, 'failed');
-
-            // Disable doofinder search
-            Settings::disable_js_layer();
-
-            return false;
-        }
-
-        // All good, save api key value
-        self::$log->log('Migrate - Set Api key');
-
-        // Old API key prefix should be removed since new API version is not containing prefixes
-        if ($api_key_value) {
-            Settings::set_api_key($api_key_value);
-        } else {
-            Settings::set_api_key($api_key);
-        }
-
-        /*
-		 * Since there may be two different scenarios during plugin migration,
-		 * first if user migrating from older version where api host is not containing 'https://' protocol and
-		 * second scenario if user is migirating form newer version where 'https://' protocol exisist in settings,
-		 * we need to check both cases to isolate prefix.
-		*/
-        $api_host = Settings::get_api_host();
+        $api_host_option_name = 'doofinder_for_wp_api_host';
+        $api_host = get_option($api_host_option_name);
 
         // Check if api host contains prefix, then isolate prefix
         if (preg_match('@-@', $api_host)) {
@@ -171,24 +126,16 @@ class Migration
         }
 
         $api_host_prefix = $arr[0] ?? null;
+        $api_host_path = $arr[1] ?? null;
 
-        // Check if prefix contains protocol, then isolate prefix
-        if (preg_match("#^((https?://)|www\.?)#i", $api_host_prefix)) {
-            $arr = preg_split("#^((https?://)|www\.?)#i", $api_host_prefix);
-            $api_host_prefix = $arr[1] ?? null;
+        if (!preg_match("#^((https?://))#i", $api_host_prefix)) {
+            $api_host_prefix = "https://" . $api_host_prefix;
         }
 
-        self::$log->log('Host: ' . $api_host);
-        self::$log->log('Host prefix: ' . $api_host_prefix);
-
-        // Check and update api host
-        $api_host_base = '-admin.doofinder.com';
-        if (!$api_host || !preg_match("@$api_host_prefix-api@", $api_host) || !preg_match("#^((https?://)|www\.?)#i", $api_host)) {
-            self::$log->log('Migrate - Set Api Host');
-            Settings::set_api_host('https://' . $api_host_prefix . $api_host_base);
+        if ($api_host_path != "admin.doofinder.com") {
+            $new_api_host = $api_host_prefix . "-admin.doofinder.com";
+            update_option($api_host_option_name, $new_api_host);
         }
-
-        return true;
     }
 
     /**
