@@ -165,15 +165,21 @@ class Store_Api
         $url = "{$this->api_host}/{$endpoint}";
         $this->log->log("Making a request to: $url");
         $response = wp_remote_post($url, $data);
+        $response_code = wp_remote_retrieve_response_code($response);
 
-        if (!is_wp_error($response)) {
-            $response_body = wp_remote_retrieve_body($response);
-            $decoded_response = json_decode($response_body, true);
-            return $decoded_response;
-        } else {
+        if (is_wp_error($response)) {
             $error_message = $response->get_error_message();
-            throw new Exception("Error #{$error_message} creating store structure.", $response->get_error_code());
+            throw new Exception($error_message, $response->get_error_code());
         }
+
+        if ($response_code < 200 || $response_code >= 400) {
+            $error_message = wp_remote_retrieve_response_message($response);
+            throw new Exception($error_message, $response_code);
+        }
+
+        $response_body = wp_remote_retrieve_body($response);
+        $decoded_response = json_decode($response_body, true);
+        return $decoded_response;
     }
 
     /**
