@@ -75,19 +75,6 @@ abstract class Language_Plugin
      *
      * @return string
      */
-    // public function get_option_name( $base ) {
-    // 	$language_code = $this->get_active_language();
-    // 	if ( ! $language_code ) {
-    // 		return $base;
-    // 	}
-
-    // 	$base_language = $this->get_base_language();
-    // 	if ( $language_code === $base_language ) {
-    // 		return $base;
-    // 	}
-
-    // 	return "{$base}_{$language_code}";
-    // }
 
     /**
      * Retrieve the name of the wordpress option
