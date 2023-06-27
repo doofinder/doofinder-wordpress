@@ -159,6 +159,7 @@ class Store_Api
             'body' => json_encode($body),
             'method'      => 'POST',
             'data_format' => 'body',
+            'timeout' => 20
         ];
 
         $url = "{$this->api_host}/{$endpoint}";
@@ -183,32 +184,26 @@ class Store_Api
      */
     private function build_store_payload($api_keys)
     {
-        $primary_language = get_locale();
-        if ($this->language->get_languages() != null) {
-            $primary_language = $this->language->get_base_locale();
-        }
-
-        $primary_language = Helpers::format_locale_to_hyphen($primary_language);
-        $domain = str_ireplace('www.', '', parse_url(get_bloginfo('url'), PHP_URL_HOST));
-
-        $store_options =  $this->get_store_options();
-        if (is_null($store_options)) {
-            throw new Exception("Invalid store options");
-        }
-
-        $callback_urls = $this->get_callback_urls($api_keys, $primary_language);
-        $currency = is_plugin_active('woocommerce/woocommerce.php') ? get_woocommerce_currency() : "EUR";
+        $primary_language = $this->get_primary_language();
 
         $store_payload = [
             "name" =>  get_bloginfo('name'),
             "platform" =>  is_plugin_active('woocommerce/woocommerce.php') ? "woocommerce" : "wordpress",
             "primary_language" => $primary_language,
-            // "skip_indexation" => true,
             "search_engines" => [],
             "sector" => Settings::get_sector(),
-            "callback_urls" => $callback_urls,
-            "options" => $store_options
+            "callback_urls" => $this->get_callback_urls($api_keys, $primary_language),
+            "options" => $this->get_store_options(),
+            "search_engines" => $this->build_search_engines($api_keys, $primary_language)
         ];
+        return $store_payload;
+    }
+
+    private function build_search_engines($api_keys, $primary_language)
+    {
+        $search_engines = [];
+        $domain = str_ireplace('www.', '', parse_url(get_bloginfo('url'), PHP_URL_HOST));
+        $currency = is_plugin_active('woocommerce/woocommerce.php') ? get_woocommerce_currency() : "EUR";
 
         foreach ($api_keys as $item) {
             //Prioritize the locale code
@@ -218,7 +213,7 @@ class Store_Api
 
             // Prepare search engine body
             $this->log->log('Wizard Step 2 - Prepare Search Enginge body : ');
-            $search_engine = [
+            $search_engines[] = [
                 'name' => $domain . ($code ? ' (' . strtoupper($code) . ')' : ''),
                 'language' => $code,
                 'currency' => $currency,
@@ -227,10 +222,25 @@ class Store_Api
                     $this->get_datatype($lang)
                 ]
             ];
-
-            $store_payload["search_engines"][] = $search_engine;
         }
-        return $store_payload;
+
+        return $search_engines;
+    }
+
+    /**
+     * This function returns the primary language in locale format: en-US,
+     * es-ES, etc.
+     *
+     * @return string Primary language.
+     */
+    private function get_primary_language()
+    {
+        $primary_language = get_locale();
+        if ($this->language->get_languages() != null) {
+            $primary_language = $this->language->get_base_locale();
+        }
+        $primary_language = Helpers::format_locale_to_hyphen($primary_language);
+        return $primary_language;
     }
 
     private function get_datatype($language)
@@ -338,8 +348,9 @@ class Store_Api
                 'api_pass' => $password_data['api_pass'],
                 'api_user' => $password_data['api_user']
             ];
+        } else {
+            throw new Exception("Error creating application credentials");
         }
-        return NULL;
     }
 
     /**
