@@ -1381,7 +1381,7 @@ class Setup_Wizard
 
         // Migration not necessary
         $log->log('Should migrate - Migration not necessary');
-        update_option('woocommerce_doofinder_migration_status', 'completed');
+        update_option($migration_option, 'completed');
 
         return false;
     }
