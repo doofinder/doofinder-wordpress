@@ -23,7 +23,6 @@
           wc_add_to_cart(response.product, response.variation, amount);
         } else {
           window.location = response.product_url;
-          return;
         }
       },
     });
