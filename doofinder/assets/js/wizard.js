@@ -53,7 +53,7 @@ jQuery(() => {
     $(".open-window").click((e) => {
         const pageType = $(e.currentTarget).attr("data-type");
         connectModal = popupCenter({
-            url: `${doofinderAdminPath}/plugins/${pageType}/woocommerce?email=${doofinderConnectEmail}&token=${doofinderConnectToken}`, // Change in future task endpoint name in doomanager.
+            url: `${doofinderAdminPath}/plugins/${pageType}/wordpress?token=${doofinderConnectToken}`, // Change in future task endpoint name in doomanager.
             title: "DoofinderConnect",
             w: 600,
             h: 700,
