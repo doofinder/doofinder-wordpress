@@ -1,5 +1,6 @@
 jQuery(function () {
     let $ = jQuery.noConflict();
+    let indexingCheckInterval = null;
     let ajaxIndexingStatus = function () {
         $.ajax({
             type: "post",
@@ -18,7 +19,7 @@ jQuery(function () {
     };
 
     if (Doofinder.show_indexing_notice === "true") {
-        let indexingCheckInterval = setInterval(ajaxIndexingStatus, 10000);
+        indexingCheckInterval = setInterval(ajaxIndexingStatus, 10000);
     }
 
     /*

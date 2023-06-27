@@ -33,11 +33,15 @@ class Multilanguage {
 				return self::$instance;
 			}
 
+			// TODO Test and finish Polylang support implementation
+			/*
 			if ( defined( 'POLYLANG_BASENAME' ) ) {
 				self::$instance = new Polylang();
+				self::$is_multilang = true;
 
 				return self::$instance;
 			}
+			*/
 		}
 
 		// Still no instance?

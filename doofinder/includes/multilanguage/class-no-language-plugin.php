@@ -2,50 +2,92 @@
 
 namespace Doofinder\WP\Multilanguage;
 
-class No_Language_Plugin extends Language_Plugin {
+class No_Language_Plugin extends Language_Plugin
+{
 
-	/**
-	 * @inheritdoc
-	 */
-	public function get_languages() {
-		return null;
-	}
+    /**
+     * @inheritdoc
+     */
+    public function get_languages()
+    {
+        return null;
+    }
 
-	/**
-	 * @inheritdoc
-	 */
-	public function get_active_language() {
-		return null;
-	}
+    /**
+     * @inheritdoc
+     */
+    public function get_formatted_languages()
+    {
+        return null;
+    }
 
-	/**
-	 * @inheritdoc
-	 */
-	public function get_base_language() {
-		return '';
-	}
+    /**
+     * @inheritdoc
+     */
+    public function get_active_language()
+    {
+        return null;
+    }
 
-	/**
-	 * @inheritdoc
-	 */
-	public function get_posts_ids( $language_code, $post_type ) {
-		global $wpdb;
+    /**
+     * @inheritdoc
+     */
+    public function get_current_language()
+    {
+        return '';
+    }
 
-		$query = "
-			SELECT ID
-			FROM $wpdb->posts
-			WHERE $wpdb->posts.post_type = '{$post_type}'
-			ORDER BY $wpdb->posts.ID
-		";
+    /**
+     * @inheritdoc
+     */
+    public function get_default_language()
+    {
+        return '';
+    }
 
-		$ids = $wpdb->get_results( $query, ARRAY_N );
+    /**
+     * @inheritdoc
+     */
+    public function get_base_language()
+    {
+        return '';
+    }
 
-		if ( ! $ids ) {
-			return array();
-		}
+    public function get_base_locale(){
+        return get_locale();
+    }
 
-		return array_map( function ( $item ) {
-			return $item[0];
-		}, $ids );
-	}
+    /**
+     * @inheritdoc
+     */
+    public function get_home_url($language)
+    {
+        return get_bloginfo('url');
+    }
+
+    /**
+     * Retrieve the name of the wordpress option
+     * for the current languages.
+     *
+     * Some fields in Doofinder settings will have different values,
+     * depending on language.
+     *
+     * @param string $base
+     *
+     * @return string
+     */
+    public function get_option_name($base)
+    {
+        $language_code = $this->get_active_language();
+        if (!$language_code) {
+            return $base;
+        }
+
+        $base_language = $this->get_base_language();
+        if ($language_code === $base_language) {
+            return $base;
+        }
+
+        return "{$base}_{$language_code}";
+    }
 }

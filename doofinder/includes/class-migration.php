@@ -2,11 +2,9 @@
 
 namespace Doofinder\WP;
 
-use Doofinder\WP\Multilanguage\Language_Plugin;
-use Doofinder\WP\Multilanguage\Multilanguage;
+use Doofinder\WP\Api\Store_Api;
 use Doofinder\WP\Settings;
 use Doofinder\WP\Log;
-use WPML_Wizard;
 
 class Migration
 {
@@ -24,22 +22,37 @@ class Migration
 
     public static function migrate()
     {
-        self::$log = new Log('migration-txt');
+        self::$log = new Log('migration.log');
         self::$log->log('Migrate - Start');
 
         self::initialize_migration();
-
         if (self::do_woocommerce_migration()) {
             self::finish_migration();
-            return;
         }
 
-        if (self::do_default_migration()) {
-            self::finish_migration();
-            return;
+        //check if app credentials are set
+        if (!Store_Api::has_application_credentials() && Settings::is_configuration_complete()) {
+            $store_api = new Store_Api();
+            $store_api->normalize_store_and_indices();
         }
     }
 
+    /**
+     * Initialize the migration
+     *
+     * @return void
+     */
+    private static function initialize_migration()
+    {
+        delete_option(Setup_Wizard::$wizard_migration_notice_name);
+        delete_option(Setup_Wizard::$wizard_migration_option);
+    }
+
+    /**
+     * Adds the migration notice
+     *
+     * @return void
+     */
     public static function add_notices()
     {
         add_action('admin_notices', function () {
@@ -53,13 +66,12 @@ class Migration
         });
     }
 
-
-    private static function initialize_migration()
-    {
-        delete_option(Setup_Wizard::$wizard_migration_notice_name);
-        delete_option(Setup_Wizard::$wizard_migration_option);
-    }
-
+    /**
+     * This function migrates the options from the former woocommerce plugin to
+     * the current plugin options.
+     *
+     * @return void
+     */
     private static function do_woocommerce_migration()
     {
         if (get_option('woocommerce_doofinder_internal_search_api_key', FALSE)) {
@@ -84,6 +96,9 @@ class Migration
             $wizard = Setup_Wizard::instance();
             $base_language = $wizard->language->get_base_language();
             $langs = $wizard->language->get_languages();
+            //define empty language for main language options
+            $langs[''] = '';
+
             foreach ($langs as $lang_key => $value) {
                 $lang = ($lang_key === $base_language) ? '' : $lang_key;
                 foreach ($multilang_options as $wc_key => $wp_key) {
@@ -92,51 +107,18 @@ class Migration
                     self::migrate_option($wc_option_name, $wp_option_name);
                 }
             }
+
+            self::maybe_fix_api_host();
+
             return true;
         }
         return false;
     }
 
-    private static function do_default_migration()
+    private static function maybe_fix_api_host()
     {
-        $api_key = Settings::get_api_key();
-
-        if (preg_match('@-@', $api_key)) {
-            $arr = explode('-', $api_key);
-        }
-
-        $api_key_prefix = $arr[0] ?? null;
-        $api_key_value = $arr[1] ?? null;
-
-        if (!$api_key) {
-
-            // Migration not possible
-            self::$log->log('Migrate - Migration Not Possible');
-            update_option(Setup_Wizard::$wizard_migration_option, 'failed');
-
-            // Disable doofinder search
-            Settings::disable_js_layer();
-
-            return false;
-        }
-
-        // All good, save api key value
-        self::$log->log('Migrate - Set Api key');
-
-        // Old API key prefix should be removed since new API version is not containing prefixes
-        if ($api_key_value) {
-            Settings::set_api_key($api_key_value);
-        } else {
-            Settings::set_api_key($api_key);
-        }
-
-        /*
-		 * Since there may be two different scenarios during plugin migration,
-		 * first if user migrating from older version where api host is not containing 'https://' protocol and
-		 * second scenario if user is migirating form newer version where 'https://' protocol exisist in settings,
-		 * we need to check both cases to isolate prefix.
-		*/
-        $api_host = Settings::get_api_host();
+        $api_host_option_name = 'doofinder_for_wp_api_host';
+        $api_host = get_option($api_host_option_name);
 
         // Check if api host contains prefix, then isolate prefix
         if (preg_match('@-@', $api_host)) {
@@ -144,26 +126,30 @@ class Migration
         }
 
         $api_host_prefix = $arr[0] ?? null;
+        $api_host_path = $arr[1] ?? null;
 
-        // Check if prefix contains protocol, then isolate prefix
-        if (preg_match("#^((https?://)|www\.?)#i", $api_host_prefix)) {
-            $arr = preg_split("#^((https?://)|www\.?)#i", $api_host_prefix);
-            $api_host_prefix = $arr[1] ?? null;
+        if (!preg_match("#^((https?://))#i", $api_host_prefix)) {
+            $api_host_prefix = "https://" . $api_host_prefix;
         }
 
-        self::$log->log('Host: ' . $api_host);
-        self::$log->log('Host prefix: ' . $api_host_prefix);
-
-        // Check and update api host
-        $api_host_base = '-admin.doofinder.com';
-        if (!$api_host || !preg_match("@$api_host_prefix-api@", $api_host) || !preg_match("#^((https?://)|www\.?)#i", $api_host)) {
-            self::$log->log('Migrate - Set Api Host');
-            Settings::set_api_host('https://' . $api_host_prefix . $api_host_base);
+        if ($api_host_path != "admin.doofinder.com") {
+            $new_api_host = $api_host_prefix . "-admin.doofinder.com";
+            update_option($api_host_option_name, $new_api_host);
         }
-
-        return true;
     }
 
+    /**
+     * This function migrates the value of the first option into the second
+     * if it is empty.
+     *
+     * @param string $wc_option_name The woocommerce option that we are going to
+     * migrate.
+     *
+     * @param string $wp_option_name The Wordpress option that we should create
+     * if it is empty.
+     *
+     * @return void
+     */
     private static function migrate_option($wc_option_name, $wp_option_name)
     {
         $current_option_value = get_option($wp_option_name);
@@ -176,6 +162,12 @@ class Migration
         }
     }
 
+    /**
+     * This function executes any needed processes after finalizing migrations.
+     * For example: update options and show migration notice.
+     *
+     * @return void
+     */
     private static function finish_migration()
     {
         // Add notice about successfull migration

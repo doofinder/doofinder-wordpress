@@ -4,6 +4,7 @@ namespace Doofinder\WP\Settings;
 
 use Doofinder\WP\Multilanguage\Language_Plugin;
 use Doofinder\WP\Multilanguage\No_Language_Plugin;
+use Doofinder\WP\Setup_Wizard;
 
 defined('ABSPATH') or die();
 
@@ -119,6 +120,7 @@ trait Renderers
 
                 ?>
             </form>
+            <?php echo Setup_Wizard::get_configure_via_setup_wizard_button_html(); ?>
         </div>
 
     <?php
@@ -206,7 +208,7 @@ trait Renderers
                                                 ); ?></span></span>
 
         <select name="<?php echo $option_name; ?>" class="widefat">
-          <?php 
+          <?php
             $selected_eu = $saved_value === $key_eu ? " selected " : "";
             echo '<option value=" ' . $key_eu . ' "' . $selected_eu . '> Europa -  ' . $key_eu . '  </option>';
             $selected_us = $saved_value === $key_us ? " selected " : "";

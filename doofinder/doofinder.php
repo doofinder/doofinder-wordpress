@@ -4,7 +4,7 @@
  * Plugin Name: Doofinder
  * License: GPLv2 or later
  * License URI: http://www.gnu.org/licenses/gpl-2.0.html
- * Version: 0.5.4
+ * Version: 1.0
  * Author: Doofinder
  * Description: Integrate Doofinder Search in your WordPress website.
  *
@@ -14,6 +14,7 @@
 namespace Doofinder\WP;
 
 use WP_REST_Response;
+use Doofinder\WP\Multilanguage\Multilanguage;
 
 defined('ABSPATH') or die;
 
@@ -32,7 +33,7 @@ if (!class_exists('\Doofinder\WP\Doofinder_For_WordPress')) :
          *
          * @var string
          */
-        public static $version = '0.5.4';
+        public static $version = '1.0';
 
         /**
          * The only instance of Doofinder_For_WordPress
@@ -125,6 +126,8 @@ if (!class_exists('\Doofinder\WP\Doofinder_For_WordPress')) :
             });
 
             self::initialize_rest_endpoints();
+            if (is_plugin_active('woocommerce/woocommerce.php'))
+                Add_To_Cart::instance();
         }
 
         /**
@@ -285,14 +288,18 @@ if (!class_exists('\Doofinder\WP\Doofinder_For_WordPress')) :
                 wp_localize_script('doofinder-admin-js', 'Doofinder', [
                     'show_indexing_notice' => Setup_Wizard::should_show_indexing_notice() ? 'true' : 'false'
                 ]);
+
+                // CSS
+                wp_enqueue_style('doofinder-admin-css', Doofinder_For_WordPress::plugin_url() . '/assets/css/admin.css');
             });
         }
 
         public static function initialize_rest_endpoints()
         {
             add_action('rest_api_init', function () {
-                register_rest_route('doofinder/v1', '/indexation-status', array(
-                    'methods' => 'GET',
+                Config::register();
+                register_rest_route('doofinder/v1', '/index-status', array(
+                    'methods' => 'POST',
                     'callback' => function (\WP_REST_Request $request) {
                         if ($request->get_param('token') != Settings::get_api_key()) {
                             return new WP_REST_Response(
@@ -303,15 +310,16 @@ if (!class_exists('\Doofinder\WP\Doofinder_For_WordPress')) :
                                 401
                             );
                         }
-
+                        $multilanguage = Multilanguage::instance();
+                        $lang = ($multilanguage->get_current_language() === $multilanguage->get_base_language()) ? "" : $multilanguage->get_current_language();
                         //Hide the indexing notice
                         Setup_Wizard::dismiss_indexing_notice();
-                        Settings::set_indexing_status('processed');
+                        Settings::set_indexing_status('processed', $lang);
 
                         return new WP_REST_Response(
                             [
                                 'status' => 200,
-                                'indexing_status' => Settings::get_indexing_status(),
+                                'indexing_status' => Settings::get_indexing_status($lang),
                                 'response' => "Indexing status updated"
                             ]
                         );
@@ -330,8 +338,10 @@ if (!class_exists('\Doofinder\WP\Doofinder_For_WordPress')) :
         private static function register_ajax_action()
         {
             add_action('wp_ajax_doofinder_check_indexing_status', function () {
+                $multilanguage = Multilanguage::instance();
+                $lang = ($multilanguage->get_current_language() === $multilanguage->get_base_language()) ? "" : $multilanguage->get_current_language();
                 wp_send_json([
-                    'status' => Settings::get_indexing_status()
+                    'status' => Settings::get_indexing_status($lang)
                 ]);
                 exit;
             });
