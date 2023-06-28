@@ -81,6 +81,8 @@ class Update_On_Save
     public static function register_hooks()
     {
         add_action('wp_insert_post', function ($post_id, \WP_Post $post, $updated) {
+            if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE )
+                return;
             self::add_item_to_update($post_id, $post, $updated);
         }, 99, 3);
 
