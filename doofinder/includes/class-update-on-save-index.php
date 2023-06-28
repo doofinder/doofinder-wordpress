@@ -65,7 +65,7 @@ class Update_On_Save_Index
     public function __construct()
     {
         $this->language             = Multilanguage::instance();
-        $this->current_language     = $this->language->get_active_language();
+        $this->current_language     = $this->language->get_current_language();
         $this->api                    = new Update_On_Save_Api($this->current_language);
         $this->log                     = new Log('update_on_save_api.txt');
     }
