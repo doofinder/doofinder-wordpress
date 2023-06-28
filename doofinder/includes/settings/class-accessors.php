@@ -359,4 +359,10 @@ trait Accessors
     {
         return get_option('doofinder_for_wp_plugin_version', '0.9.9');
     }
+
+
+    public static function set_plugin_version($version)
+    {
+        return update_option('doofinder_for_wp_plugin_version', $version);
+    }
 }
