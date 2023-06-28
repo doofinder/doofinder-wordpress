@@ -229,6 +229,7 @@ if (!class_exists('\Doofinder\WP\Doofinder_For_WordPress')) :
             flush_rewrite_rules();
 
             Update_On_Save::create_update_on_save_db();
+            Update_On_Save::activate_update_on_save_task();
 
             $log = new Log();
             $log->log('Plugin enabled');
@@ -249,6 +250,7 @@ if (!class_exists('\Doofinder\WP\Doofinder_For_WordPress')) :
             flush_rewrite_rules();
             Update_On_Save::clean_update_on_save_db();
             Update_On_Save::delete_update_on_save_db();
+            Update_On_Save::deactivate_update_on_save_task();
         }
 
         /**
@@ -401,10 +403,6 @@ endif;
 
 register_activation_hook(__FILE__, array('\Doofinder\WP\Doofinder_For_WordPress', 'plugin_enabled'));
 register_deactivation_hook(__FILE__, array('\Doofinder\WP\Doofinder_For_WordPress', 'plugin_disabled'));
-
-//Update on save hooks
-register_activation_hook(__FILE__, array('\Doofinder\WP\Update_On_Save', 'activate_update_on_save_task'));
-register_deactivation_hook(__FILE__, array('\Doofinder\WP\Update_On_Save', 'deactivate_update_on_save_task'));
 
 add_action('plugins_loaded', array('\Doofinder\WP\Doofinder_For_WordPress', 'instance'), 0);
 add_action('upgrader_process_complete', array('\Doofinder\WP\Doofinder_For_WordPress', 'upgrader_process_complete'), 10, 2);

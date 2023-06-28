@@ -270,7 +270,7 @@ trait Renderers
             }
             ?>
         </select>
-        <a id="force-update-on-save" href="#" class="button-primary update-on-save-btn update-icon">
+        <a id="force-update-on-save" href="#" class="button-secondary update-on-save-btn update-icon">
             <span class="dashicons dashicons-update"></span>
             <?php _e('Update now!', 'wordpress-doofinder'); ?>
         </a>
