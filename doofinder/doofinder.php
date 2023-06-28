@@ -15,6 +15,7 @@ namespace Doofinder\WP;
 
 use WP_REST_Response;
 use Doofinder\WP\Multilanguage\Multilanguage;
+use Doofinder\WP\Admin_Notices;
 
 defined('ABSPATH') or die;
 
@@ -92,7 +93,6 @@ if (!class_exists('\Doofinder\WP\Doofinder_For_WordPress')) :
 
             // Load classes on demand
             self::autoload(self::plugin_path() . 'includes/');
-            include_once 'lib/autoload.php';
 
             //Initialize update on save
             Update_On_Save::init();
@@ -125,11 +125,23 @@ if (!class_exists('\Doofinder\WP\Doofinder_For_WordPress')) :
             add_action('init', function () use ($class) {
                 // Register all custom URLs
                 call_user_func(array($class, 'register_urls'));
+
+                if (is_plugin_active('woocommerce/woocommerce.php'))
+                    Add_To_Cart::instance();
+
+                if (is_plugin_inactive('doofinder-for-woocommerce/doofinder-for-woocommerce.php')) {
+                    Admin_Notices::add_notice('doofinder-for-wc-detected', __('Doofinder for WooCommerce plugin detected', 'wordpress-doofinder'), __('The Doofinder for WooCommerce plugin has been consolidated into the new version of Doofinder, and we have disabled it. You can now uninstall it.', 'wordpress-doofinder'), 'warning');
+                }else{
+                    Admin_Notices::remove_notice('doofinder-for-wc-detected');
+                }
             });
 
+            add_action('plugins_loaded', array($class, 'plugin_update'));
             self::initialize_rest_endpoints();
-            if (is_plugin_active('woocommerce/woocommerce.php'))
-                Add_To_Cart::instance();
+
+            if (is_admin()) {
+                Admin_Notices::init();
+            }
         }
 
         /**
@@ -224,6 +236,10 @@ if (!class_exists('\Doofinder\WP\Doofinder_For_WordPress')) :
          */
         public static function plugin_enabled()
         {
+            $df_wc_plugin = 'doofinder-for-woocommerce/doofinder-for-woocommerce.php';
+            if (is_plugin_active($df_wc_plugin))
+                deactivate_plugins($df_wc_plugin);
+
             self::autoload(self::plugin_path() . 'includes/');
             self::register_urls();
             flush_rewrite_rules();
@@ -251,6 +267,14 @@ if (!class_exists('\Doofinder\WP\Doofinder_For_WordPress')) :
             Update_On_Save::clean_update_on_save_db();
             Update_On_Save::delete_update_on_save_db();
             Update_On_Save::deactivate_update_on_save_task();
+        }
+
+
+        public static function plugin_update()
+        {
+            if (Settings::get_plugin_version() != self::$version) {
+                Update_Manager::check_updates(self::$version);
+            }
         }
 
         /**

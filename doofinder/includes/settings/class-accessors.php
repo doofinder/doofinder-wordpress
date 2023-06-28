@@ -354,4 +354,9 @@ trait Accessors
     {
         update_option(self::option_name_for_language('doofinder_for_wp_indexing_status', $language), $value);
     }
+
+    public static function get_plugin_version()
+    {
+        return get_option('doofinder_for_wp_plugin_version', '1.0.0');
+    }
 }
