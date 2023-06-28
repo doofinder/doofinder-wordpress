@@ -366,3 +366,15 @@ Toggle
 .df-notice-col.align-center {
     align-self: center;
 }
+
+
+/* Update on save buton */
+
+.update-on-save-btn .dashicons{
+    padding-top: 3px;
+}
+
+.update-result-wrapper{
+    margin: 15px;
+    font-weight: bold;
+}

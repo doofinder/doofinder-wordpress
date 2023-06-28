@@ -130,7 +130,7 @@ trait Accessors
         return get_option(self::option_name_for_language(
             'doofinder_for_wp_update_on_save',
             $language
-        ));
+        ), 'wp_doofinder_each_day');
     }
 
     /**

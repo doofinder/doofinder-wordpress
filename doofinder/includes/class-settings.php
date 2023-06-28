@@ -84,52 +84,9 @@ class Settings
 				'fields_cb' => 'add_general_settings'
 			)
 		);
-
-		$this->add_update_on_save_intervals();
 		$this->add_plugin_settings();
 		$this->add_settings_page();
 	}
-
-	/**
-	 * Register the Update On Save Schedule Intervals
-	 */
-	public static function add_update_on_save_intervals()
-	{
-		add_filter('cron_schedules', function () {
-			return [
-				'wp_doofinder_each_15_minutes' => [
-					'display' => sprintf(__('Each %s minutes', 'doofinder_for_wp'), 15),
-					'interval' => 60 * 15
-				],
-				'wp_doofinder_each_30_minutes' => [
-					'display' => sprintf(__('Each %s minutes', 'doofinder_for_wp'), 30),
-					'interval' => 60 * 30
-				],
-				'wp_doofinder_each_60_minutes' => [
-					'display' => __('Each hour', 'doofinder_for_wp'),
-					'interval' => HOUR_IN_SECONDS
-				],
-				'wp_doofinder_each_2_hours' => [
-					'display' => sprintf(__('Each %s hours', 'doofinder_for_wp'), 2),
-					'interval' => HOUR_IN_SECONDS * 2
-				],
-				'wp_doofinder_each_6_hours' => [
-					'display' => sprintf(__('Each %s hours', 'doofinder_for_wp'), 6),
-					'interval' => HOUR_IN_SECONDS * 6
-				],
-				'wp_doofinder_each_12_hours' => [
-					'display' => sprintf(__('Each %s hours', 'doofinder_for_wp'), 12),
-					'interval' => HOUR_IN_SECONDS * 12
-				],
-				'wp_doofinder_each_day' => [
-					'display' => __('Each day', 'doofinder_for_wp'),
-					'interval' => DAY_IN_SECONDS
-				]
-			];
-		});
-	}
-
-
 
 	/**
 	 * Determine if the update on save is enabled.

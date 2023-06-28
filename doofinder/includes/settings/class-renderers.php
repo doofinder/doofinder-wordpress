@@ -5,6 +5,7 @@ namespace Doofinder\WP\Settings;
 use Doofinder\WP\Multilanguage\Language_Plugin;
 use Doofinder\WP\Multilanguage\No_Language_Plugin;
 use Doofinder\WP\Setup_Wizard;
+use Doofinder\WP\Settings;
 
 defined('ABSPATH') or die();
 
@@ -208,12 +209,12 @@ trait Renderers
                                                 ); ?></span></span>
 
         <select name="<?php echo $option_name; ?>" class="widefat">
-          <?php
+            <?php
             $selected_eu = $saved_value === $key_eu ? " selected " : "";
             echo '<option value=" ' . $key_eu . ' "' . $selected_eu . '> Europa -  ' . $key_eu . '  </option>';
             $selected_us = $saved_value === $key_us ? " selected " : "";
             echo '<option value=" ' . $key_us . ' "' . $selected_us . '> USA -  ' . $key_us . '  </option>';
-          ?>
+            ?>
         </select>
     <?php
     }
@@ -246,7 +247,7 @@ trait Renderers
      */
     private function render_html_update_on_save($option_name)
     {
-        $saved_value = get_option($option_name);
+        $saved_value = Settings::get_update_on_save($this->language->get_current_language());
         $schedules = wp_get_schedules();
         //Sort by interval
         uasort($schedules, function ($a, $b) {
@@ -263,12 +264,17 @@ trait Renderers
             <?php
             foreach ($schedules as $key => $schedule) {
                 if (strpos($key, 'wp_doofinder') === 0) {
-                    $selected = $saved_value === $key ? " selected " : "";
+                    $selected = $saved_value === $key ? " selected='selected' " : "";
                     echo '<option value="' . $key . '" ' . $selected . '>' . $schedule['display'] . '</option>';
                 }
             }
             ?>
         </select>
+        <a id="force-update-on-save" href="#" class="button-primary update-on-save-btn update-icon">
+            <span class="dashicons dashicons-update"></span>
+            <?php _e('Update now!', 'wordpress-doofinder'); ?>
+        </a>
+        <span class="update-result-wrapper"></span>
     <?php
     }
 

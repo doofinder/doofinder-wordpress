@@ -94,6 +94,8 @@ if (!class_exists('\Doofinder\WP\Doofinder_For_WordPress')) :
             self::autoload(self::plugin_path() . 'includes/');
             include_once 'lib/autoload.php';
 
+            //Initialize update on save
+            Update_On_Save::init();
             // Init admin functionalities
             if (is_admin()) {
                 Thumbnail::prepare_thumbnail_size();
@@ -337,6 +339,7 @@ if (!class_exists('\Doofinder\WP\Doofinder_For_WordPress')) :
          */
         private static function register_ajax_action()
         {
+            //Check Indexing status
             add_action('wp_ajax_doofinder_check_indexing_status', function () {
                 $multilanguage = Multilanguage::instance();
                 $lang = ($multilanguage->get_current_language() === $multilanguage->get_base_language()) ? "" : $multilanguage->get_current_language();
@@ -345,6 +348,52 @@ if (!class_exists('\Doofinder\WP\Doofinder_For_WordPress')) :
                 ]);
                 exit;
             });
+            //Force Update on save
+            add_action('wp_ajax_doofinder_force_update_on_save', function () {
+                do_action("doofinder_update_on_save");
+                wp_send_json([
+                    'success' => true
+                ]);
+                exit;
+            });
+        }
+
+        public static function add_schedules()
+        {
+            return [
+                'wp_doofinder_each_1_minute' => [
+                    'display' => __('Each minute', 'doofinder_for_wp'),
+                    'interval' => 60
+                ],
+                'wp_doofinder_each_15_minutes' => [
+                    'display' => sprintf(__('Each %s minutes', 'doofinder_for_wp'), 15),
+                    'interval' => 60 * 15
+                ],
+                'wp_doofinder_each_30_minutes' => [
+                    'display' => sprintf(__('Each %s minutes', 'doofinder_for_wp'), 30),
+                    'interval' => 60 * 30
+                ],
+                'wp_doofinder_each_60_minutes' => [
+                    'display' => __('Each hour', 'doofinder_for_wp'),
+                    'interval' => HOUR_IN_SECONDS
+                ],
+                'wp_doofinder_each_2_hours' => [
+                    'display' => sprintf(__('Each %s hours', 'doofinder_for_wp'), 2),
+                    'interval' => HOUR_IN_SECONDS * 2
+                ],
+                'wp_doofinder_each_6_hours' => [
+                    'display' => sprintf(__('Each %s hours', 'doofinder_for_wp'), 6),
+                    'interval' => HOUR_IN_SECONDS * 6
+                ],
+                'wp_doofinder_each_12_hours' => [
+                    'display' => sprintf(__('Each %s hours', 'doofinder_for_wp'), 12),
+                    'interval' => HOUR_IN_SECONDS * 12
+                ],
+                'wp_doofinder_each_day' => [
+                    'display' => __('Each day', 'doofinder_for_wp'),
+                    'interval' => DAY_IN_SECONDS
+                ]
+            ];
         }
     }
 
@@ -353,6 +402,12 @@ endif;
 register_activation_hook(__FILE__, array('\Doofinder\WP\Doofinder_For_WordPress', 'plugin_enabled'));
 register_deactivation_hook(__FILE__, array('\Doofinder\WP\Doofinder_For_WordPress', 'plugin_disabled'));
 
-add_action('plugins_loaded', array('\Doofinder\WP\Doofinder_For_WordPress', 'instance'), 0);
+//Update on save hooks
+register_activation_hook(__FILE__, array('\Doofinder\WP\Update_On_Save', 'activate_update_on_save_task'));
+register_deactivation_hook(__FILE__, array('\Doofinder\WP\Update_On_Save', 'deactivate_update_on_save_task'));
 
+add_action('plugins_loaded', array('\Doofinder\WP\Doofinder_For_WordPress', 'instance'), 0);
 add_action('upgrader_process_complete', array('\Doofinder\WP\Doofinder_For_WordPress', 'upgrader_process_complete'), 10, 2);
+
+//Define cron schedules here
+add_filter('cron_schedules', ['\Doofinder\WP\Doofinder_For_WordPress', 'add_schedules']);
