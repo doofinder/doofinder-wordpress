@@ -357,6 +357,6 @@ trait Accessors
 
     public static function get_plugin_version()
     {
-        return get_option('doofinder_for_wp_plugin_version', '1.0.0');
+        return get_option('doofinder_for_wp_plugin_version', '0.9.9');
     }
 }

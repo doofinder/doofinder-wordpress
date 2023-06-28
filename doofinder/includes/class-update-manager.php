@@ -162,7 +162,7 @@ class Update_Manager
     /**
      * Update: 1.0.0
      */
-    public static function update_010000()
+    public static function update_0100()
     {
 
         return true;
