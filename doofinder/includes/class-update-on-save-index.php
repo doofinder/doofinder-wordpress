@@ -83,7 +83,7 @@ class Update_On_Save_Index
     {
         $this->log->log('Launch Doofinder update on save');
         $this->update_on_save('update');
-        $this->update_on_save('update');
+        $this->update_on_save('delete');
         //Update last exec
         update_option('doofinder_update_on_save_last_exec', date('Y-m-d H:i:s'));
     }
