@@ -326,7 +326,11 @@ class Store_Api
     private function build_callback_url($base_url, $endpoint_path)
     {
         $parsed_url = parse_url($base_url);
-        parse_str($parsed_url['query'], $parameters);
+        $parameters = null;
+        if(array_key_exists('query', $parsed_url)){
+            parse_str($parsed_url['query'], $parameters);
+        }
+
         $callback_url = $parsed_url['scheme'] . '://' . $parsed_url['host'] . rtrim($parsed_url['path'], '/') . '/' . ltrim($endpoint_path, '/');
 
         // Combine any existing parameters with any possible endopoint path parameters
