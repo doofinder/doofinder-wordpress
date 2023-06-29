@@ -2,7 +2,7 @@
 
 namespace Doofinder\WP;
 
-use Doofinder\WP\Helpers;
+use Doofinder\WP\Api\Store_Api;
 use Doofinder\WP\Settings;
 
 defined('ABSPATH') or die;
@@ -161,10 +161,19 @@ class Update_Manager
 
     /**
      * Update: 1.0.0
+     * Normalize store and indices and create application credentials for
+     * accessing the rest API.
      */
     public static function update_010000()
     {
-
+        /*
+        Detect if we are updating from a former version of Doofinder to
+        normalize store and indices
+        */
+        if (Settings::is_configuration_complete() && !Store_Api::has_application_credentials()) {
+            $store_api = new Store_Api();
+            $store_api->normalize_store_and_indices();
+        }
         return true;
     }
 }
