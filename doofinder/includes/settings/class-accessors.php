@@ -130,7 +130,7 @@ trait Accessors
         return get_option(self::option_name_for_language(
             'doofinder_for_wp_update_on_save',
             $language
-        ));
+        ), 'wp_doofinder_each_day');
     }
 
     /**
@@ -353,5 +353,16 @@ trait Accessors
     public static function set_indexing_status($value, $language = '')
     {
         update_option(self::option_name_for_language('doofinder_for_wp_indexing_status', $language), $value);
+    }
+
+    public static function get_plugin_version()
+    {
+        return get_option('doofinder_for_wp_plugin_version', '0.9.9');
+    }
+
+
+    public static function set_plugin_version($version)
+    {
+        return update_option('doofinder_for_wp_plugin_version', $version);
     }
 }

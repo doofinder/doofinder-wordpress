@@ -116,7 +116,7 @@ class Store_Api
             $lang = Helpers::get_language_from_locale($search_engine['language']);
 
             //If the installation is not multilanguage, replace the lang with ''
-            if (is_a($this->language, No_Language_Plugin::class)) {
+            if (is_a($this->language, No_Language_Plugin::class) || $lang === $this->language->get_base_language()) {
                 $lang = '';
             }
 
@@ -129,6 +129,9 @@ class Store_Api
         if (array_key_exists('errors', $response)) {
             $this->log->log("The store and indices normalization has failed!");
             $this->log->log(print_r($response['errors'], true));
+        }else{
+            $this->log->log("The store and indices normalization has finished succesfully!");
+            $this->log->log("Response: \n" . print_r($response, true));
         }
     }
 
@@ -326,7 +329,11 @@ class Store_Api
     private function build_callback_url($base_url, $endpoint_path)
     {
         $parsed_url = parse_url($base_url);
-        parse_str($parsed_url['query'], $parameters);
+        $parameters = null;
+        if(array_key_exists('query', $parsed_url)){
+            parse_str($parsed_url['query'], $parameters);
+        }
+
         $callback_url = $parsed_url['scheme'] . '://' . $parsed_url['host'] . rtrim($parsed_url['path'], '/') . '/' . ltrim($endpoint_path, '/');
 
         // Combine any existing parameters with any possible endopoint path parameters

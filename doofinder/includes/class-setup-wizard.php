@@ -1365,7 +1365,7 @@ class Setup_Wizard
 
         // Migration was already done, we should abort
         if ($migration_option === 'completed' || $migration_option === 'failed') {
-            $log->log('Should migrate - Migration already done or not possible');
+            //$log->log('Should migrate - Migration already done or not possible');
             return false;
         }
 
@@ -1381,7 +1381,7 @@ class Setup_Wizard
 
         // Migration not necessary
         $log->log('Should migrate - Migration not necessary');
-        update_option($migration_option, 'completed');
+        update_option(self::$wizard_migration_option, 'completed');
 
         return false;
     }

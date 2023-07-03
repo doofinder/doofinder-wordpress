@@ -130,6 +130,11 @@ class WPML implements I18n_Handler
 				return '';
 			}
 
+
+            if($lang === $this->get_base_language()){
+                return '';
+            }
+
 			return $lang;
 		}
 
