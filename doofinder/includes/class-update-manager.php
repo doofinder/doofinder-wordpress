@@ -172,7 +172,12 @@ class Update_Manager
     {
         //Update api host to point to admin.doofinder.com instead of api.doofinder.com
         $multilanguage = Multilanguage::instance();
-        foreach ($multilanguage->get_languages() as $lang_key => $value) {
+        $languages = $multilanguage->get_languages();
+        if(empty($languages)){
+            $languages = ['' => []];
+        }
+
+        foreach ($languages as $lang_key => $value) {
             $lang_key = ($lang_key != $multilanguage->get_base_language()) ? $lang_key : '';
             $api_host = Settings::get_api_host($lang_key);
             if (!strpos($api_host, "admin.doofinder.com")) {
