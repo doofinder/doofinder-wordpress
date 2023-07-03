@@ -3,6 +3,7 @@
 namespace Doofinder\WP;
 
 use Doofinder\WP\Api\Store_Api;
+use Doofinder\WP\Multilanguage\Multilanguage;
 use Doofinder\WP\Settings;
 
 defined('ABSPATH') or die;
@@ -96,7 +97,8 @@ class Update_Manager
      */
     private static function update_failed($version, $message = "")
     {
-        self::log("ERROR: The update $version failed with message: " .  $message);
+        $formatted_version = self::format_normalized_plugin_version($version);
+        self::log("ERROR: The update $formatted_version failed with message: " .  $message);
         self::add_admin_notice($version, $message);
     }
 
@@ -105,7 +107,9 @@ class Update_Manager
      */
     private static function add_admin_notice($version, $message = "")
     {
-        Admin_Notices::add_custom_notice('update-' . $version, self::get_update_error_notice($version, $message));
+        $title = sprintf(__('An error occurred while updating the Doofinder Database to the %s version.', 'doofinder_for_wp'), $version);
+        $message .= "<p>" . sprintf(__('For more details please contact us at our %s support center%s.', 'doofinder_for_wp'), '<a target="_blank" href="https://support.doofinder.com/pages/contact-us.html">', '</a>') . '</p>';
+        Admin_Notices::add_notice('update-' . $version, $title, $message, 'error', null, '', true);
     }
 
     /**
@@ -166,6 +170,18 @@ class Update_Manager
      */
     public static function update_010000()
     {
+        //Update api host to point to admin.doofinder.com instead of api.doofinder.com
+        $multilanguage = Multilanguage::instance();
+        foreach ($multilanguage->get_languages() as $lang_key => $value) {
+            $lang_key = ($lang_key != $multilanguage->get_base_language()) ? $lang_key : '';
+            $api_host = Settings::get_api_host($lang_key);
+            if (!strpos($api_host, "admin.doofinder.com")) {
+                $api_host_parts = explode("-", $api_host);
+                $new_api_host = $api_host_parts[0] . '-' . 'admin.doofinder.com';
+                Settings::set_api_host($new_api_host);
+            }
+        }
+
         /*
         Detect if we are updating from a former version of Doofinder to
         normalize store and indices
