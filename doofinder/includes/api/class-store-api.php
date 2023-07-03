@@ -129,6 +129,9 @@ class Store_Api
         if (array_key_exists('errors', $response)) {
             $this->log->log("The store and indices normalization has failed!");
             $this->log->log(print_r($response['errors'], true));
+        }else{
+            $this->log->log("The store and indices normalization has finished succesfully!");
+            $this->log->log("Response: \n" . print_r($response, true));
         }
     }
 
