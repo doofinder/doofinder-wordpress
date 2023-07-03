@@ -116,7 +116,7 @@ class Store_Api
             $lang = Helpers::get_language_from_locale($search_engine['language']);
 
             //If the installation is not multilanguage, replace the lang with ''
-            if (is_a($this->language, No_Language_Plugin::class)) {
+            if (is_a($this->language, No_Language_Plugin::class) || $lang === $this->language->get_base_language()) {
                 $lang = '';
             }
 
