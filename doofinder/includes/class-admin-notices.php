@@ -47,9 +47,13 @@ class Admin_Notices
 
     public static function remove_notice($id)
     {
+        if (!self::is_notice_active($id)) {
+            return;
+        }
+
         $current_notices = self::get_custom_notices();
         if (array_key_exists($id, $current_notices)) {
-            unset($current[$id]);
+            unset($current_notices[$id]);
             update_option('doofinder_for_wp_notices', $current_notices);
         }
     }
@@ -103,5 +107,11 @@ class Admin_Notices
     public static function render_custom_notice($notice_html)
     {
         echo $notice_html;
+    }
+
+    public static function is_notice_active($notice_name)
+    {
+        $current_notices = self::get_custom_notices();
+        return array_key_exists($notice_name, $current_notices);
     }
 }
