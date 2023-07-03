@@ -130,7 +130,7 @@ if (!class_exists('\Doofinder\WP\Doofinder_For_WordPress')) :
                     Add_To_Cart::instance();
 
                 if (is_plugin_inactive('doofinder-for-woocommerce/doofinder-for-woocommerce.php')) {
-                    Admin_Notices::add_notice('doofinder-for-wc-detected', __('Doofinder for WooCommerce plugin detected', 'wordpress-doofinder'), __('The Doofinder for WooCommerce plugin has been consolidated into the new version of Doofinder, and we have disabled it. You can now uninstall it.', 'wordpress-doofinder'), 'warning');
+                    Admin_Notices::add_notice('doofinder-for-wc-detected', __('Doofinder for WooCommerce plugin detected', 'wordpress-doofinder'), __('The Doofinder for WooCommerce plugin has been merged into the new version of Doofinder, and we have disabled it. You can now uninstall it.', 'wordpress-doofinder'), 'warning');
                 }else{
                     Admin_Notices::remove_notice('doofinder-for-wc-detected');
                 }
