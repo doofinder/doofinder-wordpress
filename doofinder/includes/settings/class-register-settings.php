@@ -78,7 +78,7 @@ trait Register_Settings
             function () {
 ?>
             <p class="description"><?php _e(
-                                        'The following options allow to identify you and your search engine in Doofinder servers. Make sure you provide a Management API Key and not a Search API Key.',
+                                        'The following options allow to identify you and your search engine in Doofinder servers.',
                                         'doofinder_for_wp'
                                     ); ?></p>
 <?php
@@ -91,7 +91,7 @@ trait Register_Settings
             $this->language->get_option_name('doofinder_for_wp_enable_js_layer');
         add_settings_field(
             $enable_js_layer_option_name,
-            __('Enable Doofinder Search Bar', 'doofinder_for_wp'),
+            __('Enable Doofinder Layer', 'doofinder_for_wp'),
             function () use ($enable_js_layer_option_name) {
                 $this->render_html_enable_js_layer($enable_js_layer_option_name);
             },
@@ -105,7 +105,7 @@ trait Register_Settings
         $api_key_option_name = 'doofinder_for_wp_api_key';
         add_settings_field(
             $api_key_option_name,
-            __('User Key', 'doofinder_for_wp'),
+            __('Api Key', 'doofinder_for_wp'),
             function () use ($api_key_option_name) {
                 $this->render_html_api_key($api_key_option_name);
             },
@@ -171,7 +171,7 @@ trait Register_Settings
     {
         add_action('admin_menu', function () {
             add_menu_page(
-                'Doofinder For WordPress',
+                'Doofinder',
                 'Doofinder',
                 'manage_options',
                 self::$top_level_menu,
