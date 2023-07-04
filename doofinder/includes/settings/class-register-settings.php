@@ -124,7 +124,10 @@ trait Register_Settings
                 $this->render_html_api_host($api_host_option_name);
             },
             self::$top_level_menu,
-            $field_id
+            $field_id,
+            [
+                'class' => 'hidden'
+            ]
         );
 
         register_setting(self::$top_level_menu, $api_host_option_name, array($this, 'validate_api_host'));
