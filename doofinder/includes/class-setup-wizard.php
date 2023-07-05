@@ -452,11 +452,13 @@ class Setup_Wizard
             // Reset wizard to step 1
             update_option(self::$wizard_step_option, 1);
 
-            //Show the indexing notice
-            update_option(self::$wizard_show_indexing_notice_option, 1);
-
             //Set the indexing status to processing
             self::set_indexing_status('processing');
+
+            //Show the indexing notice
+            $notice_id = 'df-indexing-status';
+            Admin_Notices::add_custom_notice($notice_id, self::get_indexing_status_notice_html($notice_id ));
+            update_option(self::$wizard_show_indexing_notice_option, 1);
 
             // Update wizard status to finished if configuration is complete
             if (Settings::is_configuration_complete()) {
@@ -662,11 +664,11 @@ class Setup_Wizard
      *
      * @return string
      */
-    public static function get_indexing_status_notice_html()
+    public static function get_indexing_status_notice_html($notice_id)
     {
         ob_start();
     ?>
-        <div class="notice notice-success is-dismissible">
+        <div id="<?php echo $notice_id; ?>" class="notice doofinder notice-success is-dismissible">
             <div id="message" class="wordpress-message df-notice indexation-status processing">
                 <div class="status-processing">
                     <div class="df-notice-row flex-end">
@@ -717,7 +719,7 @@ class Setup_Wizard
                         <div class="df-notice-col extra align-center">
                             <figure class="logo" style="width:5rem;height:auto;float:left;margin:.5em 0;margin-right:0.75rem;">
                                 <div class="success-icon-wrapper">
-                                    <img src="wp-content/plugins/doofinder/assets/img/green_checkmark.png">
+                                    <img src="/wp-content/plugins/doofinder/assets/img/green_checkmark.png">
                                 </div>
                             </figure>
                         </div>
@@ -782,7 +784,7 @@ class Setup_Wizard
 
     ?>
         <p class="doofinder-button-setup-wizard" style="width:100px;float:right;position:relative;top:-68px;">
-            <a href="<?php echo self::get_url(); ?>" class="button-secondary"><?php _e('Setup Wizard', 'wordpress-doofinder'); ?></a>
+            <a href="<?php echo self::get_url(["step" => 1]) ?>" class="button-secondary"><?php _e('Setup Wizard', 'wordpress-doofinder'); ?></a>
         </p>
     <?php
 
@@ -797,10 +799,6 @@ class Setup_Wizard
     public static function add_notices()
     {
         add_action('admin_notices', function () {
-            if (Setup_Wizard::should_show_indexing_notice()) {
-                echo Setup_Wizard::get_indexing_status_notice_html();
-            }
-
             if (Setup_Wizard::should_show_notice()) {
                 echo Setup_Wizard::get_setup_wizard_notice_html();
             }
@@ -824,6 +822,7 @@ class Setup_Wizard
 
     public static function dismiss_indexing_notice()
     {
+        Admin_Notices::remove_notice('df-indexing-status');
         update_option(Setup_Wizard::$wizard_show_indexing_notice_option, 0);
     }
 
