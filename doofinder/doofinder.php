@@ -402,6 +402,16 @@ if (!class_exists('\Doofinder\WP\Doofinder_For_WordPress')) :
                 ]);
                 exit;
             });
+
+            //Force Update on save
+            add_action('wp_ajax_doofinder_notice_dismiss', function () {
+                $notice_id = $_POST['notice_id'];
+                Admin_Notices::remove_notice($notice_id);
+                wp_send_json([
+                    'success' => true
+                ]);
+                exit;
+            });
         }
 
         public static function add_schedules()
