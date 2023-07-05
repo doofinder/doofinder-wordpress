@@ -417,10 +417,6 @@ if (!class_exists('\Doofinder\WP\Doofinder_For_WordPress')) :
         public static function add_schedules()
         {
             return [
-                'wp_doofinder_each_1_minute' => [
-                    'display' => __('Each minute', 'doofinder_for_wp'),
-                    'interval' => 60
-                ],
                 'wp_doofinder_each_15_minutes' => [
                     'display' => sprintf(__('Each %s minutes', 'doofinder_for_wp'), 15),
                     'interval' => 60 * 15
