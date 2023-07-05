@@ -131,7 +131,7 @@ if (!class_exists('\Doofinder\WP\Doofinder_For_WordPress')) :
 
                 //Check if the plugin exists
                 $old_plugin_notice_name = 'doofinder-for-wp-old-version-detected';
-                 if (file_exists(WP_PLUGIN_DIR . '/doofinder-for-woocommerce/doofinder-for-woocommerce.php')) {
+                if (file_exists(WP_PLUGIN_DIR . '/doofinder-for-woocommerce/doofinder-for-woocommerce.php')) {
                     Admin_Notices::add_notice($old_plugin_notice_name, __('Deprecated version of Doofinder plugin detected', 'wordpress-doofinder'), __('The Doofinder plugin has been merged into the new version of Doofinder for WooCommerce and is no longer needed. Therefore, we have deactivated it. We recommend uninstalling it to avoid future issues.', 'wordpress-doofinder'), 'warning');
                 } else {
                     Admin_Notices::remove_notice($old_plugin_notice_name);
@@ -331,6 +331,9 @@ if (!class_exists('\Doofinder\WP\Doofinder_For_WordPress')) :
                 register_rest_route('doofinder/v1', '/index-status', array(
                     'methods' => 'POST',
                     'callback' => function (\WP_REST_Request $request) {
+                        $log = new Log('index-status.log');
+                        $log->log("Received indexing status request with payload:\n" . print_r($request, true));
+                        $valid_message = "Sources were processed successfully.";
                         if ($request->get_param('token') != Settings::get_api_key()) {
                             return new WP_REST_Response(
                                 [
@@ -340,6 +343,21 @@ if (!class_exists('\Doofinder\WP\Doofinder_For_WordPress')) :
                                 401
                             );
                         }
+
+                        if ($error_message = $request->get_param('message') != $valid_message) {
+                            Setup_Wizard::dismiss_indexing_notice();
+                            Admin_Notices::add_notice("indexing-status-failed", __("The indexation failed", "wordpress-doofinder"), $error_message, 'error', null, '', true);
+
+                            return new WP_REST_Response(
+                                [
+                                    'status' => 200,
+                                    'indexing_status' => 'failed',
+                                    'response' => $request->get_param('message')
+                                ]
+                            );
+                        }
+
+
                         $multilanguage = Multilanguage::instance();
                         $lang = ($multilanguage->get_current_language() === $multilanguage->get_base_language()) ? "" : $multilanguage->get_current_language();
                         //Hide the indexing notice

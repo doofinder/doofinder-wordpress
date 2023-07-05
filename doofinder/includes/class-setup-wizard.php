@@ -782,7 +782,7 @@ class Setup_Wizard
 
     ?>
         <p class="doofinder-button-setup-wizard" style="width:100px;float:right;position:relative;top:-68px;">
-            <a href="<?php echo self::get_url(); ?>" class="button-secondary"><?php _e('Setup Wizard', 'wordpress-doofinder'); ?></a>
+            <a href="<?php echo self::get_url(["step" => 1]) ?>" class="button-secondary"><?php _e('Setup Wizard', 'wordpress-doofinder'); ?></a>
         </p>
     <?php
 
