@@ -329,7 +329,7 @@ if (!class_exists('\Doofinder\WP\Doofinder_For_WordPress')) :
             add_action('rest_api_init', function () {
                 Config::register();
                 register_rest_route('doofinder/v1', '/index-status', array(
-                    'methods' => ['POST', 'GET'],
+                    'methods' => 'POST',
                     'callback' => function (\WP_REST_Request $request) {
                         $log = new Log('index-status.log');
                         $log->log("Received indexing status request with payload:\n" . print_r($request, true));
