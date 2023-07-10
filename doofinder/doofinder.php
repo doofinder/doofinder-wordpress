@@ -344,7 +344,8 @@ if (!class_exists('\Doofinder\WP\Doofinder_For_WordPress')) :
                             );
                         }
 
-                        if ($error_message = $request->get_param('message') != $valid_message) {
+                        $error_message = $request->get_param('message');
+                        if (!empty($error_message) && $error_message != $valid_message) {
                             Setup_Wizard::dismiss_indexing_notice();
                             Admin_Notices::add_notice("indexing-status-failed", __("The indexation failed", "wordpress-doofinder"), $error_message, 'error', null, '', true);
 
@@ -363,6 +364,8 @@ if (!class_exists('\Doofinder\WP\Doofinder_For_WordPress')) :
                         //Hide the indexing notice
                         Setup_Wizard::dismiss_indexing_notice();
                         Settings::set_indexing_status('processed', $lang);
+                        // Enable JS Layer for the indexed language
+                        Settings::enable_js_layer($lang);
 
                         return new WP_REST_Response(
                             [

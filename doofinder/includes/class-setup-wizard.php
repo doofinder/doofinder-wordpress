@@ -457,7 +457,7 @@ class Setup_Wizard
 
             //Show the indexing notice
             $notice_id = 'df-indexing-status';
-            Admin_Notices::add_custom_notice($notice_id, self::get_indexing_status_notice_html($notice_id ));
+            Admin_Notices::add_custom_notice($notice_id, self::get_indexing_status_notice_html($notice_id));
             update_option(self::$wizard_show_indexing_notice_option, 1);
 
             // Update wizard status to finished if configuration is complete
@@ -465,13 +465,13 @@ class Setup_Wizard
                 update_option(self::$wizard_status, self::$wizard_status_finished);
             }
 
-            //self::js_go_to_step(3);
-
-?>
+            ?>
             <script>
                 document.location.href = '<?php echo Settings::get_url(); ?>';
             </script>
-        <?php
+            <?php
+
+            return;
 
             /*
 			if ($redirect) {
@@ -643,7 +643,7 @@ class Setup_Wizard
                     </div>
                     <div class="df-notice-col extra">
                         <div class="submit">
-                            <a href="<?php echo self::get_url(); ?>" class="button-primary button-setup-wizard"><?php _e('Run Setup Wizard', 'wordpress-doofinder'); ?></a>
+                            <a href="<?php echo self::get_url(["step" => 1]); ?>" class="button-primary button-setup-wizard"><?php _e('Run Setup Wizard', 'wordpress-doofinder'); ?></a>
                             <?php if ($settings) : ?>
                                 &nbsp;<a class="button-secondary button-settings" href="<?php echo Settings::get_url(); ?>"><?php _e('Go to Settings', 'wordpress-doofinder'); ?></a>
                             <?php endif; ?>
@@ -997,66 +997,58 @@ class Setup_Wizard
     private function creating_all_structure()
     {
 
-        // Check if search engines (Hash ID in DB) already exists (for each language if multilang)
-
-        $has_api_keys = self::are_api_keys_present($this->process_all_languages, $this->language);
+        $has_search_engines = self::are_api_keys_present($this->process_all_languages, $this->language);
         $store_data = [];
-        if (!$has_api_keys || (is_array($has_api_keys) && Helpers::in_array_r('no-hash', $has_api_keys, true))) {
-            // Api keys are missing for some / all languages. We need to create
-            // search engine for that language
 
-            // If hash id is missing create store
-
-            // If there's no plugin active we still need to process 1 language.
-            if (!Multilanguage::$is_multilang) {
-                $has_api_keys[''] = [
-                    'hash' => 'no-hash'
-                ];
-            }
-
-            if (is_array($has_api_keys)) {
-                // Create search engine
-                $this->log->log('Wizard Step 2 - Try Create the Store');
-                $this->log->log('=== Store API CALL === ');
-                try {
-                    $store_api = new Store_Api();
-                    $store_data = $store_api->create_store($has_api_keys);
-
-                    if (array_key_exists('errors', $store_data)) {
-                        $message = "";
-                        foreach ($store_data['errors'] as $error) {
-                            $message .= $error . ". ";
-                        }
-                        throw new Exception($message);
-                    }
-
-                    $this->log->log('Store create result:');
-                    $this->log->log(print_r($store_data, true));
-
-                    $this->set_search_engines($store_data['search_engines']);
-                    $this->enable_layer($store_data['script']);
-                } catch (Exception $exception) {
-                    $this->log->log('Wizard Step 2 - Exception');
-                    $this->log->log($exception->getMessage());
-                    $this->errors['wizard-step-2'] =
-                        __(
-                            sprintf("Couldn't create Store. Error: %s", $exception->getMessage()),
-                            'wordpress-doofinder'
-                        );
-
-                    // Send failed ajax response
-                    wp_send_json_error(array(
-                        'status'  => false,
-                        'errors' => [
-                            $this->errors['wizard-step-2']
-                        ],
-                    ));
-
-                    return;
-                }
-            }
-            $this->log->log('Wizard Step 2 - Created Search Engine in db ');
+        // If there's no plugin active we still need to process 1 language.
+        if (!Multilanguage::$is_multilang) {
+            $has_search_engines[''] = [
+                'hash' => 'no-hash'
+            ];
         }
+
+        if (is_array($has_search_engines)) {
+            // Create search engine
+            $this->log->log('Wizard Step 2 - Try Create the Store');
+            $this->log->log('=== Store API CALL === ');
+            try {
+                $store_api = new Store_Api();
+                $store_data = $store_api->create_store($has_search_engines);
+
+                if (array_key_exists('errors', $store_data)) {
+                    $message = "";
+                    foreach ($store_data['errors'] as $error) {
+                        $message .= $error . ". ";
+                    }
+                    throw new Exception($message);
+                }
+
+                $this->log->log('Store create result:');
+                $this->log->log(print_r($store_data, true));
+
+                $this->set_search_engines($store_data['search_engines']);
+                $this->set_layer_script($store_data['script']);
+            } catch (Exception $exception) {
+                $this->log->log('Wizard Step 2 - Exception');
+                $this->log->log($exception->getMessage());
+                $this->errors['wizard-step-2'] =
+                    __(
+                        sprintf("Couldn't create Store. Error: %s", $exception->getMessage()),
+                        'wordpress-doofinder'
+                    );
+
+                // Send failed ajax response
+                wp_send_json_error(array(
+                    'status'  => false,
+                    'errors' => [
+                        $this->errors['wizard-step-2']
+                    ],
+                ));
+
+                return;
+            }
+        }
+        $this->log->log('Wizard Step 2 - Created Search Engine in db ');
     }
 
     /**
@@ -1251,7 +1243,7 @@ class Setup_Wizard
         }
     }
 
-    private function enable_layer($script)
+    private function set_layer_script($script)
     {
         $log = new Log();
         // If there's no plugin active we still need to process 1 language.
@@ -1270,9 +1262,6 @@ class Setup_Wizard
             if ($language_code !== $this->language->get_base_locale()) {
                 $options_suffix = Helpers::get_language_from_locale($language_code);
             }
-
-            // Enable JS Layer
-            Settings::enable_js_layer($options_suffix);
 
             //Convert language to hyphen format used by live layer (en-US)
             $language_code = Helpers::format_locale_to_hyphen($language_code);
