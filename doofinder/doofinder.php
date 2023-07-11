@@ -136,6 +136,22 @@ if (!class_exists('\Doofinder\WP\Doofinder_For_WordPress')) :
                 } else {
                     Admin_Notices::remove_notice($old_plugin_notice_name);
                 }
+
+                /**
+                 * Add image_link to product_categories
+                 */
+                add_action('rest_post_dispatch', function ($result,  $server,  $request) {
+                    if ($request->get_route() === "/wp/v2/product_cat") {
+                        $terms = $result->data;
+                        foreach ($terms as $key => $term) {
+                            // get the thumbnail id using the queried category term_id
+                            $thumbnail_id = get_term_meta($term['id'], 'thumbnail_id', true);
+                            $term['image_link'] = empty($thumbnail_id) ? "" : wp_get_attachment_url($thumbnail_id);
+                            $result->data[$key] = $term;
+                        }
+                    }
+                    return $result;
+                }, 10, 3);
             });
 
             add_action('plugins_loaded', array($class, 'plugin_update'));
@@ -144,14 +160,6 @@ if (!class_exists('\Doofinder\WP\Doofinder_For_WordPress')) :
             if (is_admin()) {
                 Admin_Notices::init();
             }
-
-            /**
-             * Add term link to product_categories
-             */
-            add_action('woocommerce_rest_prepare_product_cat', function ($response, $item, $request) {
-                $item->link = get_term_link($item, $item->taxonomy);
-                return (array)$item;
-            }, 10, 3);
         }
 
         /**
