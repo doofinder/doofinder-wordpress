@@ -465,11 +465,11 @@ class Setup_Wizard
                 update_option(self::$wizard_status, self::$wizard_status_finished);
             }
 
-            ?>
+?>
             <script>
                 document.location.href = '<?php echo Settings::get_url(); ?>';
             </script>
-            <?php
+        <?php
 
             return;
 
@@ -1002,8 +1002,10 @@ class Setup_Wizard
 
         // If there's no plugin active we still need to process 1 language.
         if (!Multilanguage::$is_multilang) {
-            $has_search_engines[''] = [
-                'hash' => 'no-hash'
+            $has_search_engines = [
+                "" => [
+                    'hash' => 'no-hash'
+                ]
             ];
         }
 
