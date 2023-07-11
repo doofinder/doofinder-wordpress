@@ -144,6 +144,14 @@ if (!class_exists('\Doofinder\WP\Doofinder_For_WordPress')) :
             if (is_admin()) {
                 Admin_Notices::init();
             }
+
+            /**
+             * Add term link to product_categories
+             */
+            add_action('woocommerce_rest_prepare_product_cat', function ($response, $item, $request) {
+                $item->link = get_term_link($item, $item->taxonomy);
+                return (array)$item;
+            }, 10, 3);
         }
 
         /**
