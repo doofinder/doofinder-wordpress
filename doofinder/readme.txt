@@ -116,7 +116,7 @@ Just send your questions to <mailto:support@doofinder.com> and we will try to an
 
 = 2.0.0 =
 - Added 'Doofinder for WooCommerce' functionalities.
-- Make use of the rest API to improve the way we access the date you want to index.
+- Make use of the rest API to improve the way we access the data you want to index.
 - Added Setup Wizard and settings improvements.
 
 = 0.5.4 =
