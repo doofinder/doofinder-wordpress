@@ -174,7 +174,7 @@ trait Register_Settings
     {
         add_action('admin_menu', function () {
             add_menu_page(
-                'Doofinder',
+                'Doofinder WP & WooCommerce Search',
                 'Doofinder',
                 'manage_options',
                 self::$top_level_menu,
