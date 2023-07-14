@@ -163,6 +163,23 @@ trait Register_Settings
         );
 
         register_setting(self::$top_level_menu, $update_on_save_option_name, array($this, 'validate_update_on_save'));
+
+
+        // JS Layer
+		$js_layer_option_name =
+        $this->language->get_option_name( 'doofinder_for_wp_js_layer' );
+        add_settings_field(
+            $js_layer_option_name,
+            __( 'JS Layer Script', 'doofinder_for_wp' ),
+            function () use ( $js_layer_option_name ) {
+                $this->render_html_js_layer( $js_layer_option_name );
+            },
+            self::$top_level_menu,
+            $field_id
+        );
+
+        register_setting( self::$top_level_menu, $js_layer_option_name );
+        }
     }
 
     /**
