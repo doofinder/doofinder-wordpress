@@ -1,7 +1,7 @@
 === Doofinder ===
-Contributors: doofinder, chopchoporg
+Contributors: doofinder
 Tags: search, autocomplete
-Version: 0.5.4
+Version: 2.0.0
 Requires at least: 4.1
 Tested up to: 6.1
 Stable tag: trunk
@@ -113,6 +113,11 @@ Just send your questions to <mailto:support@doofinder.com> and we will try to an
 
 
 == Changelog ==
+
+= 2.0.0 =
+- Added 'Doofinder for WooCommerce' functionalities.
+- Make use of the rest API to improve the way we access the data you want to index.
+- Added Setup Wizard and settings improvements.
 
 = 0.5.4 =
 - Add sanitization of html before index

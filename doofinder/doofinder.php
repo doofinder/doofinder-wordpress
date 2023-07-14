@@ -1,10 +1,10 @@
 <?php
 
 /**
- * Plugin Name: Doofinder
+ * Plugin Name: Doofinder WP & WooCommerce Search
  * License: GPLv2 or later
  * License URI: http://www.gnu.org/licenses/gpl-2.0.html
- * Version: 1.0
+ * Version: 2.0.0
  * Author: Doofinder
  * Description: Integrate Doofinder Search in your WordPress website.
  *
@@ -34,7 +34,7 @@ if (!class_exists('\Doofinder\WP\Doofinder_For_WordPress')) :
          *
          * @var string
          */
-        public static $version = '1.0.0';
+        public static $version = '2.0.0';
 
         /**
          * The only instance of Doofinder_For_WordPress
