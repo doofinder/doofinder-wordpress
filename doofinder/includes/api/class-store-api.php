@@ -172,7 +172,7 @@ class Store_Api
 
         if (is_wp_error($response)) {
             $error_message = $response->get_error_message();
-            throw new Exception($error_message, $response->get_error_code());
+            throw new Exception($error_message, (int)$response->get_error_code());
         }
 
         if ($response_code < 200 || $response_code >= 400) {
