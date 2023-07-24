@@ -179,7 +179,6 @@ trait Register_Settings
         );
 
         register_setting( self::$top_level_menu, $js_layer_option_name );
-        }
     }
 
     /**
